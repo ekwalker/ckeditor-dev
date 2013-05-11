@@ -3,14 +3,15 @@
  * For licensing, see LICENSE.html or http://ckeditor.com/license
  */
 
+if ( CKEDITOR.editorConfig ) {
+	CKEDITOR.customEditorConfigFn = CKEDITOR.editorConfig;
+}
+
 CKEDITOR.editorConfig = function( config ) {
-	// Define changes to default configuration here. For example:
-	// config.language = 'fr';
-	// config.uiColor = '#AADC6E';
 	// %REMOVE_START%
 	config.plugins =
 		'about,' +
-		'a11yhelp,' +
+		'autogrow,' +
 		'basicstyles,' +
 		'bidi,' +
 		'blockquote,' +
@@ -19,52 +20,152 @@ CKEDITOR.editorConfig = function( config ) {
 		'colordialog,' +
 		'contextmenu,' +
 		'dialogadvtab,' +
-		'div,' +
 		'elementspath,' +
 		'enterkey,' +
 		'entities,' +
-		'filebrowser,'+
 		'find,' +
-		'flash,' +
 		'floatingspace,' +
 		'font,' +
 		'format,' +
-		'forms,' +
 		'horizontalrule,' +
 		'htmlwriter,' +
-		'image,' +
-		'iframe,' +
 		'indent,' +
 		'justify,' +
 		'link,' +
 		'list,' +
 		'liststyle,' +
 		'magicline,' +
-		'maximize,' +
 		'newpage,' +
 		'pagebreak,' +
 		'pastefromword,' +
 		'pastetext,' +
-		'preview,' +
-		'print,' +
 		'removeformat,' +
-		'resize,' +
 		'save,' +
 		'selectall,' +
+		'sharedspace,' +
 		'showblocks,' +
 		'showborders,' +
-		'smiley,' +
 		'sourcearea,' +
 		'specialchar,' +
 		'stylescombo,' +
 		'tab,' +
 		'table,' +
+		'tableresize,' +
 		'tabletools,' +
-		'templates,' +
 		'toolbar,' +
 		'undo,' +
 		'wysiwygarea';
 	// %REMOVE_END%
+
+	config.bodyId = 'topic';
+	config.bodyClass = 'deki-content-edit ' + CKEDITOR.env.cssClass;
+
+	// SCAYT config
+	var protocol = document.location.protocol;
+	// Default to 'http' for unknown.
+	protocol = protocol.search( /https?:/) != -1 ? protocol : 'http:';
+	config.scayt_autoStartup = true;
+	config.scayt_srcUrl = protocol + '//spellcheck.mindtouch.us/spellcheck/lf/scayt/scayt.js';
+	config.scayt_contextCommands = 'ignore|ignoreall';
+
+	config.resize_enabled = false;
+	
+	config.entities = false;
+	config.entities_greek = false;
+	config.entities_latin = false;
+	
+	config.startupFocus = true;
+	
+	config.tabSpaces = 4;
+
+	// @see EDT-235
+	config.dialog_buttonsOrder = 'ltr';
+
+	config.autoGrow_minHeight = 250;
+	config.autoGrow_onStartup = true;
+	config.autoGrow_bottomSpace = 50;
+
+	config.format_p = { element : 'p', attributes : { 'class' : '' } };
+
+	// @see MT-10759
+	config.pasteFromWordRemoveFontStyles = false;
+
+	config.stylesSet = [
+		{ name : 'None', element : 'p', attributes : { 'class' : '' }, group : 'default', priority : 10 },
+		{ name : '<pre>&lt;pre&gt;</pre> Format', element : 'pre', attributes : { 'class' : '' }, group : 'default', priority : 30 },
+		{ name : 'Blockquote', element : 'blockquote', group : 'default', priority : 30 },
+		{ name : 'Comment', element : 'p', attributes : { 'class' : 'comment' }, group : 'default', priority : 30, command : 'comment' },
+
+		{ name : 'DekiScript', element : 'pre', attributes : { 'class' : 'script' }, group : 'executable', priority : 40, command : 'dekiscript' },
+		{ name : 'JavaScript (JEM)', element : 'pre', attributes : { 'class' : 'script-jem' }, group : 'executable', priority : 40 },
+		{ name : 'CSS', element : 'pre', attributes : { 'class' : 'script-css' }, group : 'executable', priority : 40 },
+
+		{ name : 'Conditional Text (Anonymous only)', element : 'div', attributes : { 'if' : 'user.anonymous', 'class' : 'mt-style-conditional', 'title' : 'Conditional Text (Anonymous only)'  }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 },
+		{ name : 'Conditional Text (Community-Member only)', element : 'div', attributes : { 'if' : '!user.seated', 'class' : 'mt-style-conditional', 'title' : 'Conditional Text (Community-Member only)' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 },
+		{ name : 'Conditional Text (Pro-Member only)', element : 'div', attributes : { 'if' : 'user.seated', 'class' : 'mt-style-conditional', 'title' : 'Conditional Text (Pro-Member only)' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 }
+	];
+
+	config.toolbar_Advanced =
+		[
+			['MindTouchSave','MindTouchCancel'],
+			['ViewMenu'],
+			['NewPage','-','WhoIsEditing'],
+			['Cut','Copy','Paste','PasteText','PasteFromWord','PasteImage'],
+			['Transformations'],
+			['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
+			['TextColor','BGColor'],
+			'/',
+			['Font','FontSize'],
+			['Bold','Italic','Underline','Strike','-','Subscript','Superscript','Code','PlainText'],
+			['NumberedList','BulletedList','-','DefinitionList','DefinitionTerm','DefinitionDescription','-','Outdent','Indent','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','BidiLtr', 'BidiRtl'],
+			['HorizontalRule','SpecialChar','PageBreak'],
+			'/',
+			['Normal','H1','H2','H3','Hx','StylesMenu'],
+			['MindTouchLink','Unlink','Anchor','TableOneClick','MindTouchImage','Video','MindTouchTemplates'],
+		];
+	
+	config.toolbar_Default =
+		[
+			['MindTouchSave','MindTouchCancel'],
+			['ViewMenu'],
+			['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
+			['Cut','Copy','Paste','PasteText','PasteFromWord'],
+			['Transformations'],
+			'/',
+			['Font','FontSize'],
+			['Bold','Italic','Underline','Strike','Subscript','Superscript','Code','PlainText'],
+			['NumberedList','BulletedList','-','DefinitionList','DefinitionTerm','DefinitionDescription','-','Outdent','Indent'],
+			['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+			['TextColor','BGColor'],
+			'/',
+			['Normal','H1','H2','H3','Hx','StylesMenu'],
+			['InsertMenu','MindTouchLink','Unlink','TableOneClick','MindTouchImage','Video','MindTouchTemplates']
+		];
+
+	config.toolbar_Simple =
+		[
+			['MindTouchSave','MindTouchCancel'],
+			['ViewMenu'],
+			['PasteText','PasteFromWord'],
+			['Bold','Italic','Underline','Strike','Code','PlainText'],
+			['NumberedList','BulletedList'],
+			['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
+			['TextColor','BGColor','-','RemoveFormat'],
+			'/',
+			['Normal','H1','H2','H3','Hx','StylesMenu'],
+			['InsertMenu','MindTouchLink','TableOneClick','MindTouchImage','Video','MindTouchTemplates']
+		];
+
+	config.toolbar_Basic =
+		[
+			['MindTouchSave','MindTouchCancel'],
+			['ViewMenu'],
+			['InsertMenu','MindTouchLink','Unlink','TableOneClick','MindTouchImage','Video','MindTouchTemplates']
+		];
+
+	if ( CKEDITOR.customEditorConfigFn ) {
+		CKEDITOR.customEditorConfigFn.call( this, config );
+	}
 };
 
 // %LEAVE_UNMINIFIED% %REMOVE_LINE%
