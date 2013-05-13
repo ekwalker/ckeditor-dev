@@ -33,27 +33,6 @@
  (function () {
 	var toolbarSpaceId = 'cke_floatingtoolbar';
 
-	var dockPanel = function ($toolbar, $panel) {
-		var top = $panel.data('cke-top');
-
-		if (!top) {
-			return;
-		}
-
-		if ($toolbar.hasClass('cke_floatingtoolbar')) {
-			$panel.css({
-				position: 'fixed',
-				top: $panel.data('cke-top') + 'px'
-			});
-		}
-		else {
-			$panel.css({
-				position: 'absolute',
-				top: $panel.data('cke-top') + Math.round($toolbar.offset().top) + 'px'
-			});
-		}
-	};
-
 	var dockToolbar = function (ev) {
 		var editor = this,
 			$toolbarContainer = $('#' + toolbarSpaceId),
@@ -86,18 +65,6 @@
 		else if (Math.round($toolbar.offset().top) != toolbarTop) {
 			$toolbar.removeClass('cke_floatingtoolbar');
 		}
-
-		// update all visible panels position
-		// @see EDT-449
-		$('body > div.cke_panel').each(function () {
-			var $panel = $(this);
-
-			if (!$panel.is(':visible')) {
-				return;
-			}
-
-			dockPanel($toolbar, $panel);
-		});
 
 		// @see EDT-293
 		CKEDITOR.env.webkit && $toolbarContainer.find('div.cke_inner').css('position', 'static').css('position', 'relative');
@@ -142,6 +109,20 @@
 					];
 
 				CKEDITOR.document.appendStyleText(css.join(''));
+
+				// @see EDT-449
+				if (CKEDITOR.ui.floatPanel) {
+					CKEDITOR.ui.floatPanel = CKEDITOR.tools.override(CKEDITOR.ui.floatPanel, function(floatPanel) {
+						return function() {
+							var elementMode = editor.elementMode;
+							// temporarily set inline mode to render panel as child of toolbar
+							editor.elementMode = CKEDITOR.ELEMENT_MODE_INLINE;
+							floatPanel.apply(this, arguments);
+							// restore element mode
+							editor.elementMode = elementMode;
+						};
+					});
+				}
 			}
 		},
 
@@ -175,54 +156,6 @@
 					if (ev.data.name == 'toolbarCollapse') {
 						dockToolbar.call(editor);
 					}
-				});
-
-				// @see EDT-449
-				var updatePanel = function (panel, toolbarTop) {
-					var onPanelVisible = function ($panel) {
-						// wait until panel get visible
-						if (!$panel.is(':visible') || $panel.css('opacity') == 0) {
-							window.setTimeout(function () {
-								onPanelVisible($panel);
-							}, 0)
-							return;
-						}
-
-						window.setTimeout(function () {
-							// save the delta between toolbar and panel top position
-							var $toolbar = $('#' + toolbarSpaceId).children().first();
-							$panel.data('cke-top', Math.round($panel.offset().top) - Math.round($toolbar.offset().top));
-							dockPanel($toolbar, $panel);
-						}, 50);
-					};
-
-					var $panel = $(panel.$);
-
-					// revert all changes before opening panel
-					$panel.css('position', 'absolute');
-					$panel.removeData('cke-top');
-					onPanelVisible($panel);
-				};
-
-				CKEDITOR.ui.on('ready', function (ev) {
-					var ui = ev.data;
-					if (ui._.panel) {
-						updatePanel(ui._.panel.element);
-
-						// for rich combos ready is fired just once on the first rendering
-						if (typeof ui.commit == 'function') {
-							ui.commit = CKEDITOR.tools.override(ui.commit, function (originalCommit) {
-								return function () {
-									originalCommit.call(this);
-									CKEDITOR.ui.fire('commit', this);
-								}
-							});
-						}
-					}
-				});
-
-				CKEDITOR.ui.on('commit', function (ev) {
-					updatePanel(ev.data._.panel.element);
 				});
 			}
 		}
