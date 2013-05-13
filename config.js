@@ -54,7 +54,9 @@ CKEDITOR.editorConfig = function( config ) {
 		'tabletools,' +
 		'toolbar,' +
 		'undo,' +
-		'wysiwygarea';
+		'wysiwygarea,' +
+		// mindtouch plugins
+		'mt-floatingtoolbar';
 	// %REMOVE_END%
 
 	config.bodyId = 'topic';
