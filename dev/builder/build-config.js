@@ -67,6 +67,7 @@ var CKBUILDER_CONFIG = {
 		'mt-floatingtoolbar': 1,
 		'mt-infobar': 1,
 		'mt-infopanel': 1,
+		'mt-clearcontents': 1,
 		'mt-storage': 1
 	}
 };

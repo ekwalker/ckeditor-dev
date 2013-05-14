@@ -60,11 +60,14 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-floatingtoolbar,' +
 		'mt-infobar,' +
 		'mt-infopanel,' +
+		'mt-clearcontents,' +
 		'mt-storage';
 	// %REMOVE_END%
 
 	config.bodyId = 'topic';
 	config.bodyClass = 'deki-content-edit ' + CKEDITOR.env.cssClass;
+
+	config.allowedContent = true;
 
 	// SCAYT config
 	var protocol = document.location.protocol;
