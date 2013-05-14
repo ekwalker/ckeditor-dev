@@ -56,7 +56,11 @@ CKEDITOR.editorConfig = function( config ) {
 		'undo,' +
 		'wysiwygarea,' +
 		// mindtouch plugins
-		'mt-floatingtoolbar';
+		'mt-autosave,' +
+		'mt-floatingtoolbar,' +
+		'mt-infobar,' +
+		'mt-infopanel,' +
+		'mt-storage';
 	// %REMOVE_END%
 
 	config.bodyId = 'topic';
@@ -123,7 +127,7 @@ CKEDITOR.editorConfig = function( config ) {
 			['HorizontalRule','SpecialChar','PageBreak'],
 			'/',
 			['Normal','H1','H2','H3','Hx','StylesMenu'],
-			['MindTouchLink','Unlink','Anchor','TableOneClick','MindTouchImage','Video','MindTouchTemplates'],
+			['MindTouchLink','Unlink','Anchor','TableOneClick','MindTouchImage','Video','MindTouchTemplates']
 		];
 	
 	config.toolbar_Default =

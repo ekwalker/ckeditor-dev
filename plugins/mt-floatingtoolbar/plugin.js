@@ -104,8 +104,7 @@
 				var top = editor.config.floating_toolbar_top || 0,
 					css = [
 						'#' + toolbarSpaceId + ' .cke_floatingtoolbar { position: fixed !important; top: ' + top + 'px; }',
-						'#' + toolbarSpaceId + ' .cke_inner { position: relative; }',
-						'#' + toolbarSpaceId + ' .cke_shared { display: block; position: relative; z-index: 99; }'
+						'#' + toolbarSpaceId + ' .cke_shared { display: block; position: relative; z-index: 99; border-bottom: none; }'
 					];
 
 				CKEDITOR.document.appendStyleText(css.join(''));

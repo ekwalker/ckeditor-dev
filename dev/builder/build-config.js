@@ -62,6 +62,11 @@ var CKBUILDER_CONFIG = {
 		toolbar: 1,
 		undo: 1,
 		wysiwygarea: 1,
-		'mt-floatingtoolbar': 1
+		// mindtouch plugins
+		'mt-autosave': 1,
+		'mt-floatingtoolbar': 1,
+		'mt-infobar': 1,
+		'mt-infopanel': 1,
+		'mt-storage': 1
 	}
 };
