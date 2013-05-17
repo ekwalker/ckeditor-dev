@@ -57,10 +57,12 @@ CKEDITOR.editorConfig = function( config ) {
 		'wysiwygarea,' +
 		// mindtouch plugins
 		'mt-autosave,' +
+		'mt-clearcontents,' +
 		'mt-floatingtoolbar,' +
 		'mt-infobar,' +
 		'mt-infopanel,' +
-		'mt-clearcontents,' +
+		'mt-richcombomenu,' +
+		'mt-stylescombomenu,' +
 		'mt-storage';
 	// %REMOVE_END%
 
@@ -101,7 +103,7 @@ CKEDITOR.editorConfig = function( config ) {
 
 	config.stylesSet = [
 		{ name : 'None', element : 'p', attributes : { 'class' : '' }, group : 'default', priority : 10 },
-		{ name : '<pre>&lt;pre&gt;</pre> Format', element : 'pre', attributes : { 'class' : '' }, group : 'default', priority : 30 },
+		{ name : '<pre>&lt;pre&gt;</pre> Format', element : 'pre', attributes : { 'class' : '' }, group : 'default', label : 'Formatted', priority : 30 },
 		{ name : 'Blockquote', element : 'blockquote', group : 'default', priority : 30 },
 		{ name : 'Comment', element : 'p', attributes : { 'class' : 'comment' }, group : 'default', priority : 30, command : 'comment' },
 
