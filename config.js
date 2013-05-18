@@ -62,6 +62,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-floatingtoolbar,' +
 		'mt-infobar,' +
 		'mt-infopanel,' +
+		'mt-pre,' +
 		'mt-richcombomenu,' +
 		'mt-stylescombomenu,' +
 		'mt-storage';
