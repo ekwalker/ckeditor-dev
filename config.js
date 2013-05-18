@@ -57,8 +57,10 @@ CKEDITOR.editorConfig = function( config ) {
 		'wysiwygarea,' +
 		// mindtouch plugins
 		'mt-autosave,' +
+		'mt-ckoverrides,' +
 		'mt-clearcontents,' +
 		'mt-commentdelete,' +
+		'mt-format,' +
 		'mt-floatingtoolbar,' +
 		'mt-infobar,' +
 		'mt-infopanel,' +

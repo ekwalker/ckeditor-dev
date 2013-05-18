@@ -64,8 +64,10 @@ var CKBUILDER_CONFIG = {
 		wysiwygarea: 1,
 		// mindtouch plugins
 		'mt-autosave': 1,
+		'mt-ckoverrides': 1,
 		'mt-clearcontents': 1,
 		'mt-commentdelete': 1,
+		'mt-format': 1,
 		'mt-floatingtoolbar': 1,
 		'mt-infobar': 1,
 		'mt-infopanel': 1,
