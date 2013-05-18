@@ -58,6 +58,7 @@ CKEDITOR.editorConfig = function( config ) {
 		// mindtouch plugins
 		'mt-autosave,' +
 		'mt-clearcontents,' +
+		'mt-commentdelete,' +
 		'mt-floatingtoolbar,' +
 		'mt-infobar,' +
 		'mt-infopanel,' +

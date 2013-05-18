@@ -41,7 +41,7 @@
 	}
 
 	CKEDITOR.plugins.add('mt-autosave', {
-		lang: 'en',
+		lang: 'en',  // %REMOVE_LINE_CORE%
 		requires: 'mt-infobar,mt-infopanel,mt-storage',
 		beforeInit: function() {
 			CKEDITOR.plugins.draft = CKEDITOR.tools.createClass({

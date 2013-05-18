@@ -65,6 +65,7 @@ var CKBUILDER_CONFIG = {
 		// mindtouch plugins
 		'mt-autosave': 1,
 		'mt-clearcontents': 1,
+		'mt-commentdelete': 1,
 		'mt-floatingtoolbar': 1,
 		'mt-infobar': 1,
 		'mt-infopanel': 1,

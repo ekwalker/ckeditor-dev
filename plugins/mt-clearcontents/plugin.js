@@ -33,7 +33,7 @@
 
 CKEDITOR.plugins.add('mt-clearcontents', {
 	requires: 'newpage',
-	lang: 'en',
+	lang: 'en',  // %REMOVE_LINE_CORE%
 	beforeInit: function(editor) {
 		editor.lang.newpage.toolbar = editor.lang['mt-clearcontents'].title;
 	},

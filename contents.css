@@ -187,3 +187,11 @@ img::selection {
 	line-height: 13px;
 }
 
+/* Comment delete */
+body.deki-content-edit p.comment.cke_comment_delete_on {
+	background-position: 0 -25px;
+}
+
+body.deki-content-edit p.comment.cke_comment_delete_off {
+	background-position: 0 0;
+}
