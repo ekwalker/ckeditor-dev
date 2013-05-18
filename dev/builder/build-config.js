@@ -72,6 +72,7 @@ var CKBUILDER_CONFIG = {
 		'mt-pre': 1,
 		'mt-richcombomenu': 1,
 		'mt-stylescombomenu': 1,
-		'mt-storage': 1
+		'mt-storage': 1,
+		'mt-viewmenu': 1
 	}
 };

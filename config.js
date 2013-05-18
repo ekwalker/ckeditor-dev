@@ -65,7 +65,8 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-pre,' +
 		'mt-richcombomenu,' +
 		'mt-stylescombomenu,' +
-		'mt-storage';
+		'mt-storage,' +
+		'mt-viewmenu';
 	// %REMOVE_END%
 
 	config.bodyId = 'topic';
