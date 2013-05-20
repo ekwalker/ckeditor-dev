@@ -162,12 +162,12 @@
 
 			addButtonCommand(editor, 'Code', {
 				label: lang.code,
-				command: 'code',
+				command: 'code'
 			}, editor.config.mindtouchStyles_code);
 
 			addButtonCommand(editor, 'PlainText', {
 				label: lang.plaintext,
-				command: 'plaintext',
+				command: 'plaintext'
 			}, editor.config.mindtouchStyles_plaintext);
 
 			CKEDITOR.skin.addIcon('hx', iconsPath, '-368');

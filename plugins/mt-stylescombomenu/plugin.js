@@ -127,7 +127,7 @@
 					panel: {
 						css: [ CKEDITOR.skin.getPath( 'editor' ) ].concat( config.contentsCss ),
 						attributes: { 'aria-label': lang.panelTitle }
-					},
+					}
 				},
 
 				onMenu: function() {
