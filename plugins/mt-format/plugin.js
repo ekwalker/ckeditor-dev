@@ -136,7 +136,9 @@
 					var me = this;
 
 					editor.on('selectionChange', function() {
-						if (editor.readOnly) return;
+						if (editor.readOnly) {
+							return;
+						}
 
 						var state = CKEDITOR.TRISTATE_OFF;
 

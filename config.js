@@ -29,6 +29,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'format,' +
 		'horizontalrule,' +
 		'htmlwriter,' +
+		'image,' +
 		'indent,' +
 		'justify,' +
 		'link,' +
@@ -64,6 +65,8 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-elementbubble,' +
 		'mt-format,' +
 		'mt-floatingtoolbar,' +
+		'mt-image,' +
+		'mt-imageresize,' +
 		'mt-infobar,' +
 		'mt-infopanel,' +
 		'mt-link,' +
