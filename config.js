@@ -60,10 +60,13 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-ckoverrides,' +
 		'mt-clearcontents,' +
 		'mt-commentdelete,' +
+		'mt-dialog,' +
+		'mt-elementbubble,' +
 		'mt-format,' +
 		'mt-floatingtoolbar,' +
 		'mt-infobar,' +
 		'mt-infopanel,' +
+		'mt-link,' +
 		'mt-pre,' +
 		'mt-richcombomenu,' +
 		'mt-stylescombomenu,' +
