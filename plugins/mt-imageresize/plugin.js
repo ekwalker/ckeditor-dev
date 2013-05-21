@@ -239,20 +239,6 @@
 
 			rtl = image.getComputedStyle('direction') == 'rtl';
 
-			// save the current values of position and z-index image styles
-			// and replace them to make resizer visible
-			var currentImageStyles = {
-				position: image.getStyle('position'),
-				'z-index': image.getStyle('z-index')
-			};
-
-			image.setCustomData('_cke_image_resizer', currentImageStyles);
-
-			image.setStyles({
-				position: 'relative',
-				'z-index': 9
-			});
-
 			this.update();
 			resizer.show();
 
@@ -268,21 +254,6 @@
 			if (!image) {
 				return;
 			}
-
-			// restore position and z-index image styles if needed
-			var savedStyles = image.getCustomData('_cke_image_resizer'),
-				styleName, style;
-
-			for (styleName in savedStyles) {
-				var style = savedStyles[styleName];
-				if (style.length) {
-					image.setStyle(styleName, style);
-				} else {
-					image.removeStyle(styleName);
-				}
-			}
-
-			image.removeCustomData('_cke_image_resizer');
 
 			image = null;
 			this.image = null;

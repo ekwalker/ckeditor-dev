@@ -74,6 +74,8 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-richcombomenu,' +
 		'mt-stylescombomenu,' +
 		'mt-storage,' +
+		'mt-templates,' +
+		'mt-transformations,' +
 		'mt-viewmenu';
 	// %REMOVE_END%
 

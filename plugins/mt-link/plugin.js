@@ -325,7 +325,7 @@
 			}
 
 			editor.on('selectionChange', function(evt) {
-				var element = CKEDITOR.plugins.link.getSelectedLink(editor) || evt.data.element;
+				var element = CKEDITOR.plugins.link.getSelectedLink(editor);
 
 				if (element && element.is('a') && element.hasAttribute('href') && !element.isReadOnly()) {
 					attachBubble(element, editor);

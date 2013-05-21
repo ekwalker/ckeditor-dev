@@ -81,6 +81,8 @@ var CKBUILDER_CONFIG = {
 		'mt-richcombomenu': 1,
 		'mt-stylescombomenu': 1,
 		'mt-storage': 1,
+		'mt-templates': 1,
+		'mt-transformations': 1,
 		'mt-viewmenu': 1
 	}
 };
