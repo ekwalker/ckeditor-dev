@@ -80,6 +80,7 @@ var CKBUILDER_CONFIG = {
 		'mt-link': 1,
 		'mt-pre': 1,
 		'mt-richcombomenu': 1,
+		'mt-statistics': 1,
 		'mt-stylescombomenu': 1,
 		'mt-storage': 1,
 		'mt-templates': 1,
