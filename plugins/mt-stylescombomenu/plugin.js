@@ -99,9 +99,14 @@
 								editor.focus();
 								editor.fire('saveSnapshot');
 
-								var style = this.style,
+								var style = CKEDITOR.tools.clone(this.style),
 									selection = editor.getSelection(),
 									elementPath = new CKEDITOR.dom.elementPath(selection.getStartElement());
+
+								if (style._.definition.group == 'conditional' && (!style._.definition.attributes || !style._.definition.attributes.title)) {
+									style._.definition.attributes = style._.definition.attributes || {};
+									style._.definition.attributes.title = style._name;
+								}
 
 								style[style.checkActive(elementPath) ? 'remove' : 'apply'](editor.document);
 

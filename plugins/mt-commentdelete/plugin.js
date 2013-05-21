@@ -86,6 +86,10 @@
 				editor.fire('saveSnapshot');
 			});
 
+			commentDelete.on('dragstart', function(ev) {
+				ev.data.preventDefault(true);
+			});
+
 			CKEDITOR.document.getBody().append(commentDelete);
 
 			editor.on('contentDom', function() {

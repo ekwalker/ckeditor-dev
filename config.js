@@ -126,9 +126,9 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name : 'JavaScript (JEM)', element : 'pre', attributes : { 'class' : 'script-jem' }, group : 'executable', priority : 40 },
 		{ name : 'CSS', element : 'pre', attributes : { 'class' : 'script-css' }, group : 'executable', priority : 40 },
 
-		{ name : 'Conditional Text (Anonymous only)', element : 'div', attributes : { 'if' : 'user.anonymous', 'class' : 'mt-style-conditional', 'title' : 'Conditional Text (Anonymous only)'  }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 },
-		{ name : 'Conditional Text (Community-Member only)', element : 'div', attributes : { 'if' : '!user.seated', 'class' : 'mt-style-conditional', 'title' : 'Conditional Text (Community-Member only)' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 },
-		{ name : 'Conditional Text (Pro-Member only)', element : 'div', attributes : { 'if' : 'user.seated', 'class' : 'mt-style-conditional', 'title' : 'Conditional Text (Pro-Member only)' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 }
+		{ name : 'Conditional Text (Anonymous only)', element : 'div', attributes : { 'if' : 'user.anonymous', 'class' : 'mt-style-conditional' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 },
+		{ name : 'Conditional Text (Community-Member only)', element : 'div', attributes : { 'if' : '!user.seated', 'class' : 'mt-style-conditional' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 },
+		{ name : 'Conditional Text (Pro-Member only)', element : 'div', attributes : { 'if' : 'user.seated', 'class' : 'mt-style-conditional' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 }
 	];
 
 	config.toolbar_Advanced =
