@@ -29,6 +29,7 @@ var CKBUILDER_CONFIG = {
 		elementspath: 1,
 		enterkey: 1,
 		entities: 1,
+		fakeobjects: 1,
 		find: 1,
 		flash: 1,
 		floatingspace: 1,
@@ -83,6 +84,7 @@ var CKBUILDER_CONFIG = {
 		'mt-storage': 1,
 		'mt-templates': 1,
 		'mt-transformations': 1,
+		'mt-video': 1,
 		'mt-viewmenu': 1
 	}
 };

@@ -67,7 +67,6 @@
 	CKEDITOR.plugins.add(pluginName, {
 		icons: 'mindtouchtemplates',
 		requires: 'mt-dialog,templates',
-		lang: 'en',
 		init: function(editor) {
 			editor.addCommand(pluginName, templatesCmd);
 			editor.ui.addButton('MindTouchTemplates', {

@@ -23,6 +23,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'elementspath,' +
 		'enterkey,' +
 		'entities,' +
+		'fakeobjects,' +
 		'find,' +
 		'floatingspace,' +
 		'font,' +
@@ -63,8 +64,8 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-commentdelete,' +
 		'mt-dialog,' +
 		'mt-elementbubble,' +
-		'mt-format,' +
 		'mt-floatingtoolbar,' +
+		'mt-format,' +
 		'mt-image,' +
 		'mt-imageresize,' +
 		'mt-infobar,' +
@@ -76,6 +77,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-storage,' +
 		'mt-templates,' +
 		'mt-transformations,' +
+		'mt-video,' +
 		'mt-viewmenu';
 	// %REMOVE_END%
 
