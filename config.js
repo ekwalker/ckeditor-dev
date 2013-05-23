@@ -70,6 +70,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-imageresize,' +
 		'mt-infobar,' +
 		'mt-infopanel,' +
+		'mt-keystrokes,' +
 		'mt-link,' +
 		'mt-pre,' +
 		'mt-richcombomenu,' +

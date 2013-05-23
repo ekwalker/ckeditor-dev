@@ -77,6 +77,7 @@ var CKBUILDER_CONFIG = {
 		'mt-imageresize': 1,
 		'mt-infobar': 1,
 		'mt-infopanel': 1,
+		'mt-keystrokes': 1,
 		'mt-link': 1,
 		'mt-pre': 1,
 		'mt-richcombomenu': 1,

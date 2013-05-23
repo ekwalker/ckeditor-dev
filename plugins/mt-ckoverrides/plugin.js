@@ -65,7 +65,7 @@
 						if (includeChildren) {
 							var childs = node.childNodes;
 							for (var i = 0; i < childs.length; i++) {
-								removeIds(childs[i]);
+								removeDekiScriptAttributes(childs[i]);
 							}
 						}
 					};
