@@ -75,6 +75,7 @@ var CKBUILDER_CONFIG = {
 		'mt-format': 1,
 		'mt-floatingtoolbar': 1,
 		'mt-image': 1,
+		'mt-imageattach': 1,
 		'mt-imageresize': 1,
 		'mt-infobar': 1,
 		'mt-infopanel': 1,

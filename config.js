@@ -68,6 +68,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-floatingtoolbar,' +
 		'mt-format,' +
 		'mt-image,' +
+		'mt-imageattach,' +
 		'mt-imageresize,' +
 		'mt-infobar,' +
 		'mt-infopanel,' +
