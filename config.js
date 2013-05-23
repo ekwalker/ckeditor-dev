@@ -74,6 +74,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-link,' +
 		'mt-pre,' +
 		'mt-richcombomenu,' +
+		'mt-save,' +
 		'mt-statistics,' +
 		'mt-stylescombomenu,' +
 		'mt-storage,' +
