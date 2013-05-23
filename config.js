@@ -86,6 +86,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-video,' +
 		'mt-viewmenu,' +
 		'mt-whoisediting,' +
+		'definitionlist,' +
 		'zeroclipboard';
 	// %REMOVE_END%
 
