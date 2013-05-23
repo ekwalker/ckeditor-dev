@@ -58,6 +58,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'undo,' +
 		'wysiwygarea,' +
 		// mindtouch plugins
+		'mt-autogrow,' +
 		'mt-autosave,' +
 		'mt-ckoverrides,' +
 		'mt-clearcontents,' +

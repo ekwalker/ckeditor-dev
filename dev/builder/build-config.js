@@ -65,6 +65,7 @@ var CKBUILDER_CONFIG = {
 		undo: 1,
 		wysiwygarea: 1,
 		// mindtouch plugins
+		'mt-autogrow': 1,
 		'mt-autosave': 1,
 		'mt-ckoverrides': 1,
 		'mt-clearcontents': 1,
