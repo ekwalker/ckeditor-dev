@@ -79,7 +79,8 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-templates,' +
 		'mt-transformations,' +
 		'mt-video,' +
-		'mt-viewmenu';
+		'mt-viewmenu,' +
+		'mt-whoisediting';
 	// %REMOVE_END%
 
 	config.bodyId = 'topic';
@@ -128,7 +129,7 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name : 'CSS', element : 'pre', attributes : { 'class' : 'script-css' }, group : 'executable', priority : 40 },
 
 		{ name : 'Conditional Text (Anonymous only)', element : 'div', attributes : { 'if' : 'user.anonymous', 'class' : 'mt-style-conditional' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 },
-		{ name : 'Conditional Text (Community-Member only)', element : 'div', attributes : { 'if' : '!user.seated', 'class' : 'mt-style-conditional' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 },
+		{ name : 'Conditional Text (Community-Member only)', element : 'div', attributes : { 'if' : '!user.seated && !user.anonymous', 'class' : 'mt-style-conditional' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 },
 		{ name : 'Conditional Text (Pro-Member only)', element : 'div', attributes : { 'if' : 'user.seated', 'class' : 'mt-style-conditional' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 }
 	];
 

@@ -40,15 +40,9 @@ CKEDITOR.plugins.add('mt-infobar', {
 			}
 		});
 
-		editor.on('contentDom', function() {
-			editor.document.getBody().addClass('infobar_enabled');
+		editor.on('dataReady', function() {
+			editor.editable().addClass('cke_infobar_enabled');
 		});
-
-		editor.on('mode', function() {
-			if (editor.mode == 'source') {
-				editor.textarea && editor.textarea.addClass('infobar_enabled');
-			}
-		}, null, null, 1);
 	},
 	onLoad : function() {
 		var css = [

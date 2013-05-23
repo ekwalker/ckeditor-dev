@@ -86,6 +86,7 @@ var CKBUILDER_CONFIG = {
 		'mt-templates': 1,
 		'mt-transformations': 1,
 		'mt-video': 1,
-		'mt-viewmenu': 1
+		'mt-viewmenu': 1,
+		'mt-whoisediting': 1
 	}
 };

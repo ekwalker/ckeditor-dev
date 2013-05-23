@@ -111,7 +111,7 @@
 		lang: 'en',
 		init: function(editor) {
 			editor.on('contentDom', function() {
-				editor.document.on('keydown', calculateStatisticsTimeout, this, editor);
+				editor.document.getBody().on('keydown', calculateStatisticsTimeout, this, editor);
 				calculateStatisticsTimeout.call(this, arguments);
 			});
 

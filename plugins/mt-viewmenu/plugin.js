@@ -97,6 +97,7 @@
 				title: lang.view,
 				className: 'cke_button_view',
 				modes: {'wysiwyg': 1, 'source': 1},
+				readOnly: 1,
 				onMenu: function() {
 					var menuItem, label, itemName, i;
 
@@ -125,8 +126,6 @@
 					var me = this;
 
 					var updateState = function() {
-						var disabled = editor.readOnly;
-
 						for (var i = 0; i < editor.config.menu_viewItems.length; i++) {
 							var button = getButtonDefinition(editor.config.menu_viewItems[i], editor),
 								command = button && editor.getCommand(button.command);
@@ -135,15 +134,11 @@
 									case CKEDITOR.TRISTATE_ON:
 										me.setState(CKEDITOR.TRISTATE_ON);
 										return;
-										// break;
-									case CKEDITOR.TRISTATE_OFF:
-										disabled = false;
-										break;
 								}
 							}
 						}
 
-						me.setState(disabled ? CKEDITOR.TRISTATE_DISABLED : CKEDITOR.TRISTATE_OFF);
+						me.setState(CKEDITOR.TRISTATE_OFF);
 					};
 
 					editor.on('afterCommandExec', function() {

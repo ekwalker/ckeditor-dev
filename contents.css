@@ -116,7 +116,7 @@ body {
 }
 
 /* @see #MT-9987 */
-body.infobar_enabled {
+body.cke_infobar_enabled {
 	padding-top: 5px;
 }
 
