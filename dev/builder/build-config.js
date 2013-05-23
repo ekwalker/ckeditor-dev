@@ -86,6 +86,7 @@ var CKBUILDER_CONFIG = {
 		'mt-save': 1,
 		'mt-statistics': 1,
 		'mt-stylescombomenu': 1,
+		'mt-stylewrap': 1,
 		'mt-storage': 1,
 		'mt-templates': 1,
 		'mt-transformations': 1,

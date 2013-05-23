@@ -29,6 +29,9 @@
 (function() {
 	CKEDITOR.plugins.add('mt-stylescombomenu', {
 		requires: 'mt-richcombomenu',
+		onLoad : function() {
+			CKEDITOR.document.appendStyleText('.cke_combo__stylesmenu .cke_combo_text {width: 90px;}');
+		},
 		init: function(editor) {
 			var config = editor.config,
 				lang = editor.lang.stylescombo,
@@ -108,8 +111,7 @@
 									style._.definition.attributes.title = style._name;
 								}
 
-								style[style.checkActive(elementPath) ? 'remove' : 'apply'](editor.document);
-
+								editor[style.checkActive(elementPath) ? 'removeStyle' : 'applyStyle'](style);
 								editor.fire('saveSnapshot');
 							}
 						});
