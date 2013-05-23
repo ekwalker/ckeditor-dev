@@ -84,7 +84,8 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-transformations,' +
 		'mt-video,' +
 		'mt-viewmenu,' +
-		'mt-whoisediting';
+		'mt-whoisediting,' +
+		'zeroclipboard';
 	// %REMOVE_END%
 
 	config.bodyId = 'topic';
