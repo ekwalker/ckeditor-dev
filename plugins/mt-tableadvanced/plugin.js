@@ -479,7 +479,7 @@
 			editor.on('paste', function(evt) {
 				// if clipboard is not empty,
 				// paste stored rows and cancel paste event
-				if (evt.data.html && !clipboard.isEmpty()) {
+				if (evt.data.dataValue && !clipboard.isEmpty()) {
 					editor.execCommand('rowPasteAfter');
 					evt.cancel();
 				}

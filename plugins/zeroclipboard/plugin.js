@@ -822,11 +822,11 @@
 
 					editor.on( 'paste', function( evt )
 						{
-							if ( evt.data.text && evt.data.text === zClipboardData )
+							if ( evt.data.type == 'text' && evt.data.dataValue === zClipboardData )
 							{
-								evt.data.text = getPlainText( editor, evt.data.text );
+								evt.data.dataValue = getPlainText( editor, evt.data.dataValue );
 							}
-							else if ( evt.data.html )
+							else if ( evt.data.type == 'html' )
 							{
 								if ( !zClipboardData )
 								{
@@ -837,7 +837,7 @@
 
 								if ( data && data === zClipboardData )
 								{
-									evt.data.html = data;
+									evt.data.dataValue = data;
 								}
 							}
 						});

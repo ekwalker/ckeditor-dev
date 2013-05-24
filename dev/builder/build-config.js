@@ -69,6 +69,7 @@ var CKBUILDER_CONFIG = {
 		'mt-autosave': 1,
 		'mt-ckoverrides': 1,
 		'mt-clearcontents': 1,
+		'mt-clipboard': 1,
 		'mt-commentdelete': 1,
 		'mt-dialog': 1,
 		'mt-elementbubble': 1,

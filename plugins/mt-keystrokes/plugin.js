@@ -31,6 +31,107 @@
  */
 
 (function() {
+	// from a11yhelp dialog
+	var keyMap = {
+		8: "BACKSPACE",
+		9: "TAB",
+		13: "ENTER",
+		16: "SHIFT",
+		17: "CTRL",
+		18: "ALT",
+		19: "PAUSE",
+		20: "CAPSLOCK",
+		27: "ESCAPE",
+		33: "PAGE UP",
+		34: "PAGE DOWN",
+		35: "END",
+		36: "HOME",
+		37: "LEFT ARROW",
+		38: "UP ARROW",
+		39: "RIGHT ARROW",
+		40: "DOWN ARROW",
+		45: "INSERT",
+		46: "DELETE",
+		91: "LEFT WINDOW KEY",
+		92: "RIGHT WINDOW KEY",
+		93: "SELECT KEY",
+		96: "NUMPAD  0",
+		97: "NUMPAD  1",
+		98: "NUMPAD  2",
+		99: "NUMPAD  3",
+		100: "NUMPAD  4",
+		101: "NUMPAD  5",
+		102: "NUMPAD  6",
+		103: "NUMPAD  7",
+		104: "NUMPAD  8",
+		105: "NUMPAD  9",
+		106: "MULTIPLY",
+		107: "ADD",
+		109: "SUBTRACT",
+		110: "DECIMAL POINT",
+		111: "DIVIDE",
+		112: "F1",
+		113: "F2",
+		114: "F3",
+		115: "F4",
+		116: "F5",
+		117: "F6",
+		118: "F7",
+		119: "F8",
+		120: "F9",
+		121: "F10",
+		122: "F11",
+		123: "F12",
+		144: "NUM LOCK",
+		145: "SCROLL LOCK",
+		186: "SEMI-COLON",
+		187: "EQUAL SIGN",
+		188: "COMMA",
+		189: "DASH",
+		190: "PERIOD",
+		191: "FORWARD SLASH",
+		192: "GRAVE ACCENT",
+		219: "OPEN BRACKET",
+		220: "BACK SLASH",
+		221: "CLOSE BRAKET",
+		222: "SINGLE QUOTE"
+	};
+
+	// Modifier keys override.
+	if ( CKEDITOR.env.mac )
+	{
+		keyMap[ CKEDITOR.ALT ] = '&#8997;';
+		keyMap[ CKEDITOR.SHIFT ] = '&#8679;';
+		keyMap[ CKEDITOR.CTRL ] = '&#8984;';
+	}
+	else
+	{
+		keyMap[ CKEDITOR.ALT ] = 'ALT';
+		keyMap[ CKEDITOR.SHIFT ] = 'SHIFT';
+		keyMap[ CKEDITOR.CTRL ] = 'CTRL';
+	}
+
+	// Sort in desc.
+	var modifiers = [ CKEDITOR.ALT, CKEDITOR.SHIFT, CKEDITOR.CTRL ];
+
+	function representKeyStroke( keystroke ) {
+		var quotient, modifier,
+			presentation = [];
+
+		for ( var i = 0; i < modifiers.length; i++ ) {
+			modifier = modifiers[ i ];
+			quotient = keystroke / modifiers[ i ];
+			if ( quotient > 1 && quotient <= 2 ) {
+				keystroke -= modifier;
+				presentation.push( keyMap[ modifier ] );
+			}
+		}
+
+		presentation.push( keyMap[ keystroke ] || String.fromCharCode( keystroke ) );
+
+		return presentation.join( '+' );
+	}
+
 	var tab = function(keyCode) {
 		var editor = this,
 			hasShift = (keyCode == CKEDITOR.SHIFT + 9);
@@ -46,7 +147,7 @@
 		var path = new CKEDITOR.dom.elementPath(range.startContainer),
 			isStartOfBlock = range.checkStartOfBlock();
 
-		if ((path.contains({li: 1}) && isStartOfBlock) || (!path.contains({td: 1, th: 1, pre: 1}) && isStartOfBlock && range.checkEndOfBlock())) {
+		if ((path.contains({li: 1}) && isStartOfBlock) || (!path.contains({td: 1, th: 1, pre: 1}) && isStartOfBlock)) {
 			editor.execCommand(hasShift ? 'outdent' : 'indent');
 			return true;
 		}
@@ -408,6 +509,104 @@
 				}
 
 			}, null, null, 1);
+
+			/**
+			 * Add command shortcut to UI element label
+			 * @see #MT-10605
+			 */
+			var keystrokes = {},
+				i;
+
+			var shortcuts =
+				{
+					'indent' : 9,
+					'outdent' : CKEDITOR.SHIFT + 9,
+					'copy' : CKEDITOR.CTRL + 67,
+					'cut' : CKEDITOR.CTRL + 88,
+					'paste' : CKEDITOR.CTRL + 86
+				};
+
+			for (i in editor.config.keystrokes) {
+				keystrokes[editor.config.keystrokes[i][1]] = editor.config.keystrokes[i][0];
+			}
+
+			editor.on('pluginsLoaded', function() {
+				var i, name, item, command, keystroke,
+				items = editor.ui._.items;
+
+				// go through ui items
+				for (name in items) {
+					if (!items.hasOwnProperty(name)) {
+						continue;
+					}
+
+					item = items[name];
+					command = item.command;
+
+					if (command && item.type == CKEDITOR.UI_BUTTON) {
+						if (command in keystrokes) {
+							keystroke = representKeyStroke(keystrokes[command]);
+						} else if (command in shortcuts) {
+							keystroke = representKeyStroke(shortcuts[command]);
+						}
+
+						if (keystroke) {
+							var def = item.args[0],
+								title = def.title || def.label || '';
+
+							title += ' (' + keystroke + ')';
+							item.args[0].title = title;
+
+							keystroke = null;
+						}
+					}
+				}
+			});
+
+			CKEDITOR.ui.on('ready', function(evt) {
+				var ui = evt.data;
+
+				if (ui.items) {
+					var element = ui._.element,
+						item, command, keystroke,
+						nodeList = element.getElementsByTag('a'),
+						itemNode, title,
+						i, j;
+
+					for (i = 0; i < ui.items.length; i++) {
+						item = ui.items[i];
+						command = item.command;
+
+						if (command) {
+							if (command in keystrokes) {
+								keystroke = representKeyStroke(keystrokes[command]);
+							} else if (command in shortcuts) {
+								keystroke = representKeyStroke(shortcuts[command]);
+							}
+
+							if (keystroke) {
+								for (j = 0; j < nodeList.count(); j++) {
+									itemNode = nodeList.getItem(j);
+
+									if (itemNode.hasClass(item.className)) {
+										// decode html entity
+										var dummy = itemNode.getDocument().createElement('div');
+										dummy.setHtml(keystroke);
+
+										title = itemNode.getAttribute('title') || item.label || '';
+										title += ' (' + dummy.getText() + ')';
+
+										itemNode.setAttribute('title', title);
+										break; // for j
+									}
+								}
+
+								keystroke = null;
+							}
+						}
+					}
+				}
+			});
 		}
 	});
 })();

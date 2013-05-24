@@ -62,6 +62,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-autosave,' +
 		'mt-ckoverrides,' +
 		'mt-clearcontents,' +
+		'mt-clipboard,' +
 		'mt-commentdelete,' +
 		'mt-dialog,' +
 		'mt-elementbubble,' +
