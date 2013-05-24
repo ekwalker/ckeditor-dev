@@ -34,8 +34,7 @@
 	CKEDITOR.plugins.add('mt-commentdelete', {
 		lang: 'en',  // %REMOVE_LINE_CORE%
 		init: function(editor) {
-			var stateBase = 'cke_comment_delete',
-				iconPath = CKEDITOR.getUrl('../images/icons.png'),
+			var iconPath = CKEDITOR.getUrl('../images/icons.png'),
 				commentDelete = CKEDITOR.document.createElement('a', {
 				attributes: {
 					id: 'cke_comment_delete',
@@ -63,7 +62,7 @@
 					return;
 				}
 
-				commentElement.setState(CKEDITOR.TRISTATE_OFF, stateBase);
+				commentElement.data('cke-commentdelete', false);
 
 				var selection = editor.getSelection(),
 					startElement = selection && selection.getStartElement(),
@@ -92,19 +91,26 @@
 
 			CKEDITOR.document.getBody().append(commentDelete);
 
+			var hideDeleteButton = function() {
+				if (commentElement) {
+					commentElement.data('cke-commentdelete', false);
+					commentElement = null;
+				}
+				commentDelete && commentDelete.hide();
+			};
+
 			editor.on('contentDom', function() {
-				editor.document.getBody().on('mouseover', function(ev) {
+				editor.document.getBody().on('mousemove', function(ev) {
 					var target = ev.data.getTarget(),
 						comment = target && target.getAscendant('p', true);
 
 					if (comment && comment.hasClass('comment')) {
 						if (commentElement && !commentElement.equals(comment)) {
-							commentElement.setState(CKEDITOR.TRISTATE_OFF, stateBase);
+							commentElement.data('cke-commentdelete', false);
 						}
 
 						commentElement = comment;
-
-						commentElement.setState(CKEDITOR.TRISTATE_ON, stateBase);
+						commentElement.data('cke-commentdelete', 1);
 
 						var pos = commentElement.getDocumentPosition(CKEDITOR.document);
 						commentDelete.setStyles({
@@ -112,17 +118,25 @@
 							top: pos.y + 2 + 'px'
 						});
 						commentDelete.show();
-					} else if (commentElement) {
-						commentElement.setState(CKEDITOR.TRISTATE_OFF, stateBase);
-						commentDelete.hide();
-						commentElement = null;
+					} else {
+						hideDeleteButton();
 					}
 				});
 			});
 
+			editor.on('selectionChange', hideDeleteButton);
+
 			editor.on('destroy', function() {
 				commentDelete && commentDelete.remove();
 			});
+		},
+		onLoad: function() {
+			var css = [
+				'body.deki-content-edit p.comment[data-cke-commentdelete] {',
+				'	background-position: 0 -25px;',
+				'}'
+			];
+			CKEDITOR.addCss(css.join(''));
 		}
 	});
 })();

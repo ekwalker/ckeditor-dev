@@ -87,9 +87,10 @@
 		requires: 'menu,menubutton',
 		lang: 'en', // %REMOVE_LINE_CORE%
 		init: function(editor) {
-			var lang = editor.lang['mt-viewmenu'];
+			var lang = editor.lang['mt-viewmenu'],
+				config = editor.config;
 
-			var uiViewMenuItems = getUIMenuItems(editor, 'viewButton', editor.config.menu_viewItems);
+			var uiViewMenuItems = getUIMenuItems(editor, 'viewButton', config.menu_viewItems);
 			editor.addMenuItems(uiViewMenuItems);
 
 			editor.ui.add('ViewMenu', CKEDITOR.UI_MENUBUTTON, {
@@ -98,11 +99,15 @@
 				className: 'cke_button_view',
 				modes: {'wysiwyg': 1, 'source': 1},
 				readOnly: 1,
+				panel: {
+					toolbarRelated: true,
+					css: [ CKEDITOR.skin.getPath( 'editor' ) ].concat( config.contentsCss )
+				},
 				onMenu: function() {
 					var menuItem, label, itemName, i;
 
-					for (i = 0; i < editor.config.menu_viewItems.length; i++) {
-						itemName = editor.config.menu_viewItems[i].toLowerCase();
+					for (i = 0; i < config.menu_viewItems.length; i++) {
+						itemName = config.menu_viewItems[i].toLowerCase();
 						menuItem = editor.getMenuItem(itemName);
 
 						switch (itemName) {
@@ -126,8 +131,8 @@
 					var me = this;
 
 					var updateState = function() {
-						for (var i = 0; i < editor.config.menu_viewItems.length; i++) {
-							var button = getButtonDefinition(editor.config.menu_viewItems[i], editor),
+						for (var i = 0; i < config.menu_viewItems.length; i++) {
+							var button = getButtonDefinition(config.menu_viewItems[i], editor),
 								command = button && editor.getCommand(button.command);
 							if (command) {
 								switch (command.state) {

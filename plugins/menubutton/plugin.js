@@ -29,10 +29,15 @@ CKEDITOR.plugins.add( 'menubutton', {
 				var menu = _.menu;
 				if ( !menu ) {
 					menu = _.menu = new CKEDITOR.menu( editor, {
-						panel: {
+						/**
+						 * Allow to define panel configuration
+						 * @author MindTouch
+						 */
+						panel: CKEDITOR.tools.extend({}, _.panelDefinition, {
 							className: 'cke_menu_panel',
 							attributes: { 'aria-label': editor.lang.common.options }
-						}
+						})
+						/* END */
 					});
 
 					menu.onHide = CKEDITOR.tools.bind( function() {
@@ -98,6 +103,13 @@ CKEDITOR.plugins.add( 'menubutton', {
 				this.hasArrow = true;
 
 				this.click = clickFn;
+
+				/**
+				 * Save panel definition
+				 * @author MindTouch
+				 */
+				this._.panelDefinition = panelDefinition || {};
+				/* END */
 			},
 
 			statics: {

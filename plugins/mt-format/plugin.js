@@ -102,6 +102,10 @@
 				title: lang.tag_hx,
 				className: 'cke_button_hx',
 				modes: {'wysiwyg': 1},
+				panel: {
+					toolbarRelated: true,
+					css: [ CKEDITOR.skin.getPath( 'editor' ) ].concat( config.contentsCss )
+				},
 				onMenu: function() {
 					var items = {};
 

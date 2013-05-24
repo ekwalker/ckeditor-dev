@@ -360,61 +360,6 @@ CKEDITOR.editor.prototype.unlock = function() {
 				});
 			}
 
-			editor.on('uiReady', function() {
-				var normalCommand = editor.getCommand('normal'),
-					button = normalCommand && normalCommand.uiItems[0];
-
-				if (button) {
-					var buttonElement = CKEDITOR.document.getById(button._.id);
-
-					buttonElement.removeAttribute(CKEDITOR.env.ie ? 'mouseup' : 'onclick');
-					buttonElement.on(CKEDITOR.env.ie ? 'mouseup' : 'click', function(ev) {
-						if (ev.data.$.shiftKey) {
-							var sel = editor.getSelection(),
-								element = sel && sel.getStartElement(),
-								path = new CKEDITOR.dom.elementPath(element),
-								block = path.blockLimit,
-								dtd = CKEDITOR.dtd;
-
-							if (block.is('body')) {
-								block = path.block;
-							} else if (dtd.$tableContent[block.getName()]) {
-								block = path.block || path.blockLimit.getAscendant('table', true);
-							}
-
-							if (dtd.$listItem[block.getName()]) {
-								for (var i = path.elements.length - 1; i >= 0; i--) {
-									var pathElement = path.elements[i];
-									if (dtd.$list[pathElement.getName()]) {
-										block = pathElement;
-										break;
-									}
-								}
-							}
-
-							var newElementName = editor.config.enterMode == CKEDITOR.ENTER_P ? 'p' : 'div',
-								newElement = editor.document.createElement(newElementName);
-
-							editor.fire('saveSnapshot');
-
-							if (!CKEDITOR.env.ie) newElement.appendBogus();
-
-							newElement.insertAfter(block);
-
-							var range = new CKEDITOR.dom.range(editor.document);
-							range.moveToElementEditStart(newElement);
-							range.select();
-
-							newElement.scrollIntoView();
-
-							editor.fire('saveSnapshot');
-						} else {
-							editor.execCommand(button.command);
-						}
-					});
-				}
-			});
-
 			/**
 			 * Find/Replace dialog: Find by enter key
 			 *
@@ -425,12 +370,12 @@ CKEDITOR.editor.prototype.unlock = function() {
 					var def = evt.data.definition;
 					def.contents[0].elements[0].children[0].setup = function() {
 						var inputElement = this;
-						this.getInputElement().on('keypress', function(evt) {
+						this.getInputElement().on('keydown', function(evt) {
 							if (evt.data.getKeystroke() == 13) {
 								inputElement.getDialog().getContentElement('find', 'btnFind').click();
-								evt.cancel();
+								evt.data.preventDefault(1);
 							}
-						});
+						}, null, null, 1);
 					};
 
 					def.onShow = CKEDITOR.tools.override(def.onShow, function(original) {

@@ -187,11 +187,16 @@ img::selection {
 	line-height: 13px;
 }
 
-/* Comment delete */
-body.deki-content-edit p.comment.cke_comment_delete_on {
-	background-position: 0 -25px;
+.cke_menubutton_on {
+	background-color: #D3D3D3;
+	display: block;
 }
 
-body.deki-content-edit p.comment.cke_comment_delete_off {
-	background-position: 0 0;
+.cke_hc .cke_menubutton_on {
+	border: 2px solid;
+	padding: 0;
+}
+
+.cke_menubutton_on .cke_menubutton_icon {
+	background-color: #D0D2D0;
 }
