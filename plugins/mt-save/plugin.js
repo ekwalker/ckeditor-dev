@@ -230,6 +230,8 @@
 				toolbar: 'document,20'
 			});
 
+			editor.setKeystroke(CKEDITOR.CTRL + 83 /*S*/, 'mindtouchsave');
+
 			CKEDITOR.dialog.add('confirmcancel', function(editor) {
 				return {
 					title: langCancel.discardChangesTitle,

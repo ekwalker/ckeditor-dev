@@ -74,6 +74,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mt-infopanel,' +
 		'mt-keystrokes,' +
 		'mt-link,' +
+		'mt-misc,' +
 		'mt-pre,' +
 		'mt-richcombomenu,' +
 		'mt-save,' +

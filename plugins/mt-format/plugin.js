@@ -49,21 +49,13 @@
 	};
 
 	CKEDITOR.plugins.add('mt-format', {
-		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'h1,h2,h3,h4,h5,hx,code,plaintext',
+		lang: 'en',
 		requires: 'format',
 		init: function(editor) {
 			var format = editor.lang.format,
 				lang = editor.lang['mt-format'],
-				config = editor.config,
-				iconsPath = CKEDITOR.getUrl('../images/icons.png'),
-				icons = {
-					h1: '-272',
-					h2: '-288',
-					h3: '-304',
-					h4: '-320',
-					h5: '-336',
-					hx: '-352'
-				};
+				config = editor.config;
 
 			format.tag_h6 = format.tag_h5;
 			format.tag_h5 = format.tag_h4;
@@ -104,9 +96,6 @@
 			};
 
 			editor.addMenuItems(menuItems);
-			for (var name in menuItems) {
-				CKEDITOR.skin.addIcon(name, iconsPath, icons[name]);
-			}
 
 			editor.ui.add('Hx', CKEDITOR.UI_MENUBUTTON, {
 				label: lang.tag_hx,
@@ -172,15 +161,28 @@
 				command: 'plaintext'
 			}, editor.config.mindtouchStyles_plaintext);
 
-			CKEDITOR.skin.addIcon('hx', iconsPath, '-368');
-			CKEDITOR.skin.addIcon('code', iconsPath, '-240');
-			CKEDITOR.skin.addIcon('plaintext', iconsPath, '-544');
-
 			addButtonCommand(editor, 'H1', menuItems.h1, config['format_h2']);
 			addButtonCommand(editor, 'H2', menuItems.h2, config['format_h3']);
 			addButtonCommand(editor, 'H3', menuItems.h3, config['format_h4']);
 			addButtonCommand(editor, 'H4', menuItems.h4, config['format_h5']);
 			addButtonCommand(editor, 'H5', menuItems.h5, config['format_h6']);
+
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 76 /*L*/, 'justifyleft');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 69 /*E*/, 'justifycenter');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 82 /*R*/, 'justifyright');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 74 /*J*/, 'justifyblock');
+
+			editor.setKeystroke(CKEDITOR.CTRL + 188 /*,*/, 'subscript');
+			editor.setKeystroke(CKEDITOR.CTRL + 190 /*.*/, 'superscript');
+			editor.setKeystroke(CKEDITOR.CTRL + 220 /*\*/, 'removeFormat');
+			editor.setKeystroke(CKEDITOR.CTRL + 222 /*'*/, 'code');
+			
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 48 /*0*/, 'normal');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 49 /*1*/, 'h1');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 50 /*2*/, 'h2');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 51 /*3*/, 'h3');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 52 /*4*/, 'h4');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 53 /*5*/, 'h5');
 		},
 		onLoad: function() {
 			var css = [

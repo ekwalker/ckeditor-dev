@@ -374,6 +374,10 @@
 		init: function(editor) {
 			editor.addCommand('toggleList', toggleListCmd);
 
+			editor.setKeystroke(CKEDITOR.CTRL + 76 /*L*/, 'toggleList');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 55 /*7*/, 'numberedlist');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 56 /*8*/, 'bulletedlist');
+
 			editor.on('key', function(evt) {
 				if (evt.editor.readOnly || evt.editor.mode != 'wysiwyg') {
 					return;

@@ -56,6 +56,9 @@
 			editor.addMenuGroup('style_conditional', 3);
 			editor.addMenuGroup('style_executable', 4);
 
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 77 /*M*/, 'comment');
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 83 /*S*/, 'dekiscript');
+
 			var addStyleCommand = function(style, commandName) {
 				editor.attachStyleStateChange(style, function(state) {
 					!editor.readOnly && editor.getCommand(commandName).setState(state);

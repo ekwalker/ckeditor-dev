@@ -752,6 +752,8 @@
 					directional: true,
 					toolbar: 'list,50'
 			});
+
+			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 57 /*9*/, 'definitionlist');
 		}
 	});
 })();
