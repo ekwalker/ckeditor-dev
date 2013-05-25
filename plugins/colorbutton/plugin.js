@@ -119,11 +119,54 @@ CKEDITOR.plugins.add( 'colorbutton', {
 
 				editor.fire( 'saveSnapshot' );
 
-				// Clean up any conflicting style within the range.
-				editor.removeStyle( new CKEDITOR.style( config[ 'colorButton_' + type + 'Style' ], { color: 'inherit' } ) );
+				/**
+				 * Apply background color to the table cell
+				 * @see #0004187
+				 * @author MindTouch
+				 */
+				var selection = editor.getSelection(),
+					range = selection && selection.getRanges()[ 0 ],
+					cells = selection && CKEDITOR.plugins.tabletools && CKEDITOR.plugins.tabletools.getSelectedCells( selection );
+
+				if ( type === 'back' && cells && ( cells.length > 1 || ( cells.length === 1 && range && range.collapsed ) ) ) {
+					var bgColorStyle = CKEDITOR.tools.clone( config[ 'colorButton_' + type + 'Style' ] );
+					bgColorStyle.element = 'td';
+
+					var style = new CKEDITOR.style( bgColorStyle, { color : 'inherit' } );
+					for ( var i = 0; i < cells.length; i++ ) {
+						var clone = range.clone();
+						clone.selectNodeContents( cells[ i ] );
+						clone.select();
+						style.removeFromRange( clone );
+					}
+					range.select();
+				} else {
+					// Clean up any conflicting style within the range.
+					editor.removeStyle( new CKEDITOR.style( config[ 'colorButton_' + type + 'Style' ], { color: 'inherit' } ) );
+				}
+				/* END */
 
 				if ( color ) {
 					var colorStyle = config[ 'colorButton_' + type + 'Style' ];
+
+					/**
+					 * Apply background color to the table cell
+					 * @see #0004187
+					 * @author MindTouch
+					 */
+					// if text is selected into cell then apply bgcolor to selected text
+					// instead of cell
+					if ( type === 'back' && cells && ( cells.length > 1 || ( cells.length === 1 && range && range.collapsed ) ) ) {
+						colorStyle = CKEDITOR.tools.clone( colorStyle );
+						colorStyle.element = 'td';
+						var style = new CKEDITOR.style( colorStyle, { color: color } );
+						for ( var i = 0; i < cells.length; i++ ) {
+							style.applyToObject( cells[ i ] );
+						}
+						editor.fire( 'saveSnapshot' );
+						return;
+					}
+					/* END */
 
 					colorStyle.childRule = type == 'back' ?
 					function( element ) {

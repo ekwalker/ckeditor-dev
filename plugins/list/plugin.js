@@ -242,6 +242,26 @@
 	};
 
 	function changeListType( editor, groupObj, database, listsCreated ) {
+		/**
+		 * It is necessary to change list type of all list items
+		 * with the same level
+		 * Why it matters: if a bulleted list exists with nested lists,
+		 * it's currently impossible to just change one level of that list to numbers
+		 * @see #0006389
+		 * @author MindTouch
+		 */
+		if ( groupObj.contents.length == 1 ) {
+			var itemNode = groupObj.contents[ 0 ],
+				parent = itemNode.getParent();
+			
+			if ( parent && listNodeNames[ parent.getName() ] ) {
+				parent.renameNode( this.type );
+				parent.removeCustomData( 'list_group_object' );
+				return;
+			}
+		}
+		/* END */
+		
 		// This case is easy...
 		// 1. Convert the whole list into a one-dimensional array.
 		// 2. Change the list type by modifying the array.
