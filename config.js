@@ -57,42 +57,41 @@ CKEDITOR.editorConfig = function( config ) {
 		'toolbar,' +
 		'undo,' +
 		'wysiwygarea,' +
-		// mindtouch plugins
-		'mt-autogrow,' +
-		'mt-autosave,' +
-		'mt-ckoverrides,' +
-		'mt-clearcontents,' +
-		'mt-clipboard,' +
-		'mt-commentdelete,' +
-		'mt-dialog,' +
-		'mt-elementbubble,' +
-		'mt-floatingtoolbar,' +
-		'mt-format,' +
-		'mt-image,' +
-		'mt-imageattach,' +
-		'mt-imageresize,' +
-		'mt-infobar,' +
-		'mt-infopanel,' +
-		'mt-keystrokes,' +
-		'mt-link,' +
-		'mt-misc,' +
-		'mt-pre,' +
-		'mt-richcombomenu,' +
-		'mt-save,' +
-		'mt-statistics,' +
-		'mt-stylescombomenu,' +
-		'mt-stylewrap,' +
-		'mt-storage,' +
-		'mt-table,' +
-		'mt-tableadvanced,' +
-		'mt-templates,' +
-		'mt-tools,' +
-		'mt-transformations,' +
-		'mt-video,' +
-		'mt-viewmenu,' +
-		'mt-whoisediting,' +
-		'definitionlist,' +
-		'zeroclipboard';
+		'mindtouch/autogrow,' +
+		'mindtouch/autosave,' +
+		'mindtouch/ckoverrides,' +
+		'mindtouch/clearcontents,' +
+		'mindtouch/clipboard,' +
+		'mindtouch/commentdelete,' +
+		'mindtouch/definitionlist,' +
+		'mindtouch/dialog,' +
+		'mindtouch/elementbubble,' +
+		'mindtouch/floatingtoolbar,' +
+		'mindtouch/format,' +
+		'mindtouch/image,' +
+		'mindtouch/imageattach,' +
+		'mindtouch/imageresize,' +
+		'mindtouch/infobar,' +
+		'mindtouch/infopanel,' +
+		'mindtouch/keystrokes,' +
+		'mindtouch/link,' +
+		'mindtouch/misc,' +
+		'mindtouch/pre,' +
+		'mindtouch/richcombomenu,' +
+		'mindtouch/save,' +
+		'mindtouch/statistics,' +
+		'mindtouch/stylescombomenu,' +
+		'mindtouch/stylewrap,' +
+		'mindtouch/storage,' +
+		'mindtouch/table,' +
+		'mindtouch/tableadvanced,' +
+		'mindtouch/templates,' +
+		'mindtouch/tools,' +
+		'mindtouch/transformations,' +
+		'mindtouch/video,' +
+		'mindtouch/viewmenu,' +
+		'mindtouch/whoisediting,' +
+		'mindtouch/zeroclipboard';
 	// %REMOVE_END%
 
 	config.bodyId = 'topic';
