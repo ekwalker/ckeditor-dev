@@ -98,7 +98,11 @@ var CKBUILDER_CONFIG = {
 		'mt-video': 1,
 		'mt-viewmenu': 1,
 		'mt-whoisediting': 1,
-		'definitionlist': 1
+		'definitionlist': 1,
 		'zeroclipboard': 1
-	}
+	},
+	js: [
+		'../../plugins/mt-video/js/sly.min.js',
+		'../../plugins/zeroclipboard/ZeroClipboard.min.js'
+	]
 };

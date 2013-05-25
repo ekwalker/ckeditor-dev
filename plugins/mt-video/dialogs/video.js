@@ -66,7 +66,7 @@
 		if ( !jQuery.fn.sly )
 		{
 			var path = CKEDITOR.plugins.get( this.dialog.getName() ).path;
-			CKEDITOR.scriptLoader.load( CKEDITOR.getUrl( path + 'dialogs/sly.min.js' ), createSly, this );
+			CKEDITOR.scriptLoader.load( CKEDITOR.getUrl( path + 'js/sly.min.js' ), createSly, this );
 		}
 		else
 		{
