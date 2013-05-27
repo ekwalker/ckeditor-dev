@@ -71,10 +71,10 @@
 			path = editor.elementPath( range.startContainer ),
 			block = path.block,
 			blockLimit = path.blockLimit,
-			pre = block.is( 'pre' ),
-			comment = block.is( 'p' ) && block.hasClass( 'comment' ),
+			pre = block && block.is( 'pre' ),
+			comment = block && block.is( 'p' ) && block.hasClass( 'comment' ),
 			conditional = forceMode && atBlockEnd && blockLimit.is( 'div' ) && blockLimit.hasClass( 'mt-style-conditional' ) && block.equals( blockLimit.getLast() ),
-			dl = !forceMode && atBlockEnd && block.is( 'dt', 'dd' );
+			dl = block && !forceMode && atBlockEnd && block.is( 'dt', 'dd' );
 
 		if ( pre || comment || conditional || dl ) {
 			var path = editor.elementPath();
