@@ -66,6 +66,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mindtouch/definitionlist,' +
 		'mindtouch/dialog,' +
 		'mindtouch/elementbubble,' +
+		'mindtouch/enterkey,' +
 		'mindtouch/floatingtoolbar,' +
 		'mindtouch/format,' +
 		'mindtouch/image,' +

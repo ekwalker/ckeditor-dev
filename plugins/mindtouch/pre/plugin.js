@@ -44,10 +44,7 @@
 
 		var range = sel.getRanges()[0],
 			node = range && range.startContainer,
-			stat = {
-				lines: 1,
-				chars: 0
-			};
+			stat = {lines: 1, chars: 0};
 
 		var processNode = function(node) {
 			var text;
@@ -204,8 +201,6 @@
 					elements: {
 						'pre': function(pre) {
 							// Replace \n to <br> inside pre elements
-							var br = new CKEDITOR.dom.element('br', editor.document);
-
 							var replaceLineBreaks = function(element) {
 								if (!element.children) {
 									return;
@@ -215,7 +210,8 @@
 									var child = element.children[i];
 
 									if (child.type == CKEDITOR.NODE_TEXT) {
-										child.value = child.value.replace(/\n|\r\n/g, br.getOuterHtml());
+										child.value = child.value.replace(/\n|\r\n/g, '<br>');
+										child.value = child.value.replace(/^<br>/, '').replace('/<br>$/', '');
 									} else {
 										replaceLineBreaks(child);
 									}

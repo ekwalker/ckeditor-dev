@@ -65,7 +65,6 @@ var CKBUILDER_CONFIG = {
 		toolbar: 1,
 		undo: 1,
 		wysiwygarea: 1,
-		// mindtouch plugins
 		'mindtouch/autogrow': 1,
 		'mindtouch/autosave': 1,
 		'mindtouch/ckoverrides': 1,
@@ -75,6 +74,7 @@ var CKBUILDER_CONFIG = {
 		'mindtouch/definitionlist': 1,
 		'mindtouch/dialog': 1,
 		'mindtouch/elementbubble': 1,
+		'mindtouch/enterkey': 1,
 		'mindtouch/format': 1,
 		'mindtouch/floatingtoolbar': 1,
 		'mindtouch/image': 1,
