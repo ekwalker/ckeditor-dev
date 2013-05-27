@@ -1,4 +1,4 @@
-CKEDITOR.plugins.setLang('mindtouch/tableadvanced', 'en', {
+CKEDITOR.plugins.setLang('mindtouch/table', 'en', {
 	'bgImage': 'Background Image URL',
 	'borderStyle': 'Border style',
 	'borderWidth': 'Border width',
@@ -25,11 +25,7 @@ CKEDITOR.plugins.setLang('mindtouch/tableadvanced', 'en', {
 	'frame': 'Frame',
 
 	'row': {
-		'copy': 'Copy Selected Rows',
-		'cut': 'Cut Selected Rows',
 		'partOf': 'Row in table part',
-		'pasteAfter': 'Paste Rows After',
-		'pasteBefore': 'Paste Rows Before',
 		'tBody': 'Table Body',
 		'tFoot': 'Table Foot',
 		'tHead': 'Table Head',

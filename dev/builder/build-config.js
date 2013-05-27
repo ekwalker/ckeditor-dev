@@ -93,7 +93,7 @@ var CKBUILDER_CONFIG = {
 		'mindtouch/stylewrap': 1,
 		'mindtouch/storage': 1,
 		'mindtouch/table': 1,
-		'mindtouch/tableadvanced': 1,
+		'mindtouch/tableclipboard': 1,
 		'mindtouch/templates': 1,
 		'mindtouch/tools': 1,
 		'mindtouch/transformations': 1,

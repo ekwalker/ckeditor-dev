@@ -221,14 +221,40 @@
 	});
 
 	CKEDITOR.plugins.add('mindtouch/table', {
+		requires: 'mindtouch/tools,table',
 		icons: 'tableoneclick',
+		lang: 'en',
 		init: function(editor) {
 			var plugin = this,
+				lang = editor.lang['mindtouch/table'],
 				picker;
 
+			var addDialog = CKEDITOR.tools.override(CKEDITOR.dialog.add, function(add) {
+				return function(name, dialogDefinition) {
+					add.apply(this, [name, dialogDefinition]);
+					if (!CKEDITOR.tools.objectCompare(this._.dialogDefinitions[ name ], dialogDefinition)) {
+						this._.dialogDefinitions[ name ] = dialogDefinition;
+					}
+				}
+			});
+
+			addDialog.call(CKEDITOR.dialog, 'table', this.path + 'dialogs/table.js');
+			addDialog.call(CKEDITOR.dialog, 'tableProperties', this.path + 'dialogs/table.js');
+			addDialog.call(CKEDITOR.dialog, 'cellProperties', this.path + 'dialogs/tableCell.js');
+
+			editor.addCommand('rowProperties', new CKEDITOR.dialogCommand('rowProperties'));
+			addDialog.call(CKEDITOR.dialog, 'rowProperties', this.path + 'dialogs/tableRow.js');
+
+			var lang = editor.lang['mindtouch/table'];
+			CKEDITOR.tools.extend(editor.lang.table, lang);
+			CKEDITOR.tools.extend(editor.lang.table.cell, lang.cell);
+			CKEDITOR.tools.extend(editor.lang.table.row, lang.row);
+
+			lang = editor.lang.table;
+
 			editor.ui.add('TableOneClick', CKEDITOR.UI_PANELBUTTON, {
-				label: editor.lang.table.toolbar,
-				title: editor.lang.table.toolbar,
+				label: lang.toolbar,
+				title: lang.toolbar,
 				className: 'cke_button_tableoneclick',
 				modes: {wysiwyg: 1},
 
@@ -236,7 +262,7 @@
 					css: [ CKEDITOR.skin.getPath( 'editor' ) ].concat([editor.config.contentsCss, plugin.path + 'css/style.css']),
 					attributes: {
 						role: 'listbox',
-						'aria-label': editor.lang.table.toolbar
+						'aria-label': lang.toolbar
 					}
 				},
 
@@ -314,6 +340,18 @@
 					picker.hide();
 				}
 			});
+
+			if (editor.addMenuItems) {
+				editor.addMenuGroup('tablerowproperties', 102);
+				editor.addMenuItems({
+					tablerow_properties: {
+						label: lang.row.title,
+						group: 'tablerowproperties',
+						command: 'rowProperties',
+						order: 40
+					}
+				});
+			}
 		},
 		onLoad: function() {
 			CKEDITOR.document.appendStyleText('.cke_button__tableoneclick .cke_button_label { display: inline; margin: 0; padding-right: 2px;}');

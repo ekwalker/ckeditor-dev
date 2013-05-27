@@ -85,7 +85,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mindtouch/stylewrap,' +
 		'mindtouch/storage,' +
 		'mindtouch/table,' +
-		'mindtouch/tableadvanced,' +
+		'mindtouch/tableclipboard,' +
 		'mindtouch/templates,' +
 		'mindtouch/tools,' +
 		'mindtouch/transformations,' +

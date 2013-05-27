@@ -359,32 +359,12 @@
 		}
 	};
 
-	CKEDITOR.plugins.add('mindtouch/tableadvanced', {
-		requires: 'dialog,mindtouch/tools,table',
+	CKEDITOR.plugins.add('mindtouch/tableclipboard', {
+		requires: 'mindtouch/table',
 		lang: 'en',
 		init: function(editor) {
-			var addDialog = CKEDITOR.tools.override(CKEDITOR.dialog.add, function(add) {
-				return function(name, dialogDefinition) {
-					add.apply(this, [name, dialogDefinition]);
-					if (!CKEDITOR.tools.objectCompare(this._.dialogDefinitions[ name ], dialogDefinition)) {
-						this._.dialogDefinitions[ name ] = dialogDefinition;
-					}
-				}
-			});
-
-			addDialog.call(CKEDITOR.dialog, 'table', this.path + 'dialogs/table.js');
-			addDialog.call(CKEDITOR.dialog, 'tableProperties', this.path + 'dialogs/table.js');
-			addDialog.call(CKEDITOR.dialog, 'cellProperties', this.path + 'dialogs/tableCell.js');
-
-			editor.addCommand('rowProperties', new CKEDITOR.dialogCommand('rowProperties'));
-			addDialog.call(CKEDITOR.dialog, 'rowProperties', this.path + 'dialogs/tableRow.js');
-
-			var lang = editor.lang['mindtouch/tableadvanced'];
-			CKEDITOR.tools.extend(editor.lang.table, lang);
-			CKEDITOR.tools.extend(editor.lang.table.cell, lang.cell);
-			CKEDITOR.tools.extend(editor.lang.table.row, lang.row);
-
-			var clipboard = new tableClipboard(editor);
+			var lang = editor.lang['mindtouch/tableclipboard'],
+				clipboard = new tableClipboard(editor);
 
 			editor.addCommand('rowCut', {
 				exec: function(editor) {
@@ -446,11 +426,7 @@
 					}
 				}
 
-				var command = 'cellsCut';
-
-				if (evt.name in {'copy': 1, 'zcBeforeCopy': 1}) {
-					command = 'cellsCopy';
-				}
+				var command = (evt.name in {'copy': 1, 'zcBeforeCopy': 1}) ? 'cellsCopy' : 'cellsCut';
 
 				editor.execCommand(command);
 
@@ -476,17 +452,10 @@
 				}
 			}, null, null, 1);
 
-			editor.on('paste', function(evt) {
+			editor.on('beforePaste', function(evt) {
 				// if clipboard is not empty,
 				// paste stored rows and cancel paste event
-				if (evt.data.dataValue && !clipboard.isEmpty()) {
-					editor.execCommand('rowPasteAfter');
-					evt.cancel();
-				}
-			});
-
-			editor.on('beforeCommandExec', function(evt) {
-				if (evt.data.name == 'paste' && !clipboard.isEmpty()) {
+				if (!clipboard.isEmpty()) {
 					editor.execCommand('rowPasteAfter');
 					evt.cancel();
 				}
@@ -496,15 +465,13 @@
 			editor.on('zcBeforeCopy', onCopyCut);
 			editor.on('zcBeforeCut', onCopyCut);
 
-			lang = editor.lang.table;
-
 			if (editor.addMenuItems) {
 				editor.addMenuGroup('tablerowcopypaste', 101);
 				editor.addMenuGroup('tablerowproperties', 102);
 
 				editor.addMenuItems({
 					tablerow: {
-						label: lang.row.menu,
+						label: editor.lang.table.row.menu,
 						group: 'tablerow',
 						order: 1,
 						getItems: function() {
@@ -522,38 +489,31 @@
 					},
 
 					tablerow_cut: {
-						label: lang.row.cut,
+						label: lang.cutRows,
 						group: 'tablerowcopypaste',
 						command: 'rowCut',
 						order: 20
 					},
 
 					tablerow_copy: {
-						label: lang.row.copy,
+						label: lang.copyRows,
 						group: 'tablerowcopypaste',
 						command: 'rowCopy',
 						order: 25
 					},
 
 					tablerow_pasteBefore: {
-						label: lang.row.pasteBefore,
+						label: lang.pasteRowsBefore,
 						group: 'tablerowcopypaste',
 						command: 'rowPasteBefore',
 						order: 30
 					},
 
 					tablerow_pasteAfter: {
-						label: lang.row.pasteAfter,
+						label: lang.pasteRowsAfter,
 						group: 'tablerowcopypaste',
 						command: 'rowPasteAfter',
 						order: 35
-					},
-
-					tablerow_properties: {
-						label: lang.row.title,
-						group: 'tablerowproperties',
-						command: 'rowProperties',
-						order: 40
 					}
 				});
 			}
