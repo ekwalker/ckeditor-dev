@@ -26,32 +26,82 @@
  * A complete copy of the MSA is available at http://www.mindtouch.com/msa
  */
 
-CKEDITOR.plugins.add('mindtouch/infobar', {
-	requires: 'mindtouch/infopanel',
-	init: function(editor) {
-		editor.ui.infobar = new CKEDITOR.ui.infoPanel(CKEDITOR.document, {
-			className: 'cke_infobar'
-		});
+(function() {
+	var checkMouseTimer,
+		checkMouse = function( mouse, infobar ) {
+			var doc = CKEDITOR.document,
+				pos = infobar.getDocumentPosition( doc ),
+				width = infobar.$.offsetWidth,
+				height = infobar.$.offsetHeight;
 
-		editor.on( 'uiSpace', function(evt) {
-			if (evt.data.space == 'top') {
-				evt.removeListener();
-				evt.data.html += editor.ui.infobar.renderHtml(evt.editor);
+			if ( mouse.x > pos.x && mouse.x < pos.x + width && mouse.y > pos.y && mouse.y < pos.y + height ) {
+				infobar.setStyle( 'visibility', 'hidden' );
+			} else {
+				infobar.setStyle( 'visibility', '' );
 			}
-		});
 
-		editor.on('dataReady', function() {
-			editor.editable().addClass('cke_infobar_enabled');
-		});
-	},
-	onLoad : function() {
-		var css = [
-			'.cke_infobar { position: absolute; z-index: 1; height: 15px; padding: 5px 0; overflow: hidden; border-radius: 0 0 0 5px; background-color: #cfd1cf; bottom: -25px; right: 0; }',
-			'.cke_infobar .cke_infopanel_group a { text-decoration: underline; color: #333; cursor: pointer; }',
-			'.cke_infobar .cke_infopanel_group { float: left; background: transparent url(/deki/plugins/page_editor_ckeditor/images/infobar-delim.gif) scroll no-repeat right center; padding: 0 1em; }',
-			'.cke_infobar span { cursor: default; -ms-filter: alpha(opacity=70); opacity: 0.70; }',
-			'.cke_hc .cke_infobar span { opacity: 1.0; -ms-filter: alpha(opacity=100); }'
-		];
-		CKEDITOR.document.appendStyleText(css.join(''));
-	}
-});
+			window.clearTimeout( checkMouseTimer );
+			checkMouseTimer = null;
+		},
+		onMouseMove = function( ev ) {
+			var editor = this;
+			
+			if ( editor.readOnly || checkMouseTimer ) {
+				return;
+			}
+
+			// IE<9 requires this event-driven object to be created
+			// outside of the setTimeout statement.
+			// Otherwise it loses the event object with its properties.
+			var mouse = ev.data.getPageOffset();
+
+			if ( ev.listenerData && ev.listenerData.context ) {
+				var pos = ev.listenerData.context.getDocumentPosition( CKEDITOR.document );
+				mouse.x += pos.x;
+				mouse.y += pos.y;
+			}
+
+			checkMouseTimer = setTimeout( function() {
+				checkMouse( mouse, editor.ui.infobar.getContainer() );
+			}, 30 ); // balances performance and accessibility
+		};
+
+	CKEDITOR.plugins.add( 'mindtouch/infobar', {
+		requires: 'mindtouch/infopanel',
+		init: function( editor ) {
+			editor.ui.infobar = new CKEDITOR.ui.infoPanel(CKEDITOR.document, {
+				className: 'cke_infobar'
+			});
+
+			editor.on( 'uiSpace', function( evt ) {
+				if ( evt.data.space == 'top' ) {
+					evt.removeListener();
+					evt.data.html += editor.ui.infobar.renderHtml(evt.editor );
+				}
+			});
+
+			editor.on( 'uiReady', function() {
+				CKEDITOR.document.on( 'mousemove', onMouseMove, editor );
+			});
+
+			editor.on( 'contentDom', function() {
+				var editable = editor.editable();
+				editable.attachListener( editable.isInline() ? editable : editor.document, 'mousemove', onMouseMove, editor, { context: editor.ui.space( 'contents' ) } );
+			});
+
+			editor.on( 'dataReady', function() {
+				editor.editable().addClass( 'cke_infobar_enabled' );
+			});
+		},
+		onLoad : function() {
+			var css = [
+				'.cke_infobar { position: absolute; z-index: 1; height: 15px; padding: 5px 0; overflow: hidden; border-radius: 0 0 0 5px; background-color: #cfd1cf; bottom: -25px; right: 0; }',
+				'.cke_infobar .cke_infopanel_group a { text-decoration: underline; color: #333; cursor: pointer; }',
+				'.cke_infobar .cke_infopanel_group { float: left; background: transparent url(/deki/plugins/page_editor_ckeditor/images/infobar-delim.gif) scroll no-repeat right center; padding: 0 1em; }',
+				'.cke_infobar span { cursor: default; -ms-filter: alpha(opacity=70); opacity: 0.70; }',
+				'.cke_hc .cke_infobar span { opacity: 1.0; -ms-filter: alpha(opacity=100); }'
+			];
+			CKEDITOR.document.appendStyleText( css.join( '' ) );
+		}
+	});
+})();
