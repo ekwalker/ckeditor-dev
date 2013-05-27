@@ -32,10 +32,9 @@
 
 (function() {
 	CKEDITOR.plugins.add('mindtouch/commentdelete', {
-		lang: 'en',  // %REMOVE_LINE_CORE%
+		lang: 'en',
 		init: function(editor) {
-			var iconPath = CKEDITOR.getUrl('../images/icons.png'),
-				commentDelete = CKEDITOR.document.createElement('a', {
+			var commentDelete = CKEDITOR.document.createElement('a', {
 				attributes: {
 					id: 'cke_comment_delete',
 					href: 'void("Delete comment")',
@@ -49,7 +48,7 @@
 					display: 'none',
 					width: '16px',
 					height: '16px',
-					background: 'transparent url(' + iconPath + ') scroll no-repeat 0 -64px'
+					background: 'transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIhSURBVDjLlZPrThNRFIWJicmJz6BWiYbIkYDEG0JbBiitDQgm0PuFXqSAtKXtpE2hNuoPTXwSnwtExd6w0pl2OtPlrphKLSXhx07OZM769qy19wwAGLhM1ddC184+d18QMzoq3lfsD3LZ7Y3XbE5DL6Atzuyilc5Ciyd7IHVfgNcDYTQ2tvDr5crn6uLSvX+Av2Lk36FFpSVENDe3OxDZu8apO5rROJDLo30+Nlvj5RnTlVNAKs1aCVFr7b4BPn6Cls21AWgEQlz2+Dl1h7IdA+i97A/geP65WhbmrnZZ0GIJpr6OqZqYAd5/gJpKox4Mg7pD2YoC2b0/54rJQuJZdm6Izcgma4TW1WZ0h+y8BfbyJMwBmSxkjw+VObNanp5h/adwGhaTXF4NWbLj9gEONyCmUZmd10pGgf1/vwcgOT3tUQE0DdicwIod2EmSbwsKE1P8QoDkcHPJ5YESjgBJkYQpIEZ2KEB51Y6y3ojvY+P8XEDN7uKS0w0ltA7QGCWHCxSWWpwyaCeLy0BkA7UXyyg8fIzDoWHeBaDN4tQdSvAVdU1Aok+nsNTipIEVnkywo/FHatVkBoIhnFisOBoZxcGtQd4B0GYJNZsDSiAEadUBCkstPtN3Avs2Msa+Dt9XfxoFSNYF/Bh9gP0bOqHLAm2WUF1YQskwrVFYPWkf3h1iXwbvqGfFPSGW9Eah8HSS9fuZDnS32f71m8KFY7xs/QZyu6TH2+2+FAAAAABJRU5ErkJggg==) scroll no-repeat 0 0'
 				}
 			});
 
@@ -99,10 +98,9 @@
 				commentDelete && commentDelete.hide();
 			};
 
-			editor.on('contentDom', function() {
-				editor.document.getBody().on('mousemove', function(ev) {
-					var target = ev.data.getTarget(),
-						comment = target && target.getAscendant('p', true);
+			var checkMouseTimer,
+				checkMouse = function( target ) {
+					var comment = target && target.getAscendant('p', true);
 
 					if (comment && comment.hasClass('comment')) {
 						if (commentElement && !commentElement.equals(comment)) {
@@ -121,6 +119,23 @@
 					} else {
 						hideDeleteButton();
 					}
+
+					window.clearTimeout( checkMouseTimer );
+					checkMouseTimer = null;
+				};
+
+			editor.on('contentDom', function() {
+				var editable = editor.editable();
+				editable.attachListener( editable.isInline() ? editable : editor.document, 'mousemove', function(ev) {			
+					if ( editor.readOnly || checkMouseTimer ) {
+						return;
+					}
+
+					var target = ev.data.getTarget();
+
+					checkMouseTimer = setTimeout( function() {
+						checkMouse( target );
+					}, 30 );
 				});
 			});
 
