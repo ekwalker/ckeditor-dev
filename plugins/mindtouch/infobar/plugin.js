@@ -103,7 +103,10 @@
 				'.cke_infobar .cke_infopanel_group a { text-decoration: underline; color: #333; cursor: pointer; }',
 				'.cke_infobar .cke_infopanel_group { float: left; background: transparent url(data:image/gif;base64,R0lGODlhAQANAIABAJmZmf///yH5BAEKAAEALAAAAAABAA0AAAIDhI9XADs=) scroll no-repeat right center; padding: 0 1em; }',
 				'.cke_infobar span { cursor: default; -ms-filter: alpha(opacity=70); opacity: 0.70; }',
-				'.cke_hc .cke_infobar span { opacity: 1.0; -ms-filter: alpha(opacity=100); }'
+				'.cke_hc .cke_infobar span { opacity: 1.0; -ms-filter: alpha(opacity=100); }',
+				// @see #MT-9987
+				'.cke textarea.cke_source.cke_infobar_enabled { padding-top: 25px; }'
+
 			];
 			CKEDITOR.document.appendStyleText( css.join( '' ) );
 		}

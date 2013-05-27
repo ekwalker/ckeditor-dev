@@ -28,6 +28,7 @@
 
 (function() {
 	CKEDITOR.plugins.add('mindtouch/stylescombomenu', {
+		icons: 'none,preltpregtpre_format,comment,dekiscript,javascript_jem,css,conditional_text_anonymous_only,conditional_text_community_member_only,conditional_text_pro_member_only',
 		requires: 'mindtouch/richcombomenu',
 		onLoad : function() {
 			CKEDITOR.document.appendStyleText('.cke_combo__stylesmenu .cke_combo_text {width: 90px;}');
@@ -37,19 +38,7 @@
 				lang = editor.lang.stylescombo,
 				styles = [],
 				combo,
-				allowedContent = [],
-				iconPath = CKEDITOR.getUrl( '../images/icons.png' ),
-				icons = {
-					'none' : '-464',
-					'preltpregtpre_format' : '-480',
-					'comment' : '-80',
-					'dekiscript' : '-224',
-					'javascript_jem' : '-208',
-					'css' : '-192',
-					'conditional_text_anonymous_only' : '-512',
-					'conditional_text_community_member_only' : '-512',
-					'conditional_text_pro_member_only' : '-512'
-				};
+				allowedContent = [];
 
 			editor.addMenuGroup('style_default', 1);
 			editor.addMenuGroup('style_user', 2);
@@ -118,10 +107,6 @@
 								editor.fire('saveSnapshot');
 							}
 						});
-
-						if (icons[buttonName]) {
-							CKEDITOR.skin.addIcon(buttonName, iconPath, icons[buttonName]);
-						}
 
 						styles.push(style);
 						allowedContent.push(style);
