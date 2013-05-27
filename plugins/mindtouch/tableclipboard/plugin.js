@@ -360,6 +360,7 @@
 	};
 
 	CKEDITOR.plugins.add('mindtouch/tableclipboard', {
+		icons: 'tablerow_copy,tablerow_cut,tablerow_pasteAfter,tablerow_pasteBefore',
 		requires: 'mindtouch/table',
 		lang: 'en',
 		init: function(editor) {
