@@ -255,6 +255,7 @@
 			editor.ui.add('TableOneClick', CKEDITOR.UI_PANELBUTTON, {
 				label: lang.toolbar,
 				title: lang.toolbar,
+				toolbar: 'insert,40',
 				className: 'cke_button_tableoneclick',
 				modes: {wysiwyg: 1},
 

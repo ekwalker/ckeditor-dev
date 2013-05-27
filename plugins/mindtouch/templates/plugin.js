@@ -72,7 +72,7 @@
 			editor.ui.addButton('MindTouchTemplates', {
 				label: editor.lang['mindtouch/templates'].button,
 				command: pluginName,
-				toolbar: 'doctools,10'
+				toolbar: 'insert,70'
 			});
 		},
 		onLoad: function() {

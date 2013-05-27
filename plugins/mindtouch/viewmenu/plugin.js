@@ -93,9 +93,12 @@
 			var uiViewMenuItems = getUIMenuItems(editor, 'viewButton', config.menu_viewItems);
 			editor.addMenuItems(uiViewMenuItems);
 
+			editor.ui.addToolbarGroup('view', 'doctools', 'document');
+
 			editor.ui.add('ViewMenu', CKEDITOR.UI_MENUBUTTON, {
 				label: lang.view,
 				title: lang.view,
+				toolbar: 'view,10',
 				className: 'cke_button_view',
 				modes: {'wysiwyg': 1, 'source': 1},
 				readOnly: 1,

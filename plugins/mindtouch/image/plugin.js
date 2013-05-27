@@ -196,7 +196,7 @@
 			editor.ui.addButton('MindTouchImage', {
 				label: editor.lang.common.image,
 				command: pluginName,
-				toolbar: 'insert,10'
+				toolbar: 'insert,50'
 			});
 
 			if (editor.addMenuItems) {

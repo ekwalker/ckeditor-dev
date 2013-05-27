@@ -320,7 +320,8 @@
 			editor.addCommand('pasteimage', pasteImageCmd);
 			editor.ui.addButton('PasteImage', {
 				label: editor.lang['mindtouch/imageattach'].pasteFromClipboard,
-				command: 'pasteimage'
+				command: 'pasteimage',
+				toolbar: 'clipboard,60'
 			});
 
 			editor.on('contentDom', function() {

@@ -101,7 +101,7 @@
 				label: editor.lang['mindtouch/video'].label,
 				title: editor.lang['mindtouch/video'].title,
 				command: pluginName,
-				toolbar: 'insert,40'
+				toolbar: 'insert,60'
 			});
 
 			editor.addCommand('videoDelete', {

@@ -57,6 +57,8 @@
 				lang = editor.lang['mindtouch/format'],
 				config = editor.config;
 
+			editor.ui.addToolbarGroup('format', 'styles');
+
 			format.tag_h6 = format.tag_h5;
 			format.tag_h5 = format.tag_h4;
 			format.tag_h4 = format.tag_h3;
@@ -100,6 +102,7 @@
 			editor.ui.add('Hx', CKEDITOR.UI_MENUBUTTON, {
 				label: lang.tag_hx,
 				title: lang.tag_hx,
+				toolbar: 'format,50',
 				className: 'cke_button_hx',
 				modes: {'wysiwyg': 1},
 				panel: {
@@ -149,20 +152,24 @@
 				}
 			});
 
-			var nTag = config.enterMode == CKEDITOR.ENTER_DIV ? 'div' : 'p';
+			var nTag = config.enterMode == CKEDITOR.ENTER_DIV ? 'div' : 'p',
+				order = 0;
 			addButtonCommand(editor, 'Normal', {
 				label: format['tag_' + nTag],
-				command: 'normal'
+				command: 'normal',
+				toolbar: 'format,' + ( order += 10 )
 			}, config['format_' + nTag]);
 
 			addButtonCommand(editor, 'Code', {
 				label: lang.code,
-				command: 'code'
+				command: 'code',
+				toolbar: 'basicstyles,70'
 			}, editor.config.mindtouchStyles_code);
 
 			addButtonCommand(editor, 'PlainText', {
 				label: lang.plaintext,
-				command: 'plaintext'
+				command: 'plaintext',
+				toolbar: 'basicstyles,80'
 			}, editor.config.mindtouchStyles_plaintext);
 
 			addButtonCommand(editor, 'H1', menuItems.h1, config['format_h2']);

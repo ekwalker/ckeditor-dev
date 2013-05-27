@@ -164,7 +164,8 @@
 
 			editor.ui.addButton('WhoIsEditing', {
 				label: lang.title,
-				command: 'whoisediting'
+				command: 'whoisediting',
+				toolbar: 'document,40'
 			});
 
 			editor.on('instanceReady', function() {
