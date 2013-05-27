@@ -746,7 +746,13 @@
 			// 3. It doesn't have bogus br yet.
 			if ( pathBlock && pathBlock.isBlockBoundary() &&
 				!( lastNode && lastNode.type == CKEDITOR.NODE_ELEMENT && lastNode.isBlockBoundary() ) &&
-				!pathBlock.is( 'pre' ) && !pathBlock.getBogus() ) {
+				/**
+				 * An empty pre block needs of bogus as well
+				 * @author MindTouch
+				 */
+				!pathBlock.getBogus() ) {
+				// !pathBlock.is( 'pre' ) && !pathBlock.getBogus() ) {
+				/* END */
 
 				pathBlock.appendBogus();
 			}

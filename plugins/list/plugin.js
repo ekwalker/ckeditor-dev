@@ -553,6 +553,15 @@
 						blockLimit = path.blockLimit,
 						element;
 
+						
+					/**
+					 * dd as blocklimit
+					 * @see EDT-344
+					 * @author MindTouch 
+					 */
+					blockLimit = path.block && path.block.is( 'dd' ) ? path.block : blockLimit;
+					/* END */
+
 					// First, try to group by a list ancestor.
 					for ( var i = pathElementsCount - 1; i >= 0 && ( element = pathElements[ i ] ); i-- ) {
 						if ( listNodeNames[ element.getName() ] && blockLimit.contains( element ) ) // Don't leak outside block limit (#3940).
