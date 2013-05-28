@@ -192,6 +192,10 @@ CKEDITOR.ui.elementBubble = CKEDITOR.tools.createClass({
 
 		getAttachedElement: function() {
 			return this.attachedElement;
+		},
+
+		isAttached: function() {
+			return !!this.getAttachedElement();
 		}
 	}
 });

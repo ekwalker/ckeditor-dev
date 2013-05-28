@@ -31,41 +31,53 @@
  */
 
 (function() {
-	CKEDITOR.plugins.add('mindtouch/clipboard', {
-		init: function(editor) {
+	CKEDITOR.plugins.add( 'mindtouch/clipboard', {
+		init: function( editor ) {
 			/**
 			 * Paste as text in pre blocks
 			 *
 			 * @see #0007029
 			 * @see #MT-9352
 			 */
-			editor.on('beforePaste', function(evt) {
+			editor.on( 'paste', function( evt ) {
 				var sel = editor.getSelection(),
-					pre = sel && sel.getStartElement().getAscendant('pre', true);
+					pre = sel && sel.getStartElement().getAscendant( 'pre', true );
 
-				evt.data.type = pre ? 'text' : evt.data.type;
+				if ( pre ) {
+					evt.data.type = 'text';
+					evt.data.preSniffing = 'html';
+				}
+			}, null, null, 3 );
+
+			editor.on( 'paste', function( evt ) {
+				var sel = editor.getSelection(),
+					pre = sel && sel.getStartElement().getAscendant( 'pre', true );
+
+				if ( pre ) {
+					evt.data.dataValue = evt.data.dataValue.replace( /\n/g, '<br>' );
+				}
 			});
 	
-			if (CKEDITOR.env.gecko) {
+			if ( CKEDITOR.env.gecko ) {
 				// if list element contains only ul/ol element
 				// move the last one to the previous list element
 				// @see EDT-20
 				var fixNestedList = function() {
 					var sel = editor.getSelection(),
 						startElement = sel && sel.getStartElement(),
-						li = startElement && startElement.getAscendant('li', true);
+						li = startElement && startElement.getAscendant( 'li', true );
 
-					if (li) {
+					if ( li ) {
 						var nextLi = li.getNext(),
 							first = nextLi && nextLi.getFirst();
-						if (first && first.is && first.is('ul', 'ol')) {
-							first.move(li);
+						if ( first && first.is && first.is( 'ul', 'ol' ) ) {
+							first.move( li );
 							nextLi.remove();
 						}
 					}
 				};
 
-				editor.on('insertHtml', fixNestedList, null, null, 100);
+				editor.on( 'insertHtml', fixNestedList, null, null, 100 );
 			}
 		}
 	});

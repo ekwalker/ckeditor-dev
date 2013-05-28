@@ -449,7 +449,19 @@
 				}
 			};
 
+			var update = function() {
+				if (bubble && bubble.isAttached()) {
+					window.setTimeout(function() {
+						bubble.update();
+					}, 0);
+				}
+			};
+
 			editor.on('selectionChange', onSelectionChange, this, null, 1);
+
+			editor.on('insertHtml', update, null, null, 90);
+			editor.on('insertElement', update, null, null, 90);
+			editor.on('insertText', update, null, null, 90);
 		}
 	});
 })();
