@@ -54,15 +54,18 @@ CKEDITOR.plugins.add('mindtouch/clearcontents', {
 					this.getButton('ok').focus();
 				},
 				onOk: function() {
-					// executing newpage command here throws the js error
-					// @todo: investigate why and replace this function with execCommand('newpage')
-					editor.setData('', function() {
-						editor.focus();
-						// Save the undo snapshot after all document changes are affected. (#4889)
-						setTimeout(function() {
-							editor.selectionChange();
-						}, 200);
-					});
+					CKEDITOR.tools.setTimeout(function() {
+						var dialog = this;
+						editor.setData(editor.config.newpage_html || '', function() {
+							dialog.hide();
+
+							var range = editor.createRange();
+							range.moveToElementEditStart( editor.editable() );
+							range.select();
+						});
+					}, 0, this);
+
+					return false;
 				},
 				contents: [{
 					id: 'info',

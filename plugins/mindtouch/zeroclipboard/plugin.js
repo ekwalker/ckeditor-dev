@@ -415,7 +415,8 @@
 		});
 
 		editor.on('contentDom', function() {
-			editor.document.on('mouseup', function() {
+			var editable = editor.editable();
+			editable.attachListener( editable.isInline() ? editable : editor.document, 'mouseup', function() {
 				setToolbarStates(editor);
 			});
 		});

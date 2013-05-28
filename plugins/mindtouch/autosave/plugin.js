@@ -116,7 +116,13 @@
 
 						if (data) {
 							this.editor.setData(data, function() {
-								this.fire('draftLoaded');
+								this.focus();
+
+								var editor = this;
+								setTimeout(function() {
+									editor.selectionChange();
+									editor.fire('draftLoaded');
+								}, 200);
 							});
 							return true;
 						}
@@ -284,9 +290,10 @@
 					return false;
 				}
 
-				var currentData = editor.getData();
-
+				editor.focusManager.blur(1);
 				editor.lock && editor.lock();
+
+				var currentData = editor.getData();
 
 				editor.on('draftLoaded', function() {
 					startAutosave();

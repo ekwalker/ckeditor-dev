@@ -378,39 +378,45 @@
 					insertImages.call(editor, attachedFileIds);
 				};
 
+				var stopPropagation = function(evt) {
+					var stop = true;
+
+					// files.length in webkit is 0 if event default action is not cancelled
+					if (CKEDITOR.env.webkit) {
+						try {
+							for (var i = 0; i < evt.data.$.dataTransfer.types.length; i++) {
+								if (evt.data.$.dataTransfer.types[i].toLowerCase() == 'files') {
+									stop = false;
+									break;
+								}
+							}
+						} catch (ex) {};
+					} else if (evt.data.$.dataTransfer && evt.data.$.dataTransfer.files && evt.data.$.dataTransfer.files.length) {
+						stop = false;
+					}
+
+					stop && evt.data.stopPropagation();
+				};
+
+
 				var destroyUploader = function() {
 					Deki.Plugin.Unsubscribe('PageAttachFiles.attach', onAttach);
 					up && up.GetUploader().destroy();
+
+					var doc = editor.document;
+					if (doc) {
+						doc.removeListener('dragenter', stopPropagation);
+						doc.removeListener('dragover', stopPropagation);
+						doc.removeListener('drop', stopPropagation);
+					}
 				};
 
 				var initUploader = function() {
 					var doc = editor.document;
 
-					var stopPropagation = function(evt) {
-						var stop = true;
-
-						// files.length in webkit is 0 if event default action is not cancelled
-						if (CKEDITOR.env.webkit) {
-							try {
-								for (var i = 0; i < evt.data.$.dataTransfer.types.length; i++) {
-									if (evt.data.$.dataTransfer.types[i].toLowerCase() == 'files') {
-										stop = false;
-										break;
-									}
-								}
-							} catch (ex) {};
-						} else if (evt.data.$.dataTransfer && evt.data.$.dataTransfer.files && evt.data.$.dataTransfer.files.length) {
-							stop = false;
-						}
-
-						stop && evt.data.stopPropagation();
-					};
-
 					doc.on('dragenter', stopPropagation);
 					doc.on('dragover', stopPropagation);
 					doc.on('drop', stopPropagation);
-
-					destroyUploader();
 
 					up = Deki.Plugin.PageAttachFiles.InitUploader(doc.getWindow().$);
 
