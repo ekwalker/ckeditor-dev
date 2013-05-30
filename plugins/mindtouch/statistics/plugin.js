@@ -36,11 +36,8 @@
 			return;
 		}
 
-		var stat = {
-			words: 0,
-			chars: 0
-		},
-		content = '',
+		var stat = {words: 0, chars: 0},
+			content = '',
 			node = editor.document.getBody(),
 			next,
 			parent, prevParent;

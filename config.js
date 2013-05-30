@@ -57,6 +57,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'toolbar,' +
 		'undo,' +
 		'wysiwygarea,' +
+		'onchange,' +
 		'mindtouch/autogrow,' +
 		'mindtouch/autosave,' +
 		'mindtouch/ckoverrides,' +

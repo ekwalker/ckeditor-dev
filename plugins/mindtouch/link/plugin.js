@@ -31,6 +31,10 @@
  */
 
 (function() {
+	var linkTpl = CKEDITOR.addTemplate('bubbleLink', '<a target="_blank" href="{href}">{link}</a>&nbsp;&ndash;&nbsp;' +
+		'<a href="javascript:void(\'Edit Link\')" onclick="return CKEDITOR.tools.callFunction({fn}, \'mindtouch/link\')">{labelEdit}</a>&nbsp;|&nbsp;' +
+		'<a href="javascript:void(\'Unlink\')" onclick="return CKEDITOR.tools.callFunction({fn}, \'unlink\')">{labelUnlink}</a>');
+
 	var pluginName = 'mindtouch/link';
 
 	var linkCmd = {
@@ -159,7 +163,6 @@
 					delete this._.selectedElement;
 				}
 
-				editor.fire('linkUpdated');
 				editor.fire('saveSnapshot');
 			}
 		}
@@ -183,17 +186,6 @@
 			}, editor);
 
 			bubble = new CKEDITOR.ui.elementBubble({
-				onAttach: function() {
-					var link = this.getAttachedElement();
-					link.on('attrModified', this.asyncUpdate, this);
-				},
-				onDetach: function() {
-					var link = this.getAttachedElement();
-					// if link still in dom
-					try {
-						link.removeListener('attrModified', this.asyncUpdate);
-					} catch (e) {}
-				},
 				onUpdate: function(data) {
 					var link = this.getAttachedElement(),
 						image = link.getFirst(),
@@ -219,21 +211,17 @@
 					// @see EDT-377
 					text = mindtouchLink.truncate(text);
 
-					var html = [
-						'<a target="_blank" href="',
-					href, '">',
-					text,
-						'</a> &ndash; ',
-						'<a href="javascript:void(\'Edit Link\')" ',
-						'onclick="return CKEDITOR.tools.callFunction(',
-					commandFn, ', \'', pluginName, '\')">',
-					editor.lang.link.menu,
-						'</a> | ',
-						'<a href="javascript:void(\'Unlink\')" ',
-						'onclick="return CKEDITOR.tools.callFunction(',
-					commandFn, ', \'unlink\')">',
-					editor.lang.link.unlink,
-						'</a>'];
+					var html = [],
+						lang = editor.lang.link,
+						params = {
+							href: href,
+							link: text,
+							fn: commandFn,
+							labelEdit: lang.menu,
+							labelUnlink: lang.unlink
+						};
+
+					linkTpl.output(params, html);
 
 					if (title && title != href) {
 						if (title.length > 80) {
@@ -250,7 +238,7 @@
 			}, CKEDITOR.document, editor);
 		}
 
-		bubble.attachTo(linkElement);
+		bubble.attach(linkElement);
 	}
 
 	var mindtouchLink = {
@@ -265,8 +253,10 @@
 			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 75 /*K*/, 'quicklink');
 			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 75 /*K*/, 'unlink');
 
+			var lang = editor.lang.link;
+
 			editor.ui.addButton('MindTouchLink', {
-				label: editor.lang.link.toolbar,
+				label: lang.toolbar,
 				command: pluginName,
 				toolbar: 'links,10'
 			});
@@ -285,7 +275,7 @@
 			if (editor.addMenuItems) {
 				editor.addMenuItems({
 					link: {
-						label: editor.lang.link.menu,
+						label: lang.menu,
 						command: pluginName,
 						group: 'link',
 						order: 1
@@ -330,7 +320,7 @@
 				if (element && element.is('a') && element.hasAttribute('href') && !element.isReadOnly()) {
 					attachBubble(element, editor);
 				} else {
-					bubble && bubble.detach();
+					bubble && bubble.isAttached() && bubble.detach();
 				}
 			}, null, null, 1);
 		},

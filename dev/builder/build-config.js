@@ -65,6 +65,7 @@ var CKBUILDER_CONFIG = {
 		toolbar: 1,
 		undo: 1,
 		wysiwygarea: 1,
+		onchange: 1,
 		'mindtouch/autogrow': 1,
 		'mindtouch/autosave': 1,
 		'mindtouch/ckoverrides': 1,

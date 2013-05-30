@@ -85,49 +85,15 @@ CKEDITOR.ui.elementBubble = CKEDITOR.tools.createClass({
 		this.attachedElement = null;
 	},
 
-	proto: {
-		attachTo: function(element) {
-			if (!element || (this.attachedElement && this.attachedElement.equals(element))) {
-				return;
-			} else if (this.attachedElement) {
-				this.detach();
-			}
-
-			if (this.filter && this.filter.call(this, element)) {
-				this.detach();
-				return;
-			}
-
-			this.attachedElement = element;
-
-			this.doc.getWindow().on('resize', this.update, this);
-			this.editor.on('afterCommandExec', this.asyncUpdate, this);
-			this.editor.on('key', this.asyncUpdate, this);
-
-			this.onAttach && this.onAttach.call(this);
-
-			this.asyncUpdate();
-		},
-
-		detach: function() {
-			this.doc.getWindow().removeListener('resize', this.update);
-			this.editor.removeListener('afterCommandExec', this.asyncUpdate);
-			this.editor.removeListener('key', this.asyncUpdate);
-
-			this.onDetach && this.onDetach.call(this);
-
-			this.attachedElement = null;
-			this.bubble.hide();
-		},
-
+	_ : {
 		update: function() {
-			if (!this.attachedElement) {
+			if (!this.isAttached()) {
 				this.detach();
 				return;
 			}
 
 			var pxUnit = CKEDITOR.tools.cssLength,
-				element = this.attachedElement,
+				element = this.getAttachedElement(),
 				elementPosition;
 
 			this.bubble.setHtml('');
@@ -144,7 +110,7 @@ CKEDITOR.ui.elementBubble = CKEDITOR.tools.createClass({
 			try {
 				elementPosition = element.getDocumentPosition(this.doc);
 			} catch (e) {
-				this.asyncUpdate();
+				this._.asyncUpdate();
 				return;
 			}
 
@@ -174,12 +140,45 @@ CKEDITOR.ui.elementBubble = CKEDITOR.tools.createClass({
 
 			this.bubble.removeStyle('visibility');
 		},
-
 		asyncUpdate: function() {
 			var self = this;
 			window.setTimeout(function() {
-				self.update();
+				self._.update();
 			}, 0);
+		}
+	},
+
+	proto: {
+		attach: function(element) {
+			if (!element || (this.attachedElement && this.attachedElement.equals(element))) {
+				return;
+			} else if (this.attachedElement) {
+				this.detach();
+			}
+
+			if (this.filter && this.filter.call(this, element)) {
+				this.detach();
+				return;
+			}
+
+			this.attachedElement = element;
+
+			this.doc.getWindow().on('resize', this._.update, this);
+			this.editor.on('change', this._.asyncUpdate, this);
+
+			this.onAttach && this.onAttach.call(this);
+
+			this._.asyncUpdate();
+		},
+
+		detach: function() {
+			this.doc.getWindow().removeListener('resize', this._.update);
+			this.editor.removeListener('change', this._.asyncUpdate);
+
+			this.onDetach && this.onDetach.call(this);
+
+			this.attachedElement = null;
+			this.bubble.hide();
 		},
 
 		getElement: function() {

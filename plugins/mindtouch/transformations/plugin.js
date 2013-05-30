@@ -186,8 +186,6 @@
 
 					this.currentTransformName = attachedElement.data('cke-transform');
 
-					this.update();
-
 					editor.fire('saveSnapshot');
 
 					return false;
@@ -266,7 +264,7 @@
 			}, CKEDITOR.document, editor);
 		}
 
-		bubble.attachTo(preElement);
+		bubble.attach(preElement);
 	}
 
 	var transformations = [
@@ -445,23 +443,11 @@
 				if (element && !element.isReadOnly()) {
 					attachBubble(element, editor, this.transformations);
 				} else {
-					bubble && bubble.detach();
-				}
-			};
-
-			var update = function() {
-				if (bubble && bubble.isAttached()) {
-					window.setTimeout(function() {
-						bubble.update();
-					}, 0);
+					bubble && bubble.isAttached() && bubble.detach();
 				}
 			};
 
 			editor.on('selectionChange', onSelectionChange, this, null, 1);
-
-			editor.on('insertHtml', update, null, null, 90);
-			editor.on('insertElement', update, null, null, 90);
-			editor.on('insertText', update, null, null, 90);
 		}
 	});
 })();

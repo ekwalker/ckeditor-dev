@@ -33,6 +33,10 @@
  */
 
 (function() {
+	var resizerCornerTpl = CKEDITOR.addTemplate('imageResizerCorner', '<div data-cke-temp=1 contenteditable=false unselectable=on style="position:absolute;padding:0;background-color:#fff;background-image:none;border:1px solid #000;z-index:11;width:5px;height:5px;pointer-events:auto;{style}" data-cke-corner-pos="{pos}"></div>'),
+		resizerInfoTpl = CKEDITOR.addTemplate('imageResizerInfo', '<div id="cke_image_resizer_info" unselectable=on data-cke-image-resize-info=1 style="position:absolute;display:none;cursor:default;font-size:11px;padding:3px;background-color:#ffff88;background-image:none;border:1px solid #000;z-index:99"></div>'),
+		resizerTpl = CKEDITOR.addTemplate('imageResizer', '<div data-cke-temp=1 contenteditable=false unselectable=on data-cke-image-resizer=1 style="position:absolute;display:none;cursor:default;padding:0;background-color:transparent;background-image:none;border:1px solid #000;z-index:10;pointer-events:none;"></div>');
+
 	function cancel(evt) {
 		(evt.data || evt).preventDefault();
 	}
@@ -279,42 +283,38 @@
 		};
 
 		var createResizeCorner = function(cornerPos) {
-			var style = 'position:absolute;padding:0;background-color:#fff;' +
-				'background-image:none;border:1px solid #000;z-index:11;' +
-				'width:5px;height:5px;pointer-events:auto;';
+			var style;
 
 			switch (cornerPos) {
 				case 'top-left':
-					style += 'cursor:nw-resize;left:-3px;top:-3px;';
+					style = 'cursor:nw-resize;left:-3px;top:-3px;';
 					break;
 				case 'top':
-					style += 'cursor:n-resize;left:50%;top:-3px;';
+					style = 'cursor:n-resize;left:50%;top:-3px;';
 					break;
 				case 'top-right':
-					style += 'cursor:ne-resize;right:-3px;top:-3px;';
+					style = 'cursor:ne-resize;right:-3px;top:-3px;';
 					break;
 				case 'right':
-					style += 'cursor:e-resize;right:-3px;top:50%;';
+					style = 'cursor:e-resize;right:-3px;top:50%;';
 					break;
 				case 'bottom-right':
-					style += 'cursor:se-resize;right:-3px;bottom:-3px;';
+					style = 'cursor:se-resize;right:-3px;bottom:-3px;';
 					break;
 				case 'bottom':
-					style += 'cursor:s-resize;left:50%;bottom:-3px;';
+					style = 'cursor:s-resize;left:50%;bottom:-3px;';
 					break;
 				case 'bottom-left':
-					style += 'cursor:sw-resize;left:-3px;bottom:-3px;';
+					style = 'cursor:sw-resize;left:-3px;bottom:-3px;';
 					break;
 				case 'left':
-					style += 'cursor:w-resize;left:-3px;top:50%;';
+					style = 'cursor:w-resize;left:-3px;top:50%;';
 					break;
 				default:
 					break;
 			}
 
-			var resizeCorner = CKEDITOR.dom.element.createFromHtml(
-				'<div data-cke-temp=1 contenteditable=false unselectable=on ' +
-				'style="' + style + '" data-cke-corner-pos="' + cornerPos + '"></div>', doc);
+			var resizeCorner = CKEDITOR.dom.element.createFromHtml(resizerCornerTpl.output({style: style, pos: cornerPos}), doc);
 
 			resizeCorner.on('mouseover', function() {
 				this.setStyle('background-color', '#000');
@@ -327,10 +327,7 @@
 			return resizeCorner;
 		};
 
-		resizer = CKEDITOR.dom.element.createFromHtml(
-			'<div data-cke-temp=1 contenteditable=false unselectable=on data-cke-image-resizer=1 ' +
-			'style="position:absolute;display:none;cursor:default;' +
-			'padding:0;background-color:transparent;background-image:none;border:1px solid #000;z-index:10;pointer-events:none;"></div>', doc);
+		resizer = CKEDITOR.dom.element.createFromHtml(resizerTpl.output({}), doc);
 
 		resizer.append(createResizeCorner('top-left'));
 		resizer.append(createResizeCorner('top'));
@@ -346,11 +343,7 @@
 		resizeInfo = CKEDITOR.document.getById('cke_image_resizer_info');
 
 		if (!resizeInfo) {
-			resizeInfo = CKEDITOR.dom.element.createFromHtml(
-				'<div id="cke_image_resizer_info" unselectable=on data-cke-image-resize-info=1 ' +
-				'style="position:absolute;display:none;cursor:default;font-size:11px;' +
-				'padding:3px;background-color:#ffff88;background-image:none;border:1px solid #000;z-index:99"></div>', CKEDITOR.document);
-
+			resizeInfo = CKEDITOR.dom.element.createFromHtml(resizerInfoTpl.output({}), CKEDITOR.document);
 			CKEDITOR.document.getDocumentElement().append(resizeInfo);
 		}
 	}
@@ -420,12 +413,13 @@
 				return;
 			}
 
-			var resizer;
+			var resizer, timeout;
 			editor.on('selectionChange', function(ev) {
 				var selection = ev.data.selection,
 					element = selection && selection.getStartElement();
 
 				if (!element || !element.is('img') || element.isReadOnly()) {
+					window.clearTimeout(timeout);
 					resizer && resizer.detach();
 					return;
 				}
@@ -435,7 +429,7 @@
 				}
 
 				// in some cases we need to wait while image will be loaded
-				window.setTimeout(function() {
+				timeout = window.setTimeout(function() {
 					resizer.attachTo(element);
 				}, 0);
 			}, null, null, 1);

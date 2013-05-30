@@ -33,6 +33,12 @@
 
 (function() {
 
+	var continueTpl = CKEDITOR.addTemplate('autosaveContinue', '<a href="javascript:void(0)"' +
+		' onclick="return CKEDITOR.tools.callFunction({fn}, event);">{label}</a>'),
+		discardTpl = CKEDITOR.addTemplate('autosaveDiscard', '<a href="javascript:void(0)"' +
+		' onclick="return CKEDITOR.tools.callFunction({fn}, event);">{label}</a>'),
+		delimiterTpl = CKEDITOR.addTemplate('autosaveDelimiter', '<span class="delimiter">{label}</span>');
+
 	// allow additional checks on dirty
 	function checkDirty(editor) {
 		return editor.fire('checkDirty', {
@@ -306,6 +312,7 @@
 						infoPanel.hide();
 						updateTimeAgo(lang.localSave + timeAgo());
 						editor.focus();
+						return false;
 					};
 
 					discardFn = function() {
@@ -317,6 +324,7 @@
 							infoPanel.hide();
 							editor.focus();
 						});
+						return false;
 					};
 
 					onEsc = function(evt) {
@@ -344,13 +352,12 @@
 
 					if (pageRevision > draftRevision) {
 						// draft is outdated
-
 						notificationLabel = lang.draftOutdated.replace('%1', draftRevision)
 							.replace('%2', pageRevision);
 
 						continueLinkLabel = lang.editVersion.replace('%1', draftRevision);
 						discardLinkLabel = lang.editVersion.replace('%1', pageRevision);
-						linksDelimiter = '<span class="delimiter">' + lang.or + '</span>';
+						linksDelimiter = delimiterTpl.output({label: lang.or});
 
 						infoPanel.getContainer().addClass('cke_autosave_outdated');
 					} else {
@@ -358,17 +365,13 @@
 							.replace('%2', getFormattedTime(draftDate));
 					}
 
-					var continueLink = '<a href="javascript:void(0)"' +
-						' onclick="CKEDITOR.tools.callFunction(' + continueFnRef + '); return false;"' +
-						'>' + continueLinkLabel + '</a>';
-
-					var discardLink = '<a href="javascript:void(0)"' +
-						' onclick="CKEDITOR.tools.callFunction(' + discardFnRef + '); return false;"' +
-						'>' + discardLinkLabel + '</a>';
-
+					var output = [];
+					continueTpl.output({fn: continueFnRef, label: continueLinkLabel}, output);
+					output.push(linksDelimiter);
+					discardTpl.output({fn: discardFnRef, label: discardLinkLabel}, output);
 
 					infoPanel.updateLabel('draft', 'notification', notificationLabel);
-					infoPanel.updateLabel('draft', 'links', continueLink + linksDelimiter + discardLink);
+					infoPanel.updateLabel('draft', 'links', output.join(''));
 
 					infoPanel.showGroup('draft');
 

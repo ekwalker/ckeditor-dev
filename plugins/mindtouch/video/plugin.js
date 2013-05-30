@@ -32,6 +32,10 @@
 
 (function() {
 
+	var videoTpl = CKEDITOR.addTemplate('bubbleVideo', '<a target="_blank" href="{url}">{link}</a> &ndash; ' +
+		'<a href="javascript:void(\'Edit Video\')" onclick="return CKEDITOR.tools.callFunction({fn}, \'mindtouch/video\')">{labelEdit}</a>&nbsp;|&nbsp;' +
+		'<a href="javascript:void(\'Delete Video\')" onclick="return CKEDITOR.tools.callFunction({fn}, \'videoDelete\')">{labelDelete}</a>');
+
 	var bubble;
 	function attachBubble(videoElement, editor) {
 		if (!bubble) {
@@ -45,19 +49,23 @@
 					var element = this.getElement(),
 						video = editor.restoreRealElement(this.getAttachedElement()),
 						url = video.getAttribute('media'),
-						text = CKEDITOR.plugins.get('mindtouchlink').truncate(url);
+						text = CKEDITOR.plugins.get('mindtouch/link').truncate(url),
+						lang = editor.lang['mindtouch/video'],
+						params = {
+							url: url,
+							link: text,
+							fn: commandFn,
+							labelEdit: lang.edit,
+							labelDelete: lang['delete']
+						};
 
-					var html = '<a target="_blank" href="' + url + '">' + text + '</a> &ndash; ' +
-						'<a href="javascript:void(\'Edit Video\')" onclick="return CKEDITOR.tools.callFunction(' + commandFn + ', \'video\')">' + editor.lang.video.edit +
-						'</a> | <a href="javascript:void(\'Delete Video\')" onclick="return CKEDITOR.tools.callFunction(' + commandFn + ', \'videoDelete\')">' + editor.lang.video['delete'] + '</a>';
-
-					element.setHtml(html);
+					element.setHtml(videoTpl.output(params));
 					this.setElement(element);
 				}
 			}, CKEDITOR.document, editor);
 		}
 
-		bubble.attachTo(videoElement);
+		bubble.attach(videoElement);
 	}
 
 	var pluginName = 'mindtouch/video';
@@ -109,12 +117,18 @@
 					var selection = editor.getSelection(),
 						element = selection && selection.getStartElement();
 
-					if (!element || !element.is('img') || element.data('cke-real-element-type') != 'video' || element.isReadOnly()) return;
+					if (!element || !element.is('img') || element.data('cke-real-element-type') != 'video' || element.isReadOnly()) {
+						return;
+					}
+
+					editor.fire('saveSnapshot');
 
 					var range = new CKEDITOR.dom.range(editor.document);
 					range.moveToPosition(element, CKEDITOR.POSITION_BEFORE_START);
 					element.remove();
 					range.select();
+
+					editor.fire('saveSnapshot');
 				}
 			});
 
@@ -126,12 +140,12 @@
 			});
 
 			editor.on('selectionChange', function(evt) {
-				var element = evt.data.element;
+				var element = evt.data.selection.getStartElement();
 
 				if (element && element.is('img') && element.data('cke-real-element-type') == 'video' && !element.isReadOnly()) {
 					attachBubble(element, editor);
 				} else {
-					bubble && bubble.detach();
+					bubble && bubble.isAttached() && bubble.detach();
 				}
 			}, null, null, 1);
 		},
