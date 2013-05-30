@@ -543,10 +543,8 @@
 			}
 		}
 
-		var newList = CKEDITOR.plugins.definitionList.arrayToList(listArray, database, null, editor.config.enterMode,
-		groupObj.root.getAttribute('dir'));
+		var newList = CKEDITOR.plugins.definitionList.arrayToList(listArray, database, null, editor.config.enterMode, groupObj.root.getAttribute('dir'));
 
-		// Compensate <br> before/after the list node if the surrounds are non-blocks.(#3836)
 		var docFragment = newList.listNode;
 		docFragment.replace(groupObj.root);
 	}
@@ -555,27 +553,28 @@
 		this.name = name;
 		this.type = type;
 		this.context = 'dl';
+		if (type != 'dl') {
+			this.allowedContent = type + ' li';
+			this.requiredContent = type;
+		}
 	}
 
 	defListCommand.prototype = {
 		exec: function(editor) {
+			this.refresh( editor, editor.elementPath() );
+
 			var doc = editor.document,
 				config = editor.config,
 				selection = editor.getSelection(),
 				ranges = selection && selection.getRanges(true);
 
-			// There should be at least one selected range.
-			if (!ranges || ranges.length < 1) {
-				return;
-			}
-
 			// Midas lists rule #1 says we can create a list even in an empty document.
 			// But DOM iterator wouldn't run if the document is really empty.
 			// So create a paragraph if the document is empty and we're going to create a list.
 			if (this.state == CKEDITOR.TRISTATE_OFF) {
-				var body = doc.getBody();
-				if (!body.getFirst(nonEmpty)) {
-					config.enterMode == CKEDITOR.ENTER_BR ? body.appendBogus() : ranges[0].fixBlock(1, config.enterMode == CKEDITOR.ENTER_P ? 'p' : 'div');
+				var editable = editor.editable();
+				if (!editable.getFirst( nonEmpty )) {
+					config.enterMode == CKEDITOR.ENTER_BR ? editable.appendBogus() : ranges[0].fixBlock(1, config.enterMode == CKEDITOR.ENTER_P ? 'p' : 'div');
 
 					selection.selectRanges(ranges);
 				}
@@ -596,7 +595,8 @@
 				if (range && range.collapsed && range.checkEndOfBlock()) {
 					var itemNode = range.startContainer.getAscendant(CKEDITOR.dtd.dl, true);
 					if (itemNode.getParent().getLast().equals(itemNode) && (range.startContainer.equals(itemNode) || itemNode.getLast().equals(range.startContainer) || itemNode.getLast().contains(range.startContainer))) {
-						range.splitElement(itemNode);
+						var newNode = range.splitElement(itemNode);
+						range.moveToPosition(newNode, CKEDITOR.POSITION_AFTER_START);
 						range.select();
 						selection = editor.getSelection();
 						ranges = selection && selection.getRanges(true);
