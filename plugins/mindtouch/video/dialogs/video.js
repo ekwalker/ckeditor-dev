@@ -412,12 +412,12 @@
 
 			var viewportSize = CKEDITOR.document.getWindow().getViewPaneSize(),
 				dialogSize = this.dialog.getSize(),
-				height = 500;
+				height = 450;
 
-			if ( viewportSize.height > 600 )
+			if ( viewportSize.height > 550 )
 			{
 				height = viewportSize.height -
-					( dialogSize.height - $( this.dialog.parts.contents.$ ).height() + 100 );
+					( dialogSize.height - $( this.dialog.parts.contents.$ ).height() + 50 );
 			}
 
 			this.dialog.resize( 600, height );
