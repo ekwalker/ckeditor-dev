@@ -131,8 +131,8 @@
 	}
 
 	CKEDITOR.plugins.add('mindtouch/whoisediting', {
-		icons: 'whoisediting',
-		lang: 'en',
+		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'whoisediting', // %REMOVE_LINE_CORE%
 		requires: 'dialog,mindtouch/infobar',
 		init: function(editor) {
 			var lang = editor.lang['mindtouch/whoisediting'];

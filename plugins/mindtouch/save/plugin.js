@@ -198,8 +198,8 @@
 
 
 	CKEDITOR.plugins.add('mindtouch/save', {
-		icons: 'mindtouchcancel,mindtouchsave',
-		lang: 'en',
+		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'mindtouchcancel,mindtouchsave', // %REMOVE_LINE_CORE%
 		requires: 'dialog,save',
 		init: function(editor) {
 			var langCancel = editor.lang['mindtouch/save'].cancel,

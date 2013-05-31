@@ -65,7 +65,7 @@
 	};
 
 	CKEDITOR.plugins.add(pluginName, {
-		icons: 'mindtouchtemplates',
+		icons: 'mindtouchtemplates', // %REMOVE_LINE_CORE%
 		requires: 'mindtouch/dialog',
 		init: function(editor) {
 			editor.addCommand(pluginName, templatesCmd);

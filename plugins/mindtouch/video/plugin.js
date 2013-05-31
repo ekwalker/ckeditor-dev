@@ -71,9 +71,9 @@
 	var pluginName = 'mindtouch/video';
 
 	CKEDITOR.plugins.add(pluginName, {
-		icons: 'video',
+		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'video', // %REMOVE_LINE_CORE%
 		requires: 'dialog,mindtouch/elementbubble,fakeobjects,mindtouch/link',
-		lang: 'en',
 		onLoad: function() {
 			var placeholderPath = Deki.PathCommon + '/images/icon-video.png';
 			CKEDITOR.addCss(
@@ -103,7 +103,13 @@
 		},
 		init: function(editor) {
 			CKEDITOR.dialog.add(pluginName, this.path + 'dialogs/video.js');
-			editor.addCommand(pluginName, new CKEDITOR.dialogCommand(pluginName));
+			editor.addCommand(pluginName, new CKEDITOR.dialogCommand(pluginName, {
+				allowedContent: 'img[media,class,width,height,src,style]{*}(mt-media)',
+				requiredContent: 'img[media]',
+				contentTransformations: [
+					[ 'img{width}: sizeToStyle', 'img[width]: sizeToAttribute' ]
+				]
+			}));
 
 			editor.ui.addButton('Video', {
 				label: editor.lang['mindtouch/video'].label,

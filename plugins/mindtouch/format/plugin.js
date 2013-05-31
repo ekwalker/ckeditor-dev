@@ -31,33 +31,33 @@
  */
 
 (function() {
-	var addButtonCommand = function(editor, name, buttonDefinition, styleDefiniton) {
+	var addButtonCommand = function( editor, name, buttonDefinition, styleDefiniton ) {
 		var command = buttonDefinition.command;
 
-		if (command) {
-			var style = new CKEDITOR.style(styleDefiniton);
+		if ( command ) {
+			var style = new CKEDITOR.style( styleDefiniton );
 			style._.enterMode = editor.config.enterMode;
 
-			editor.attachStyleStateChange(style, function(state) {
-				!editor.readOnly && editor.getCommand(command).setState(state);
+			editor.attachStyleStateChange( style, function( state ) {
+				!editor.readOnly && editor.getCommand( command ).setState( state );
 			});
 
-			editor.addCommand(command, new CKEDITOR.styleCommand(style));
+			editor.addCommand( command, new CKEDITOR.styleCommand( style ) );
 		}
 
-		editor.ui.addButton(name, buttonDefinition);
+		editor.ui.addButton( name, buttonDefinition );
 	};
 
-	CKEDITOR.plugins.add('mindtouch/format', {
-		icons: 'h1,h2,h3,h4,h5,hx,code,plaintext',
-		lang: 'en',
+	CKEDITOR.plugins.add( 'mindtouch/format', {
+		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'h1,h2,h3,h4,h5,hx,code,plaintext', // %REMOVE_LINE_CORE%
 		requires: 'format',
-		init: function(editor) {
+		init: function( editor ) {
 			var format = editor.lang.format,
-				lang = editor.lang['mindtouch/format'],
+				lang = editor.lang[ 'mindtouch/format' ],
 				config = editor.config;
 
-			editor.ui.addToolbarGroup('format', 'styles');
+			editor.ui.addToolbarGroup( 'format', 'styles' );
 
 			format.tag_h6 = format.tag_h5;
 			format.tag_h5 = format.tag_h4;
@@ -67,7 +67,7 @@
 			format.tag_h1 = lang.tag_h1;
 
 			var menuGroup = 'formatButton';
-			editor.addMenuGroup(menuGroup);
+			editor.addMenuGroup( menuGroup );
 
 			var menuItems = {
 				h1: {
@@ -97,14 +97,14 @@
 				}
 			};
 
-			editor.addMenuItems(menuItems);
+			editor.addMenuItems( menuItems );
 
-			editor.ui.add('Hx', CKEDITOR.UI_MENUBUTTON, {
+			editor.ui.add( 'Hx', CKEDITOR.UI_MENUBUTTON, {
 				label: lang.tag_hx,
 				title: lang.tag_hx,
 				toolbar: 'format,50',
 				className: 'cke_button_hx',
-				modes: {'wysiwyg': 1},
+				modes: { 'wysiwyg': 1 },
 				panel: {
 					toolbarRelated: true,
 					css: [ CKEDITOR.skin.getPath( 'editor' ) ].concat( config.contentsCss )
@@ -112,18 +112,18 @@
 				onMenu: function() {
 					var items = {};
 
-					for (var i = 0; i < config.menu_hxItems.length; i++) {
-						var itemName = config.menu_hxItems[i].toLowerCase();
+					for ( var i = 0; i < config.menu_hxItems.length; i++ ) {
+						var itemName = config.menu_hxItems[ i ].toLowerCase();
 
 						var state = CKEDITOR.TRISTATE_DISABLED,
-							commandName = menuItems[itemName].command,
-							command = commandName && editor.getCommand(commandName);
+							commandName = menuItems[ itemName ].command,
+							command = commandName && editor.getCommand( commandName );
 
-						if (command) {
+						if ( command ) {
 							state = command.state;
 						}
 
-						items[itemName] = state;
+						items[ itemName ] = state;
 					}
 
 					return items;
@@ -131,76 +131,76 @@
 				onRender: function() {
 					var me = this;
 
-					editor.on('selectionChange', function() {
-						if (editor.readOnly) {
+					editor.on( 'selectionChange', function() {
+						if ( editor.readOnly ) {
 							return;
 						}
 
 						var state = CKEDITOR.TRISTATE_OFF;
 
-						for (var i = 0; i < config.menu_hxItems.length; i++) {
-							var itemName = config.menu_hxItems[i].toLowerCase();
-							var command = editor.getCommand(menuItems[itemName].command);
+						for ( var i = 0; i < config.menu_hxItems.length; i++ ) {
+							var itemName = config.menu_hxItems[ i ].toLowerCase();
+							var command = editor.getCommand( menuItems[ itemName ].command );
 
-							if (command && command.state == CKEDITOR.TRISTATE_ON) {
+							if ( command && command.state == CKEDITOR.TRISTATE_ON ) {
 								state = CKEDITOR.TRISTATE_ON;
 							}
 						}
 
-						me.setState(state);
+						me.setState( state );
 					});
 				}
 			});
 
 			var nTag = config.enterMode == CKEDITOR.ENTER_DIV ? 'div' : 'p',
 				order = 0;
-			addButtonCommand(editor, 'Normal', {
+			addButtonCommand( editor, 'Normal', {
 				label: format['tag_' + nTag],
 				command: 'normal',
 				toolbar: 'format,' + ( order += 10 )
-			}, config['format_' + nTag]);
+			}, config['format_' + nTag] );
 
-			addButtonCommand(editor, 'Code', {
+			addButtonCommand( editor, 'Code', {
 				label: lang.code,
 				command: 'code',
 				toolbar: 'basicstyles,70'
-			}, editor.config.mindtouchStyles_code);
+			}, editor.config.mindtouchStyles_code );
 
-			addButtonCommand(editor, 'PlainText', {
+			addButtonCommand( editor, 'PlainText', {
 				label: lang.plaintext,
 				command: 'plaintext',
 				toolbar: 'basicstyles,80'
-			}, editor.config.mindtouchStyles_plaintext);
+			}, editor.config.mindtouchStyles_plaintext );
 
-			addButtonCommand(editor, 'H1', menuItems.h1, config['format_h2']);
-			addButtonCommand(editor, 'H2', menuItems.h2, config['format_h3']);
-			addButtonCommand(editor, 'H3', menuItems.h3, config['format_h4']);
-			addButtonCommand(editor, 'H4', menuItems.h4, config['format_h5']);
-			addButtonCommand(editor, 'H5', menuItems.h5, config['format_h6']);
+			addButtonCommand( editor, 'H1', menuItems.h1, config[ 'format_h2' ] );
+			addButtonCommand( editor, 'H2', menuItems.h2, config[ 'format_h3' ] );
+			addButtonCommand( editor, 'H3', menuItems.h3, config[ 'format_h4' ] );
+			addButtonCommand( editor, 'H4', menuItems.h4, config[ 'format_h5' ] );
+			addButtonCommand( editor, 'H5', menuItems.h5, config[ 'format_h6' ] );
 
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 76 /*L*/, 'justifyleft');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 69 /*E*/, 'justifycenter');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 82 /*R*/, 'justifyright');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 74 /*J*/, 'justifyblock');
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 76 /*L*/, 'justifyleft' );
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 69 /*E*/, 'justifycenter' );
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 82 /*R*/, 'justifyright' );
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 74 /*J*/, 'justifyblock' );
 
-			editor.setKeystroke(CKEDITOR.CTRL + 188 /*,*/, 'subscript');
-			editor.setKeystroke(CKEDITOR.CTRL + 190 /*.*/, 'superscript');
-			editor.setKeystroke(CKEDITOR.CTRL + 220 /*\*/, 'removeFormat');
-			editor.setKeystroke(CKEDITOR.CTRL + 222 /*'*/, 'code');
+			editor.setKeystroke( CKEDITOR.CTRL + 188 /*,*/, 'subscript' );
+			editor.setKeystroke( CKEDITOR.CTRL + 190 /*.*/, 'superscript' );
+			editor.setKeystroke( CKEDITOR.CTRL + 220 /*\*/, 'removeFormat' );
+			editor.setKeystroke( CKEDITOR.CTRL + 222 /*'*/, 'code' );
 			
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 48 /*0*/, 'normal');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 49 /*1*/, 'h1');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 50 /*2*/, 'h2');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 51 /*3*/, 'h3');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 52 /*4*/, 'h4');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 53 /*5*/, 'h5');
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 48 /*0*/, 'normal' );
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 49 /*1*/, 'h1' );
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 50 /*2*/, 'h2' );
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 51 /*3*/, 'h3' );
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 52 /*4*/, 'h4' );
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 53 /*5*/, 'h5' );
 		},
 		onLoad: function() {
 			var css = [
 				'.cke .cke_button__normal .cke_button_icon { display: none; }',
 				'.cke .cke_button__normal .cke_button_label { display: inline; margin: 0; padding: 0 2px 0 0; }'
 			];
-			CKEDITOR.document.appendStyleText(css.join(''));
+			CKEDITOR.document.appendStyleText( css.join( '' ) );
 		}
 	});
 })();
@@ -212,12 +212,10 @@
  * @example
  * config.mindtouchStyles_code = { element : 'code', attributes : { 'class': 'Code' } };
  */
-CKEDITOR.config.mindtouchStyles_code = {element: 'code'};
+CKEDITOR.config.mindtouchStyles_code = { element: 'code' };
 CKEDITOR.config.mindtouchStyles_plaintext = {
 	element: 'span',
-	attributes: {
-		'class': 'plain'
-	}
+	attributes: { 'class': 'plain' }
 };
 
-CKEDITOR.config.menu_hxItems = ['H4', 'H5'];
+CKEDITOR.config.menu_hxItems = [ 'H4', 'H5' ];

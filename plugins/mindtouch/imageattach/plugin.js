@@ -234,7 +234,7 @@
 			var applet = CKEDITOR.document.getById('SupaApplet');
 
 			if (!applet) {
-				var html = '<applet id="SupaApplet" archive="' + CKEDITOR.getUrl('mindtouch/plugins/attachimage/supa/Supa.jar') + '" code="de.christophlinder.supa.SupaApplet" width="1" height="1">' +
+				var html = '<applet id="SupaApplet" archive="' + CKEDITOR.getUrl('plugins/mindtouch/imageattach/supa/Supa.jar') + '" code="de.christophlinder.supa.SupaApplet" width="1" height="1">' +
 					'<param name="imagecodec" value="png">' +
 					'<param name="encoding" value="base64">' +
 					'<param name="previewscaler" value="fit to canvas">' +
@@ -313,9 +313,9 @@
 	};
 
 	CKEDITOR.plugins.add('mindtouch/imageattach', {
-		icons: 'pasteimage',
+		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'pasteimage', // %REMOVE_LINE_CORE%
 		requires: 'dialog,mindtouch/dialog,mindtouch/save',
-		lang: 'en',
 		init: function(editor) {
 			editor.addCommand('pasteimage', pasteImageCmd);
 			editor.ui.addButton('PasteImage', {

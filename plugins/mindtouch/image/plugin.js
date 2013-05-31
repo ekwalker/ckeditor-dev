@@ -34,6 +34,12 @@
 	var pluginName = 'mindtouch/image';
 
 	var imageCmd = {
+		allowedContent: 'img[alt,dir,id,lang,longdesc,!src,title]{*}(*)',
+		requiredContent: 'img[alt,src]',
+		contentTransformations: [
+			[ 'img{width}: sizeToStyle', 'img[width]: sizeToAttribute' ],
+			[ 'img{float}: alignmentToStyle', 'img[align]: alignmentToAttribute' ]
+		],
 		canUndo: false,
 		exec: function(editor) {
 			this.editor = editor;
@@ -188,7 +194,7 @@
 	}
 
 	CKEDITOR.plugins.add(pluginName, {
-		icons: 'mindtouchimage',
+		icons: 'mindtouchimage', // %REMOVE_LINE_CORE%
 		requires: 'image,mindtouch/dialog',
 		init: function(editor) {
 			editor.addCommand(pluginName, imageCmd);

@@ -360,9 +360,9 @@
 	};
 
 	CKEDITOR.plugins.add('mindtouch/tableclipboard', {
-		icons: 'tablerow_copy,tablerow_cut,tablerow_pasteAfter,tablerow_pasteBefore',
+		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'tablerow_copy,tablerow_cut,tablerow_pasteAfter,tablerow_pasteBefore', // %REMOVE_LINE_CORE%
 		requires: 'mindtouch/table',
-		lang: 'en',
 		init: function(editor) {
 			var lang = editor.lang['mindtouch/tableclipboard'],
 				clipboard = new tableClipboard(editor);

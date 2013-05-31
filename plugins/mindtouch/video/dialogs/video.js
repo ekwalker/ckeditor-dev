@@ -532,8 +532,8 @@
 				var extraStyles = {}, extraAttributes = {};
 				this.commitContent( videoNode, extraStyles, extraAttributes );
 
-				videoNode.addClass( 'mindtouch/media' );
-				videoNode.setAttribute( 'src', '' );
+				videoNode.addClass( 'mt-media' );
+				videoNode.setAttribute( 'src', Deki.PathCommon + '/images/icon-video.png' );
 
 				// Refresh the fake image.
 				var newFakeImage = editor.createFakeElement( videoNode, 'cke_video', 'video', true );

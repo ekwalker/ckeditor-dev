@@ -28,7 +28,7 @@
 
 (function() {
 	CKEDITOR.plugins.add('mindtouch/stylescombomenu', {
-		icons: 'none,preltpregtpre_format,comment,dekiscript,javascript_jem,css,conditional_text_anonymous_only,conditional_text_community_member_only,conditional_text_pro_member_only',
+		icons: 'none,preltpregtpre_format,comment,dekiscript,javascript_jem,css,conditional_text_anonymous_only,conditional_text_community_member_only,conditional_text_pro_member_only', // %REMOVE_LINE_CORE%
 		requires: 'mindtouch/richcombomenu',
 		onLoad : function() {
 			CKEDITOR.document.appendStyleText('.cke_combo__stylesmenu .cke_combo_text {width: 90px;}');
@@ -53,7 +53,8 @@
 					!editor.readOnly && editor.getCommand(commandName).setState(state);
 				});
 
-				editor.addCommand(commandName, new CKEDITOR.styleCommand(style));
+				var cmd = editor.addCommand(commandName, new CKEDITOR.styleCommand(style));
+				editor.addFeature(cmd);
 			};
 
 			editor.on( 'stylesSet', function( evt ) {
@@ -73,7 +74,7 @@
 
 					var style = new CKEDITOR.style(styleDefinition);
 
-					if (!editor.filter.customConfig || editor.filter.check( style )) {
+					if ( !editor.filter.customConfig || editor.filter.check( style ) ) {
 						// filter the style name
 						buttonName = buttonName.replace(/\s+|-+/g, '_');
 						buttonName = buttonName.replace(/[^a-zA-Z0-9_]/g, '');
@@ -119,6 +120,8 @@
 				label: lang.label,
 				title: lang.panelTitle,
 				toolbar: 'styles,10',
+				allowedContent: allowedContent,
+
 				menu: {
 					panel: {
 						css: [ CKEDITOR.skin.getPath( 'editor' ) ].concat( config.contentsCss ),

@@ -103,12 +103,15 @@
 				var tableButton = editor.ui.create('Table'),
 					output = [];
 
-				tableButton.label = tableButton.title = editor.lang.table.title;
+				if (tableButton && editor.addFeature(tableButton)) {
+					tableButton.label = tableButton.title = editor.lang.table.title;
 
-				tableButton.render(editor, output);
-				this._.tableButton.setHtml(output.join(''));
+					tableButton.render(editor, output);
+					this._.tableButton.setHtml(output.join(''));
 
-				this._.container.append(this._.tableButton);
+					this._.container.append(this._.tableButton);
+				}
+
 				this._.container.append(this._.picker);
 				this._.container.append(this._.statusDiv);
 
@@ -221,9 +224,9 @@
 	});
 
 	CKEDITOR.plugins.add('mindtouch/table', {
+		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'tableoneclick', // %REMOVE_LINE_CORE%
 		requires: 'mindtouch/tools,table',
-		icons: 'tableoneclick',
-		lang: 'en',
 		init: function(editor) {
 			var plugin = this,
 				lang = editor.lang['mindtouch/table'],
@@ -310,7 +313,9 @@
 									var cell = new CKEDITOR.dom.element('td', editor.document);
 									row.append(cell);
 
-									if (!CKEDITOR.env.ie) cell.append('br');
+									if (!CKEDITOR.env.ie) {
+										cell.append('br');
+									}
 
 									if (i == 0 && j == 0) {
 										firstCell = cell;

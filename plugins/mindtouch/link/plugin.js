@@ -38,6 +38,8 @@
 	var pluginName = 'mindtouch/link';
 
 	var linkCmd = {
+		allowedContent: 'a[!href,accesskey,charset,dir,id,lang,name,rel,tabindex,title,type,target,onclick]{*}(*)',
+		requiredContent: 'a[href]',
 		canUndo: false,
 		exec: function(editor) {
 			this.editor = editor;
@@ -242,8 +244,8 @@
 	}
 
 	var mindtouchLink = {
-		icons: 'mindtouchlink',
-		lang: 'en',
+		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'mindtouchlink', // %REMOVE_LINE_CORE%
 		requires: 'link,mindtouch/dialog,mindtouch/elementbubble',
 		init: function(editor) {
 			editor.addCommand(pluginName, linkCmd);

@@ -554,9 +554,9 @@
 		this.type = type;
 		this.context = 'dl';
 		if (type != 'dl') {
-			this.allowedContent = type + ' li';
-			this.requiredContent = type;
+			this.allowedContent = 'dl ' + type;
 		}
+		this.requiredContent = type;
 	}
 
 	defListCommand.prototype = {
@@ -721,9 +721,9 @@
 	};
 
 	CKEDITOR.plugins.add('mindtouch/definitionlist', {
-		icons: 'definitionlist,definitionterm,definitiondescription',
+		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'definitionlist,definitionterm,definitiondescription', // %REMOVE_LINE_CORE%
 		requires: 'list',
-		lang: 'en',
 		init: function(editor) {
 			if (editor.blockless) {
 				return;

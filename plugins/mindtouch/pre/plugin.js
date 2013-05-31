@@ -260,6 +260,10 @@
 				 * @see EDT-264
 				 */
 				editor.on('change', function() {
+					if (editor.mode != 'wysiwyg') {
+						return;
+					}
+					
 					var preElements = editor.document.getElementsByTag( 'pre' ),
 						count = preElements.count(),
 						pre, i;
