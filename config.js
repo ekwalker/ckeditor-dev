@@ -99,7 +99,7 @@ CKEDITOR.editorConfig = function( config ) {
 	config.bodyId = 'topic';
 	config.bodyClass = 'deki-content-edit ' + CKEDITOR.env.cssClass;
 
-	config.allowedContent = true;
+	// config.allowedContent = true;
 
 	// SCAYT config
 	var protocol = document.location.protocol;

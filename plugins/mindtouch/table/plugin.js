@@ -57,7 +57,7 @@
 	}
 
 	var dimensionPicker = CKEDITOR.tools.createClass({
-		$: function(container, panel, onPick) {
+		$: function(container, panel, tableButton, onPick) {
 			this._.minCols = 5;
 			this._.minRows = 5;
 			this._.lastCols = 0;
@@ -65,6 +65,8 @@
 
 			this._.container = container;
 			this._.panel = panel;
+
+			this._.tableButtonUi = tableButton;
 
 			this.onPick = onPick;
 
@@ -100,13 +102,10 @@
 				this._.tableButton.addClass('cke_' + editor.lang.dir);
 				this._.tableButton.addClass('dimension-picker-tableButton');
 
-				var tableButton = editor.ui.create('Table'),
-					output = [];
+				if (this._.tableButtonUi) {
+					var output = [];
 
-				if (tableButton && editor.addFeature(tableButton)) {
-					tableButton.label = tableButton.title = editor.lang.table.title;
-
-					tableButton.render(editor, output);
+					this._.tableButtonUi.render(editor, output);
 					this._.tableButton.setHtml(output.join(''));
 
 					this._.container.append(this._.tableButton);
@@ -255,6 +254,18 @@
 
 			lang = editor.lang.table;
 
+			var tableButton;
+			editor.on( 'uiSpace', function( event ) {
+				if ( event.data.space != editor.config.toolbarLocation ) {
+					return;
+				}
+
+				tableButton = editor.ui.create('Table');
+				if (tableButton && editor.addFeature(tableButton)) {
+					tableButton.label = tableButton.title = lang.title;
+				}
+			});
+
 			editor.ui.add('TableOneClick', CKEDITOR.UI_PANELBUTTON, {
 				label: lang.toolbar,
 				title: lang.toolbar,
@@ -284,7 +295,7 @@
 
 					CKEDITOR.ui.fire('ready', this);
 
-					picker = new dimensionPicker(pickerContainer, panel, function(dimensions) {
+					picker = new dimensionPicker(pickerContainer, panel, tableButton, function(dimensions) {
 						editor.focus();
 						panel.hide();
 

@@ -48,15 +48,6 @@
 			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 77 /*M*/, 'comment');
 			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 83 /*S*/, 'dekiscript');
 
-			var addStyleCommand = function(style, commandName) {
-				editor.attachStyleStateChange(style, function(state) {
-					!editor.readOnly && editor.getCommand(commandName).setState(state);
-				});
-
-				var cmd = editor.addCommand(commandName, new CKEDITOR.styleCommand(style));
-				editor.addFeature(cmd);
-			};
-
 			editor.on( 'stylesSet', function( evt ) {
 				var stylesDefinitions = evt.data.styles;
 
@@ -84,7 +75,8 @@
 						style._.enterMode = config.enterMode;
 
 						if (styleDefinition.command) {
-							addStyleCommand(style, styleDefinition.command);
+							var cmd = editor.addCommand(styleDefinition.command, new CKEDITOR.styleCommand(style));
+							editor.addFeature(cmd);
 						}
 
 						editor.addMenuItem(buttonName, {

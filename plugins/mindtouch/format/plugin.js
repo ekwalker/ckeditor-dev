@@ -31,18 +31,26 @@
  */
 
 (function() {
+	var styles = {},
+		allowedContent = [];
+
 	var addButtonCommand = function( editor, name, buttonDefinition, styleDefiniton ) {
 		var command = buttonDefinition.command;
 
-		if ( command ) {
-			var style = new CKEDITOR.style( styleDefiniton );
+		var style = new CKEDITOR.style( styleDefiniton );
+
+		if ( !editor.filter.customConfig || editor.filter.check( style ) ) {
 			style._.enterMode = editor.config.enterMode;
 
-			editor.attachStyleStateChange( style, function( state ) {
-				!editor.readOnly && editor.getCommand( command ).setState( state );
-			});
+			if ( command ) {
+				editor.attachStyleStateChange( style, function( state ) {
+					!editor.readOnly && editor.getCommand( command ).setState( state );
+				});
+				editor.addCommand( command, new CKEDITOR.styleCommand( style ) );
+			}
 
-			editor.addCommand( command, new CKEDITOR.styleCommand( style ) );
+			styles[ name.toLowerCase() ] = style;
+			allowedContent.push( style );
 		}
 
 		editor.ui.addButton( name, buttonDefinition );
@@ -69,42 +77,67 @@
 			var menuGroup = 'formatButton';
 			editor.addMenuGroup( menuGroup );
 
-			var menuItems = {
-				h1: {
-					label: format.tag_h2,
-					command: 'h1',
-					group: menuGroup
-				},
-				h2: {
-					label: editor.lang.format.tag_h3,
-					command: 'h2',
-					group: menuGroup
-				},
-				h3: {
-					label: editor.lang.format.tag_h4,
-					command: 'h3',
-					group: menuGroup
-				},
-				h4: {
-					label: editor.lang.format.tag_h5,
-					command: 'h4',
-					group: menuGroup
-				},
-				h5: {
-					label: editor.lang.format.tag_h6,
-					command: 'h5',
-					group: menuGroup
-				}
-			};
+			var normalTag = config.enterMode == CKEDITOR.ENTER_DIV ? 'div' : 'p',
+				menuItems = {
+					normal: {
+						label: format[ 'tag_' + normalTag ],
+						group: menuGroup,
+						toolbar: 'format,10',
+						click: function() {
+							editor.focus();
+							editor.fire( 'saveSnapshot' );
+							editor.applyStyle( styles.normal );
+							editor.fire( 'saveSnapshot' );
+						}
+					},
+					h1: {
+						label: format.tag_h2,
+						command: 'h1',
+						group: menuGroup,
+						toolbar: 'format,20'
+					},
+					h2: {
+						label: editor.lang.format.tag_h3,
+						command: 'h2',
+						group: menuGroup,
+						toolbar: 'format,30'
+					},
+					h3: {
+						label: editor.lang.format.tag_h4,
+						command: 'h3',
+						group: menuGroup,
+						toolbar: 'format,40'
+					},
+					h4: {
+						label: editor.lang.format.tag_h5,
+						command: 'h4',
+						group: menuGroup,
+						toolbar: 'format,50'
+					},
+					h5: {
+						label: editor.lang.format.tag_h6,
+						command: 'h5',
+						group: menuGroup,
+						toolbar: 'format,60'
+					}
+				};
+
+			addButtonCommand( editor, 'Normal', menuItems.normal, config[ 'format_' + normalTag ] );
+			addButtonCommand( editor, 'H1', menuItems.h1, config[ 'format_h2' ] );
+			addButtonCommand( editor, 'H2', menuItems.h2, config[ 'format_h3' ] );
+			addButtonCommand( editor, 'H3', menuItems.h3, config[ 'format_h4' ] );
+			addButtonCommand( editor, 'H4', menuItems.h4, config[ 'format_h5' ] );
+			addButtonCommand( editor, 'H5', menuItems.h5, config[ 'format_h6' ] );
 
 			editor.addMenuItems( menuItems );
 
 			editor.ui.add( 'Hx', CKEDITOR.UI_MENUBUTTON, {
 				label: lang.tag_hx,
 				title: lang.tag_hx,
-				toolbar: 'format,50',
+				toolbar: 'format,70',
 				className: 'cke_button_hx',
 				modes: { 'wysiwyg': 1 },
+				allowedContent: allowedContent,
 				panel: {
 					toolbarRelated: true,
 					css: [ CKEDITOR.skin.getPath( 'editor' ) ].concat( config.contentsCss )
@@ -152,14 +185,6 @@
 				}
 			});
 
-			var nTag = config.enterMode == CKEDITOR.ENTER_DIV ? 'div' : 'p',
-				order = 0;
-			addButtonCommand( editor, 'Normal', {
-				label: format['tag_' + nTag],
-				command: 'normal',
-				toolbar: 'format,' + ( order += 10 )
-			}, config['format_' + nTag] );
-
 			addButtonCommand( editor, 'Code', {
 				label: lang.code,
 				command: 'code',
@@ -171,12 +196,6 @@
 				command: 'plaintext',
 				toolbar: 'basicstyles,80'
 			}, editor.config.mindtouchStyles_plaintext );
-
-			addButtonCommand( editor, 'H1', menuItems.h1, config[ 'format_h2' ] );
-			addButtonCommand( editor, 'H2', menuItems.h2, config[ 'format_h3' ] );
-			addButtonCommand( editor, 'H3', menuItems.h3, config[ 'format_h4' ] );
-			addButtonCommand( editor, 'H4', menuItems.h4, config[ 'format_h5' ] );
-			addButtonCommand( editor, 'H5', menuItems.h5, config[ 'format_h6' ] );
 
 			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 76 /*L*/, 'justifyleft' );
 			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 69 /*E*/, 'justifycenter' );
