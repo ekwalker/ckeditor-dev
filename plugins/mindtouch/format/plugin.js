@@ -31,8 +31,7 @@
  */
 
 (function() {
-	var styles = {},
-		allowedContent = [];
+	var allowedContent = [];
 
 	var addButtonCommand = function( editor, name, buttonDefinition, styleDefiniton ) {
 		var command = buttonDefinition.command;
@@ -46,10 +45,13 @@
 				editor.attachStyleStateChange( style, function( state ) {
 					!editor.readOnly && editor.getCommand( command ).setState( state );
 				});
-				editor.addCommand( command, new CKEDITOR.styleCommand( style ) );
+
+				var cmd = new CKEDITOR.styleCommand( style );
+				cmd.requiredContent = styleDefiniton.element;
+
+				editor.addCommand( command, cmd );
 			}
 
-			styles[ name.toLowerCase() ] = style;
 			allowedContent.push( style );
 		}
 
@@ -81,14 +83,9 @@
 				menuItems = {
 					normal: {
 						label: format[ 'tag_' + normalTag ],
+						command: 'normal',
 						group: menuGroup,
-						toolbar: 'format,10',
-						click: function() {
-							editor.focus();
-							editor.fire( 'saveSnapshot' );
-							editor.applyStyle( styles.normal );
-							editor.fire( 'saveSnapshot' );
-						}
+						toolbar: 'format,10'
 					},
 					h1: {
 						label: format.tag_h2,

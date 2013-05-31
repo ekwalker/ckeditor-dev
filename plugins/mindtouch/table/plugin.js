@@ -225,12 +225,20 @@
 	CKEDITOR.plugins.add('mindtouch/table', {
 		lang: 'en', // %REMOVE_LINE_CORE%
 		icons: 'tableoneclick', // %REMOVE_LINE_CORE%
-		requires: 'mindtouch/tools,table',
+		requires: 'mindtouch/tools,table,tabletools',
 		init: function(editor) {
 			var plugin = this,
 				lang = editor.lang['mindtouch/table'],
 				picker;
 
+			// update allowedContent for table and cell properties dialogs
+			editor.getCommand('table').allowedContent += ';table[frame,rules,id]{border,border-width,border-style,border-color,background,background-image,background-color}(*)';
+
+			var cellPropertiesCommand = editor.getCommand('cellProperties');
+			cellPropertiesCommand.allowedContent += ';td th[id]{border,border-width,border-style,border-color,background,background-image}(*)';
+			editor.addFeature(cellPropertiesCommand);
+
+			// allow to override dialog definition
 			var addDialog = CKEDITOR.tools.override(CKEDITOR.dialog.add, function(add) {
 				return function(name, dialogDefinition) {
 					add.apply(this, [name, dialogDefinition]);
@@ -244,7 +252,16 @@
 			addDialog.call(CKEDITOR.dialog, 'tableProperties', this.path + 'dialogs/table.js');
 			addDialog.call(CKEDITOR.dialog, 'cellProperties', this.path + 'dialogs/tableCell.js');
 
-			editor.addCommand('rowProperties', new CKEDITOR.dialogCommand('rowProperties'));
+			var cmd = editor.addCommand('rowProperties', new CKEDITOR.dialogCommand('rowProperties', {
+				allowedContent: 'tr{height,vertical-align,text-align,background,background-color,background-image}[id](*)',
+				requiredContent: 'table',
+				contextSensitive: 1,
+				refresh: function( editor, path ) {
+					this.setState( path.contains( { tr:1 }, 1 ) ? CKEDITOR.TRISTATE_OFF : CKEDITOR.TRISTATE_DISABLED );
+				}
+			}));
+			editor.addFeature( cmd );
+
 			addDialog.call(CKEDITOR.dialog, 'rowProperties', this.path + 'dialogs/tableRow.js');
 
 			var lang = editor.lang['mindtouch/table'];
