@@ -84,17 +84,17 @@
 		123: "F12",
 		144: "NUM LOCK",
 		145: "SCROLL LOCK",
-		186: "SEMI-COLON",
-		187: "EQUAL SIGN",
-		188: "COMMA",
-		189: "DASH",
-		190: "PERIOD",
-		191: "FORWARD SLASH",
-		192: "GRAVE ACCENT",
-		219: "OPEN BRACKET",
-		220: "BACK SLASH",
-		221: "CLOSE BRAKET",
-		222: "SINGLE QUOTE"
+		186: ";",
+		187: "=",
+		188: ",",
+		189: "-",
+		190: ".",
+		191: "/",
+		192: "`",
+		219: "(",
+		220: "\\",
+		221: ")",
+		222: "'"
 	};
 
 	// Modifier keys override.
@@ -127,6 +127,7 @@
 			}
 		}
 
+		presentation.reverse();
 		presentation.push( keyMap[ keystroke ] || String.fromCharCode( keystroke ) );
 
 		return presentation.join( '+' );
