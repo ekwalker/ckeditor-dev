@@ -171,6 +171,69 @@
 		infobar.updateLabel('dekiscript', 'col', lang.col + ':&nbsp;' + col);
 	}
 
+	var styles = {};
+	function updateWidth(pre) {
+		var editor = this,
+			updateSnapshot = false;
+
+		if (!pre) {
+			var sel = editor.getSelection(),
+				firstElement = sel && sel.getStartElement(),
+				path = firstElement && new CKEDITOR.dom.elementPath(firstElement);
+
+			if (!path || !path.block || !path.block.is('pre')) {
+				return;
+			}
+
+			pre = path.block;
+		}
+
+		// the fake pre element to calculate the width
+		var dummyPre = pre.clone(true);
+		dummyPre.data('cke-temp', 1);
+		dummyPre.setStyles({
+			'position': 'absolute',
+			'left': '-9999px',
+			'overflow': 'auto',
+			'width': 'auto'
+		});
+		dummyPre.data('cke-prewidth', false);
+		editor.document.getBody().append(dummyPre);
+
+		var id = pre.data('cke-prewidth');
+
+		if (!id) {
+			id = CKEDITOR.tools.getNextNumber();
+			pre.data('cke-prewidth', id);
+			updateSnapshot = true;
+		}
+
+		var doc = editor.document,
+			style = styles[id],
+			newWidth = dummyPre.$.scrollWidth,
+			cssStyleText = '';
+
+		if (doc.getBody().$.offsetWidth < newWidth) {
+			cssStyleText = 'pre[data-cke-prewidth="' + id + '"] { width : ' + newWidth + 'px; }';
+		}
+
+		cssStyleText = new CKEDITOR.dom.text(cssStyleText, doc);
+
+		if (!style) {
+			style = new CKEDITOR.dom.element('style', doc);
+			style.append(cssStyleText);
+			doc.getHead().append(style);
+
+			styles[id] = style;
+		} else {
+			cssStyleText.replace(style.getFirst());
+		}
+
+		dummyPre.remove();
+
+		updateSnapshot && editor.fire('updateSnapshot');
+	}
+
 	CKEDITOR.plugins.add('mindtouch/pre', {
 		requires: 'mindtouch/infobar',
 		lang: 'en', // %REMOVE_LINE_CORE%
@@ -190,6 +253,23 @@
 				infobar.addLabel('dekiscript', 'line');
 				infobar.addLabel('dekiscript', 'col');
 			});
+
+			if (!CKEDITOR.env.ie) {
+				/**
+				 * Recalculate width of pre blocks.
+				 * @see EDT-264
+				 */
+				editor.on('change', function() {
+					var preElements = editor.document.getElementsByTag( 'pre' ),
+						count = preElements.count(),
+						pre, i;
+
+					for ( i = 0 ; i < count ; i++ ) {
+						pre = preElements.getItem( i );
+						updateWidth.call( editor, pre );
+					}
+				});
+			}
 		},
 
 		afterInit: function(editor) {
