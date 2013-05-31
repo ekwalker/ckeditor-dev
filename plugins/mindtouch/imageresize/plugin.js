@@ -349,6 +349,9 @@
 	}
 
 	CKEDITOR.plugins.add('mindtouch/imageresize', {
+		onLoad: function() {
+			CKEDITOR.addCss('img::selection { background-color: transparent; }');
+		},
 		init: function(editor) {
 
 			// keep image ratio on resizing in IE

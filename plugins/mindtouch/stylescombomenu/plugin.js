@@ -90,6 +90,7 @@
 							group: 'style_' + group,
 							label: styleName,
 							style: style,
+							command: styleDefinition.command || null,
 							onClick: function() {
 								editor.focus();
 								editor.fire('saveSnapshot');

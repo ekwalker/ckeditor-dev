@@ -115,26 +115,6 @@ body {
 	background: #fff;
 }
 
-/* @see #MT-9987 */
-body.cke_infobar_enabled {
-	padding-top: 5px;
-}
-
-dl {
-	padding: 0;
-	margin: 0;
-}
-
-dl dt {
-	font-weight: bold;
-}
-
-dl dd {
-	border-bottom: 1px dashed #999;
-	margin: 0 0 20px 0;
-	padding: 2px 0 4px 16px;
-}
-
 blockquote {
 	_padding: 0 !important; /* @see #0007714 */
 }
@@ -150,11 +130,6 @@ pre {
 .cke_browser_ie pre.script-js,
 .cke_browser_ie pre.script-css {
 	width: auto;
-}
-
-/* @see EDT-203 */
-img::selection {
-	background-color: transparent;
 }
 
 /* @see EDT-323 */

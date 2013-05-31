@@ -510,29 +510,29 @@
 
 			}, null, null, 1);
 
+
 			/**
 			 * Add command shortcut to UI element label
 			 * @see #MT-10605
 			 */
-			var keystrokes = {},
-				i;
+			var keystrokes = {};
+			editor.on( 'uiSpace', function( ev ) {
+				if ( ev.data.space != editor.config.toolbarLocation ) {
+					return;
+				}
 
-			var shortcuts =
-				{
-					'indent' : 9,
-					'outdent' : CKEDITOR.SHIFT + 9,
-					'copy' : CKEDITOR.CTRL + 67,
-					'cut' : CKEDITOR.CTRL + 88,
-					'paste' : CKEDITOR.CTRL + 86
-				};
-
-			for (i in editor.config.keystrokes) {
-				keystrokes[editor.config.keystrokes[i][1]] = editor.config.keystrokes[i][0];
-			}
-
-			editor.on('pluginsLoaded', function() {
 				var i, name, item, command, keystroke,
-				items = editor.ui._.items;
+					items = editor.ui.items;
+
+				for (keystroke in editor.keystrokeHandler.keystrokes) {
+					keystrokes[editor.keystrokeHandler.keystrokes[keystroke]] = keystroke;
+				}
+
+				keystrokes['indent'] = 9;
+				keystrokes['outdent'] = CKEDITOR.SHIFT + 9;
+				keystrokes['copy'] = CKEDITOR.CTRL + 67;
+				keystrokes['cut'] = CKEDITOR.CTRL + 88;
+				keystrokes['paste'] = CKEDITOR.CTRL + 86;
 
 				// go through ui items
 				for (name in items) {
@@ -543,25 +543,17 @@
 					item = items[name];
 					command = item.command;
 
-					if (command && item.type == CKEDITOR.UI_BUTTON) {
-						if (command in keystrokes) {
-							keystroke = representKeyStroke(keystrokes[command]);
-						} else if (command in shortcuts) {
-							keystroke = representKeyStroke(shortcuts[command]);
-						}
+					if (command && item.type == CKEDITOR.UI_BUTTON && command in keystrokes) {
+						keystroke = representKeyStroke(keystrokes[command]);
 
-						if (keystroke) {
-							var def = item.args[0],
-								title = def.title || def.label || '';
+						var def = item.args[0],
+							title = def.title || def.label || '';
 
-							title += ' (' + keystroke + ')';
-							item.args[0].title = title;
-
-							keystroke = null;
-						}
+						title += ' (' + keystroke + ')';
+						item.args[0].title = title;
 					}
 				}
-			});
+			}, null, null, 1);
 
 			CKEDITOR.ui.on('ready', function(evt) {
 				var ui = evt.data;
@@ -577,31 +569,23 @@
 						item = ui.items[i];
 						command = item.command;
 
-						if (command) {
-							if (command in keystrokes) {
-								keystroke = representKeyStroke(keystrokes[command]);
-							} else if (command in shortcuts) {
-								keystroke = representKeyStroke(shortcuts[command]);
-							}
+						if (command && command in keystrokes) {
+							keystroke = representKeyStroke(keystrokes[command]);
 
-							if (keystroke) {
-								for (j = 0; j < nodeList.count(); j++) {
-									itemNode = nodeList.getItem(j);
+							for (j = 0; j < nodeList.count(); j++) {
+								itemNode = nodeList.getItem(j);
 
-									if (itemNode.hasClass(item.className)) {
-										// decode html entity
-										var dummy = itemNode.getDocument().createElement('div');
-										dummy.setHtml(keystroke);
+								if (itemNode.hasClass(item.className)) {
+									// decode html entity
+									var dummy = itemNode.getDocument().createElement('div');
+									dummy.setHtml(keystroke);
 
-										title = itemNode.getAttribute('title') || item.label || '';
-										title += ' (' + dummy.getText() + ')';
+									title = itemNode.getAttribute('title') || item.label || '';
+									title += ' (' + dummy.getText() + ')';
 
-										itemNode.setAttribute('title', title);
-										break; // for j
-									}
+									itemNode.setAttribute('title', title);
+									break; // for j
 								}
-
-								keystroke = null;
 							}
 						}
 					}
