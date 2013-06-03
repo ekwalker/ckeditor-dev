@@ -242,7 +242,7 @@
 			var addDialog = CKEDITOR.tools.override(CKEDITOR.dialog.add, function(add) {
 				return function(name, dialogDefinition) {
 					add.apply(this, [name, dialogDefinition]);
-					if (!CKEDITOR.tools.objectCompare(this._.dialogDefinitions[ name ], dialogDefinition)) {
+					if (this._.dialogDefinitions[ name ] !== dialogDefinition) {
 						this._.dialogDefinitions[ name ] = dialogDefinition;
 					}
 				}

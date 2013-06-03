@@ -896,7 +896,7 @@
 						},
 						{
 							type : 'hbox',
-							widths : [ '30%', '20%', '50%' ],
+							widths : [ '30%', '20%', '45%' ],
 							padding : 0,
 							children :
 							[
