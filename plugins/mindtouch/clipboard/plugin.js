@@ -57,6 +57,12 @@
 					evt.data.dataValue = evt.data.dataValue.replace( /\n/g, '<br>' );
 				}
 			});
+
+			if ( CKEDITOR.plugins.get( 'autogrow' ) ) {
+				editor.on( 'afterPaste', function() {
+					editor.getSelection().scrollIntoView();
+				});
+			}
 	
 			if ( CKEDITOR.env.gecko ) {
 				// if list element contains only ul/ol element
