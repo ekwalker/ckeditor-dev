@@ -128,7 +128,7 @@
 				editable = autogrowArea.getLast();
 
 				var contents = editor.ui.space('contents'),
-					inner = contents.getParent();;
+					inner = contents.getParent();
 
 				contents.setStyle('height', 'auto');
 

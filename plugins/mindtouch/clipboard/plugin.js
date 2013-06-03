@@ -40,20 +40,16 @@
 			 * @see #MT-9352
 			 */
 			editor.on( 'paste', function( evt ) {
-				var sel = editor.getSelection(),
-					pre = sel && sel.getStartElement().getAscendant( 'pre', true );
-
-				if ( pre ) {
+				var sel = editor.getSelection();
+				if ( sel && sel.getStartElement().hasAscendant( 'pre', true ) ) {
 					evt.data.type = 'text';
 					evt.data.preSniffing = 'html';
 				}
 			}, null, null, 3 );
 
 			editor.on( 'paste', function( evt ) {
-				var sel = editor.getSelection(),
-					pre = sel && sel.getStartElement().getAscendant( 'pre', true );
-
-				if ( pre ) {
+				var sel = editor.getSelection();
+				if ( sel && sel.getStartElement().hasAscendant( 'pre', true ) ) {
 					evt.data.dataValue = evt.data.dataValue.replace( /\n/g, '<br>' );
 				}
 			});

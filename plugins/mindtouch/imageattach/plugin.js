@@ -403,22 +403,24 @@
 					Deki.Plugin.Unsubscribe('PageAttachFiles.attach', onAttach);
 					up && up.GetUploader().destroy();
 
-					var doc = editor.document;
-					if (doc) {
-						doc.removeListener('dragenter', stopPropagation);
-						doc.removeListener('dragover', stopPropagation);
-						doc.removeListener('drop', stopPropagation);
+					var body = editor.document && editor.document.getBody();
+					if (body) {
+						body.removeListener('dragenter', stopPropagation);
+						body.removeListener('dragover', stopPropagation);
+						body.removeListener('drop', stopPropagation);
 					}
 				};
 
 				var initUploader = function() {
-					var doc = editor.document;
+					var body = editor.document.getBody();
 
-					doc.on('dragenter', stopPropagation);
-					doc.on('dragover', stopPropagation);
-					doc.on('drop', stopPropagation);
+					// prevent bubbling event to window when files are not transfered
+					// to allow drag/drop operations available into editor
+					body.on('dragenter', stopPropagation);
+					body.on('dragover', stopPropagation);
+					body.on('drop', stopPropagation);
 
-					up = Deki.Plugin.PageAttachFiles.InitUploader(doc.getWindow().$);
+					up = Deki.Plugin.PageAttachFiles.InitUploader(editor.document.getWindow().$);
 
 					Deki.Plugin.Subscribe('PageAttachFiles.attach', onAttach);
 				};

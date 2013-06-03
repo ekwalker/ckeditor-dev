@@ -117,6 +117,17 @@
 						});
 					}
 
+					/**
+					 * Autogrow source plugin may change editor height
+					 * so it is necessary to reset lastHeight
+					 * @author MindTouch
+					 */
+					editor.on( 'mode', function( evt ) {
+						if ( evt.editor.mode == 'source' ) {
+							lastHeight = 0;
+						}
+					});
+
 					// Coordinate with the "maximize" plugin. (#9311)
 					editor.on( 'afterCommandExec', function( evt ) {
 						if ( evt.data.name == 'maximize' && evt.editor.mode == 'wysiwyg' ) {
