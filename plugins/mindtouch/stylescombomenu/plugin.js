@@ -99,6 +99,9 @@
 
 								editor[style.checkActive(elementPath) ? 'removeStyle' : 'applyStyle'](style);
 								editor.fire('saveSnapshot');
+
+								editor.forceNextSelectionCheck();
+								editor.selectionChange(1);
 							}
 						});
 
