@@ -41,24 +41,24 @@
 			span = pre.getFirst();
 
 		pre.setStyles({
-			'padding-top': textarea.getComputedStyle('padding-top'),
-			'padding-right': textarea.getComputedStyle('padding-right'),
-			'padding-bottom': textarea.getComputedStyle('padding-bottom'),
-			'padding-left': textarea.getComputedStyle('padding-left'),
-			'margin-top': textarea.getComputedStyle('margin-top'),
-			'margin-right': textarea.getComputedStyle('margin-right'),
-			'margin-bottom': textarea.getComputedStyle('margin-bottom'),
-			'margin-left': textarea.getComputedStyle('margin-left'),
-			'border-top': textarea.getComputedStyle('border-top'),
-			'border-right': textarea.getComputedStyle('border-right'),
-			'border-bottom': textarea.getComputedStyle('border-bottom'),
-			'border-left': textarea.getComputedStyle('border-left'),
-			'font-size': textarea.getComputedStyle('font-size'),
-			'font-family': textarea.getComputedStyle('font-family'),
-			'line-height': textarea.getComputedStyle('line-height'),
-			'letter-spacing': textarea.getComputedStyle('letter-spacing'),
-			'tab-size': textarea.getComputedStyle('tab-size'),
-			'outline': textarea.getComputedStyle('outline')
+			'padding-top': textarea.getComputedStyle('padding-top') || 0,
+			'padding-right': textarea.getComputedStyle('padding-right') || 0,
+			'padding-bottom': textarea.getComputedStyle('padding-bottom') || 0,
+			'padding-left': textarea.getComputedStyle('padding-left') || 0,
+			'margin-top': textarea.getComputedStyle('margin-top') || 0,
+			'margin-right': textarea.getComputedStyle('margin-right') || 0,
+			'margin-bottom': textarea.getComputedStyle('margin-bottom') || 0,
+			'margin-left': textarea.getComputedStyle('margin-left') || 0,
+			'border-top': textarea.getComputedStyle('border-top') || '',
+			'border-right': textarea.getComputedStyle('border-right') || '',
+			'border-bottom': textarea.getComputedStyle('border-bottom') || '',
+			'border-left': textarea.getComputedStyle('border-left') || '',
+			'font-size': textarea.getComputedStyle('font-size') || 'medium',
+			'font-family': textarea.getComputedStyle('font-family') || '',
+			'line-height': textarea.getComputedStyle('line-height') || 'normal',
+			'letter-spacing': textarea.getComputedStyle('letter-spacing') || 'normal',
+			'tab-size': textarea.getComputedStyle('tab-size') || '8',
+			'outline': textarea.getComputedStyle('outline') || 'inherit'
 		});
 
 		if (CKEDITOR.env.ie) {
@@ -74,10 +74,6 @@
 		}
 
 		var update = function(ev) {
-			if (CKEDITOR.env.ie && ev && ev.data && ev.data.$ && ev.data.$.propertyName != 'value') {
-				return;
-			}
-
 			span.setText(textarea.getValue());
 		};
 
@@ -108,6 +104,11 @@
 						editor.removeListener('resize', onResize);
 						CKEDITOR.document.getWindow().removeListener('resize', onResize);
 					}
+
+					var inner = editor.ui.space('contents').getParent();
+					inner.removeStyle('display');
+					inner.removeStyle('table-layout');
+					inner.removeStyle('width');
 				}
 			});
 
@@ -126,7 +127,21 @@
 				editable.move(autogrowArea);
 				editable = autogrowArea.getLast();
 
-				autogrowArea.getParent().setStyle('height', 'auto');
+				var contents = editor.ui.space('contents'),
+					inner = contents.getParent();;
+
+				contents.setStyle('height', 'auto');
+
+				inner.setStyles({
+					'display': 'table',
+					'table-layout': 'fixed',
+					'width': '100%'
+				});
+
+				if (CKEDITOR.env.webkit) {
+					inner.setStyle('display', '');
+					inner.setStyle('display', 'table');
+				}
 			});
 		},
 
@@ -140,7 +155,7 @@
 				.cke_autogrow_source textarea.cke_source,	\
 				.cke_autogrow_source pre		\
 				{								\
-					padding: 20px 5px;			\
+					padding: 20px 10px;			\
 					background: transparent;	\
 					white-space: pre-wrap;		\
 					word-wrap: break-word;		\
