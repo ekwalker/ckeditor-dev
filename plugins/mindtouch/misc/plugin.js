@@ -112,42 +112,6 @@ CKEDITOR.editor.prototype.unlock = function() {
 };
 
 (function() {
-	/**
-	 * Merge a <pre> block with a previous sibling if available.
-	 *
-	 * from style plug-in
-	 */
-
-	function mergePres(preBlock, previousBlock) {
-		// Merge the previous <pre> block contents into the current <pre>
-		// block.
-		//
-		// Another thing to be careful here is that currentBlock might contain
-		// a '\n' at the beginning, and previousBlock might contain a '\n'
-		// towards the end. These new lines are not normally displayed but they
-		// become visible after merging.
-		var mergedHtml = replace(previousBlock.getHtml(), /\n$/, '') + '\n' + replace(preBlock.getHtml(), /^\n/, '');
-
-		previousBlock.setHtml(mergedHtml);
-		preBlock.remove();
-	}
-
-	// Wrapper function of String::replace without considering of head/tail bookmarks nodes.
-
-	function replace(str, regexp, replacement) {
-		var headBookmark = '',
-			tailBookmark = '';
-
-		str = str.replace(/(^<span[^>]+data-cke-bookmark.*?\/span>)|(<span[^>]+data-cke-bookmark.*?\/span>$)/gi,
-
-		function(str, m1, m2) {
-			m1 && (headBookmark = m1);
-			m2 && (tailBookmark = m2);
-			return '';
-		});
-		return headBookmark + str.replace(regexp, replacement) + tailBookmark;
-	}
-
 	CKEDITOR.plugins.add('mindtouch/misc', {
 		init: function(editor) {
 			editor.setKeystroke(CKEDITOR.ALT + 13 /*ENTER*/ , 'source');
@@ -155,135 +119,98 @@ CKEDITOR.editor.prototype.unlock = function() {
 			/**
 			 * Webkit specific fixes
 			 */
-			if (false && CKEDITOR.env.webkit) {
-				// @see MT-8868
+			if (CKEDITOR.env.webkit) {
+				var evaluator = function() {
+					var nodeType = CKEDITOR.dom.walker.nodeType(CKEDITOR.NODE_ELEMENT),
+						isBookmark = CKEDITOR.dom.walker.bookmark();
+					return function(node) {
+						return nodeType(node) && !isBookmark(node) && !node.is('br');
+					};
+				};
+
 				editor.on('contentDom', function() {
-					var body = editor.document.getBody(),
-						draggedElement;
+					var body = editor.document.getBody();
 
-					body.on('dragstart', function(evt) {
-						draggedElement = evt.data.getTarget();
+					/**
+					 * Webkit adds custom styles and span elements on drag and drop operations
+					 * 1. Save current elements style on dragstart
+					 * 2. Restore saved styles on dragend and remove added spans
+					 *
+					 * @see MT-8868
+					 * @see MT-9985
+					 */
+					body.on('dragstart', function() {
+						var selection = editor.getSelection(),
+							range = selection && selection.getRanges(true)[0],
+							startContainer = range.startContainer,
+							walker = new CKEDITOR.dom.walker(range.clone()),
+							node;
 
-						if (draggedElement) {
-							if (draggedElement.type == CKEDITOR.NODE_TEXT) {
-								draggedElement = draggedElement.getParent();
-							}
+						editor.fire('saveSnapshot');
 
-							// webkit won't add any styles
-							// if element has style attribute
-							if (!draggedElement.hasAttribute('style')) {
-								draggedElement.setAttribute('style', '');
-							}
+						walker.evaluator = evaluator();
 
-							// webkit splits pre block on dragging
-							// so we add custom data attribute to find split block
-							// @see MT-9985
-							draggedElement.is('pre') && draggedElement.data('cke-draggedpre', true);
+						node = (startContainer.type === CKEDITOR.NODE_ELEMENT) ? startContainer : startContainer.getParent();
+
+						while (node) {
+							var style = node.getAttribute('style') || '';
+							node.data('cke-dnd-style', style);
+							node = walker.next();
 						}
 					});
 
 					body.on('dragend', function(evt) {
-						var nodeList, count, i, node;
+						if (evt.data.$.dataTransfer.dropEffect === 'none') {
+							return;
+						}
 
-						if (draggedElement) {
-							// remove empty style attributes which was added on dragstart event
+						var selection = editor.getSelection(),
+							range = selection && selection.getRanges(true)[0],
+							startContainer = range.startContainer,
+							walker = new CKEDITOR.dom.walker(range.clone()),
+							bookmarks = range.createBookmark(),
+							toRemove = [],
+							node;
 
-							nodeList = editor.document.getElementsByTag(draggedElement.getName());
-							count = nodeList.count();
+						walker.evaluator = evaluator();
 
-							for (i = 0; i < count; i++) {
-								node = nodeList.getItem(i);
-								if (node && node.hasAttribute('style') && !node.getAttribute('style').length) {
-									node.removeAttribute('style');
-								}
-							}
+						node = (startContainer.type === CKEDITOR.NODE_ELEMENT) ? startContainer : startContainer.getParent();
 
-							// if pre block was split merge blocks back into one
-							// @see MT-9985
-							if (draggedElement.is('pre')) {
-								nodeList = editor.document.getElementsByTag('pre');
+						while (node) {
+							// Webkit adds the child pre block on dragging a few lines of pre
+							if (node.is('pre') && node.hasAscendant('pre')) {
+								var br = editor.document.createElement('br');
+								br.appendTo(node, true);
+								toRemove.push(node);
+							} else {
+								var style = node.data('cke-dnd-style');
 
-								for (i = 0; i < nodeList.count(); i++) {
-									node = nodeList.getItem(i);
-									if (node && node.data('cke-draggedpre')) {
-										var next = node.getNext();
-										if (next && next.data && next.data('cke-draggedpre')) {
-											var sel = editor.getSelection(),
-												ranges = sel && sel.getRanges(),
-												range = ranges && ranges[0],
-												bookmark = range && range.createBookmark(true);
-
-											mergePres(next, draggedElement);
-
-											bookmark && range.moveToBookmark(bookmark);
-											range && range.select();
-											break;
-										}
+								if (style === null) {
+									// remove span nodes which were added on drag and drop operation
+									node.is('span') && toRemove.push(node);
+								} else {
+									// restore saved style
+									if (style.length) {
+										node.setAttribute('style', style);
+									} else {
+										node.removeAttribute('style');
 									}
+
+									node.data('cke-dnd-style', false);
 								}
 							}
+
+							node = walker.next();
 						}
 
-						// remove dummy span
-
-						nodeList = editor.document.getElementsByTag('span');
-
-						for (i = nodeList.count() - 1; i >= 0; i--) {
-							node = nodeList.getItem(i);
-							if (node && node.hasClass('Apple-style-span')) {
-								node.remove(true);
-							}
-						}
-					});
-
-					editor.document.on('DOMNodeInserted', function(evt) {
-						var target = evt.data.getTarget(),
-							name = target.getName && target.getName(),
-							styles = [];
-
-						switch (name) {
-							case 'font':
-								if (target.hasAttribute('face')) {
-									var face = target.getAttribute('face');
-									styles.push(new CKEDITOR.style(editor.config.font_style, {'family': face}));
-								}
-
-								if (target.hasAttribute('size')) {
-									var size = target.getAttribute('size'),
-										fontSizes = [8, 10, 13, 16, 18, 24, 32, 48];
-
-									size = fontSizes[size] ? fontSizes[size] + 'px' : 'medium';
-									styles.push(new CKEDITOR.style(editor.config.fontSize_style, {
-										'size': size
-									}));
-								}
-								break;
-							case 'b':
-								styles.push(new CKEDITOR.style(editor.config.coreStyles_bold));
-								break;
-							case 'i':
-								styles.push(new CKEDITOR.style(editor.config.coreStyles_italic));
-								break;
-							default:
-								break;
+						for (var i = 0; i < toRemove.length; i++) {
+							toRemove[i].remove(true);
 						}
 
-						if (styles.length) {
-							setTimeout(function() {
-								var sel = editor.getSelection(),
-									ranges = sel && sel.getRanges(),
-									range = ranges && ranges[0];
+						range.moveToBookmark(bookmarks);
+						range.select();
 
-								if (range) {
-									range.selectNodeContents(target);
-									for (var i in styles) {
-										styles[i].applyToRange(range);
-									}
-									range.collapse(true);
-									range.select();
-								}
-							}, 0);
-						}
+						editor.fire('saveSnapshot');
 					});
 				});
 			}
