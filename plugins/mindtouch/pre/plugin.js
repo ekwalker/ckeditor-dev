@@ -176,16 +176,8 @@
 		var editor = this,
 			updateSnapshot = false;
 
-		if (!pre) {
-			var sel = editor.getSelection(),
-				firstElement = sel && sel.getStartElement(),
-				path = firstElement && new CKEDITOR.dom.elementPath(firstElement);
-
-			if (!path || !path.block || !path.block.is('pre')) {
-				return;
-			}
-
-			pre = path.block;
+		if (!pre || !pre.is || !pre.is( 'pre' )) {
+			return;
 		}
 
 		// the fake pre element to calculate the width
@@ -254,24 +246,44 @@
 				infobar.addLabel('dekiscript', 'col');
 			});
 
-			if (!CKEDITOR.env.ie) {
+			if ( !CKEDITOR.env.ie ) {
 				/**
 				 * Recalculate width of pre blocks.
 				 * @see EDT-264
 				 */
-				editor.on('change', function() {
-					if (editor.mode != 'wysiwyg') {
-						return;
-					}
-					
+				var updateAll = function() {
 					var preElements = editor.document.getElementsByTag( 'pre' ),
 						count = preElements.count(),
 						pre, i;
 
-					for ( i = 0 ; i < count ; i++ ) {
+					for ( i = 0; i < count; i++ ) {
 						pre = preElements.getItem( i );
 						updateWidth.call( editor, pre );
 					}
+				};
+
+				var update = function() {
+					var sel = editor.getSelection(),
+						startElement = sel && sel.getStartElement().getAscendant( 'pre', true );
+
+					if ( startElement ) {
+						updateWidth.call( editor, startElement );
+						editor.execCommand( 'autogrow' );
+					}
+				};
+
+				editor.on( 'afterPaste', update );
+
+				editor.on( 'contentDom', function() {
+					updateAll();
+
+					var callback = function() {
+						timer = CKEDITOR.tools.setTimeout( update, 0, editor );
+					};
+
+					var body = editor.document.getBody();
+					body.on( 'keydown', callback );
+					body.on( 'mouseup', callback );
 				});
 			}
 		},
