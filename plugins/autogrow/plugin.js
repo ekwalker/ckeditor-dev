@@ -127,6 +127,7 @@
 							lastHeight = 0;
 						}
 					});
+					/* END */
 
 					// Coordinate with the "maximize" plugin. (#9311)
 					editor.on( 'afterCommandExec', function( evt ) {
