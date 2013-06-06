@@ -228,10 +228,16 @@
 			return false;
 		}
 
+		var cancel = function(evt) {
+			evt.cancel();
+		};
+
 		var wrapBlock = function(block) {
 			var wrapper = editor.document.createElement('em'),
 				wrapperPad = editor.document.createElement('span'),
 				id = CKEDITOR.tools.getNextId();
+
+			editor.getCommand('italic').on('state', cancel, null, null, 1);
 
 			wrapper.setAttribute('id', id);
 			wrapper.data('cke-temp', 1);
@@ -261,10 +267,12 @@
 				// remove wrapper
 				wrapper.remove(true);
 
+				editor.getCommand('italic').removeListener('state', cancel);
+
 				range.moveToBookmark(bookmark);
 				range.select();
 			}
-		}
+		};
 
 		// in some cases checkStartOfBlock returns incorrect result
 		// so we need reselect range
