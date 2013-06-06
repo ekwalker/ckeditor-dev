@@ -308,6 +308,8 @@
 
 					continueFn = function() {
 						editor.removeListener('draftSaved', continueFn);
+						editor.editable().removeListener('keydown', continueFn);
+						editor.editable().removeListener('click', continueFn);
 						CKEDITOR.document.removeListener('keydown', onEsc);
 						infoPanel.hide();
 						updateTimeAgo(lang.localSave + timeAgo());
@@ -317,6 +319,8 @@
 
 					discardFn = function() {
 						editor.removeListener('draftSaved', continueFn);
+						editor.editable().removeListener('keydown', continueFn);
+						editor.editable().removeListener('click', continueFn);
 						CKEDITOR.document.removeListener('keydown', onEsc);
 						editor.setData(currentData, function() {
 							editor.resetDirty();
@@ -377,8 +381,8 @@
 
 					editor.on('draftSaved', continueFn);
 					CKEDITOR.document.on('keydown', onEsc);
-					editor.document.getBody().on('keydown', continueFn);
-					editor.document.getBody().on('click', continueFn);
+					editor.editable().on('keydown', continueFn);
+					editor.editable().on('click', continueFn);
 
 					editor.unlock && editor.unlock();
 
