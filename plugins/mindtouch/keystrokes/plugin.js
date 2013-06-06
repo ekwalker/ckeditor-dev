@@ -98,20 +98,16 @@
 	};
 
 	// Modifier keys override.
-	if ( CKEDITOR.env.mac )
-	{
+	if ( CKEDITOR.env.mac ) {
 		keyMap[ CKEDITOR.ALT ] = '&#8997;';
 		keyMap[ CKEDITOR.SHIFT ] = '&#8679;';
 		keyMap[ CKEDITOR.CTRL ] = '&#8984;';
-	}
-	else
-	{
+	} else {
 		keyMap[ CKEDITOR.ALT ] = 'ALT';
 		keyMap[ CKEDITOR.SHIFT ] = 'SHIFT';
 		keyMap[ CKEDITOR.CTRL ] = 'CTRL';
 	}
 
-	// Sort in desc.
 	var modifiers = [ CKEDITOR.ALT, CKEDITOR.SHIFT, CKEDITOR.CTRL ];
 
 	function representKeyStroke( keystroke ) {
@@ -145,10 +141,9 @@
 			return false;
 		}
 
-		var path = new CKEDITOR.dom.elementPath(range.startContainer),
-			isStartOfBlock = range.checkStartOfBlock();
+		var path = new CKEDITOR.dom.elementPath(range.startContainer);
 
-		if ((path.contains({li: 1}) && isStartOfBlock) || (!path.contains({td: 1, th: 1, pre: 1}) && isStartOfBlock)) {
+		if (!path.contains({td: 1, th: 1, pre: 1}) && range.checkStartOfBlock()) {
 			editor.execCommand(hasShift ? 'outdent' : 'indent');
 			return true;
 		}
@@ -233,28 +228,20 @@
 			return false;
 		}
 
-		var snapshotCounter = 0,
-			onSaveSnapshot = function() {
-				snapshotCounter++;
-			};
-
 		var wrapBlock = function(block) {
 			var wrapper = editor.document.createElement('em'),
 				wrapperPad = editor.document.createElement('span'),
 				id = CKEDITOR.tools.getNextId();
 
 			wrapper.setAttribute('id', id);
-			wrapper.data('cke-temp');
+			wrapper.data('cke-temp', 1);
 
 			wrapperPad.append(new CKEDITOR.dom.text('\ufeff', editor.document));
-			wrapperPad.data('cke-temp');
+			wrapperPad.data('cke-temp', 1);
 			wrapper.append(wrapperPad);
 
 			block.moveChildren(wrapper);
 			block.append(wrapper);
-
-			editor.fire('updateSnapshot');
-			editor.on('saveSnapshot', onSaveSnapshot);
 
 			return id;
 		};
@@ -274,18 +261,8 @@
 				// remove wrapper
 				wrapper.remove(true);
 
-				if (bookmark) {
-					range.moveToBookmark(bookmark);
-					range.select();
-				}
-
-				editor.removeListener('saveSnapshot', onSaveSnapshot);
-
-				for (var i = 0; i < snapshotCounter; i++) {
-					editor.fire('updateSnapshot');
-				}
-
-				snapshotCounter = 0;
+				range.moveToBookmark(bookmark);
+				range.select();
 			}
 		}
 
@@ -314,6 +291,7 @@
 
 				window.setTimeout(function() {
 					removeWrapper(id);
+					editor.fire('updateSnapshot');
 				}, 0);
 			}
 		} else if (keyCode == 46 && isEndOfBlock) {
@@ -358,6 +336,7 @@
 
 					window.setTimeout(function() {
 						removeWrapper(id);
+						editor.fire('updateSnapshot');
 					}, 0);
 				}
 			}
@@ -511,6 +490,15 @@
 
 			}, null, null, 1);
 
+			editor.on( 'contentDom', function() {
+				editor.document.getBody().on( 'keydown', function( evt ) {
+					var keyCode = evt.data.getKeystroke();
+
+					if (keyCode === 8 || keyCode === 46) {
+						fixStyleOnMergeBlocks.call(editor, keyCode) && evt.data.preventDefault( true );
+					}
+				}, null, null, 100);
+			});
 
 			/**
 			 * Add command shortcut to UI element label
@@ -591,6 +579,20 @@
 						}
 					}
 				}
+			});
+
+			editor.on('uiReady', function() {
+				// Prevent temp nodes from displaying in elements path and been removed when cleaning format.
+				var elementsPathFilters,
+					tempFilter = function( element ) {
+						if ( element.hasAttribute( 'data-cke-temp' ) )
+							return false;
+					};
+
+				if ( editor._.elementsPath && ( elementsPathFilters = editor._.elementsPath.filters ) )
+					elementsPathFilters.push( tempFilter );
+
+				editor.addRemoveFormatFilter && editor.addRemoveFormatFilter( tempFilter );
 			});
 		}
 	});
