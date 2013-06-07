@@ -412,6 +412,10 @@
 									styledNode = range.getNextNode(),
 									reselect = false;
 
+								if (!styledNode) {
+									return;
+								}
+
 								if (styledNode.type === CKEDITOR.NODE_TEXT) {
 									styledNode = styledNode.getParent();
 									range.setStartBefore(styledNode);

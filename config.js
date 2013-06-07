@@ -135,7 +135,7 @@ CKEDITOR.editorConfig = function( config ) {
 	config.stylesSet = [
 		{ name : 'None', element : 'p', attributes : { 'class' : '' }, group : 'default', priority : 10 },
 		{ name : '<pre>&lt;pre&gt;</pre> Format', element : 'pre', attributes : { 'class' : '' }, group : 'default', label : 'Formatted', priority : 30 },
-		{ name : 'Blockquote', element : 'blockquote', group : 'default', priority : 30 },
+		{ name : 'Blockquote', element : 'blockquote', group : 'default', priority : 30, command : 'blockquote' },
 		{ name : 'Comment', element : 'p', attributes : { 'class' : 'comment' }, group : 'default', priority : 30, command : 'comment' },
 
 		{ name : 'DekiScript', element : 'pre', attributes : { 'class' : 'script' }, group : 'executable', priority : 40, command : 'dekiscript' },

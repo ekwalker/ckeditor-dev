@@ -24,6 +24,11 @@ body
 	line-height: 1.6em;
 }
 
+/**
+ * Use skin styles for blockquote
+ * @author MindTouch
+ */
+/*
 blockquote
 {
 	font-style: italic;
@@ -47,6 +52,7 @@ blockquote
 	padding-right: 20px;
 	border-right-width: 5px;
 }
+*/
 
 a
 {
@@ -115,13 +121,13 @@ body {
 	background: #fff;
 }
 
-blockquote {
-	_padding: 0 !important; /* @see #0007714 */
-}
-
 /* @see MT-10386 */
 pre {
 	word-wrap: normal;
+}
+
+blockquote p {
+	margin: 1em 0;
 }
 
 /* @see EDT-444 */

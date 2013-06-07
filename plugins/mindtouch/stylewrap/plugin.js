@@ -291,6 +291,12 @@
 					} else {
 						var divs = toApply.length ? toApply : createDiv(editor);
 
+						// createDiv fires selection change event
+						// but style is not applied at this point yet
+						// and next selection change events are not fired because path is not changed
+						// so we need force selection check
+						editor.forceNextSelectionCheck();
+
 						for (var i = 0, count = divs.length; i < count; i++) {
 							div = divs[i];
 							style.applyToObject(div);

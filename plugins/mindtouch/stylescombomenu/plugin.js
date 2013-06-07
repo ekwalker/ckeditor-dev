@@ -74,8 +74,9 @@
 						style._button = buttonName;
 						style._.enterMode = config.enterMode;
 
-						if (styleDefinition.command) {
-							var cmd = editor.addCommand(styleDefinition.command, new CKEDITOR.styleCommand(style));
+						var command = styleDefinition.command;
+						if (command && !editor.getCommand(command)) {
+							var cmd = editor.addCommand(command, new CKEDITOR.styleCommand(style));
 							editor.addFeature(cmd);
 						}
 
@@ -83,8 +84,13 @@
 							group: 'style_' + group,
 							label: styleName,
 							style: style,
-							command: styleDefinition.command || null,
+							command: command || null,
 							onClick: function() {
+								if (this.command) {
+									editor.execCommand(this.command);
+									return;
+								}
+
 								editor.focus();
 								editor.fire('saveSnapshot');
 
@@ -99,9 +105,6 @@
 
 								editor[style.checkActive(elementPath) ? 'removeStyle' : 'applyStyle'](style);
 								editor.fire('saveSnapshot');
-
-								editor.forceNextSelectionCheck();
-								editor.selectionChange(1);
 							}
 						});
 
