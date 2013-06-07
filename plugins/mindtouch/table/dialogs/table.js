@@ -595,7 +595,7 @@
 											items :
 											[
 												[ editor.lang.table.fixed , 'fixed'],
-												[ editor.lang.table.flexible , 'flexible'],
+												[ editor.lang.table.flexible , 'flexible']
 											],
 											setup : function( selectedTable )
 											{

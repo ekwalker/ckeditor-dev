@@ -242,7 +242,7 @@
 							}
 						}),
 						CKEDITOR.dialog.cancelButton.override({
-							label: lang.continueEditing,
+							label: lang.continueEditing
 						}),
 						{
 							id: 'readOnly',

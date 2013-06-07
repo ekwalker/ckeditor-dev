@@ -115,7 +115,7 @@
 		}
 	};
 
-	/*
+	/**
 	 * transformations bubble
 	 * @see EDT-378
 	 */

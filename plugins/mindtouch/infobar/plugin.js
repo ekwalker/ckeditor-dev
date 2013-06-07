@@ -110,7 +110,7 @@
 			];
 			CKEDITOR.document.appendStyleText( css.join( '' ) );
 
-			/* @see #MT-9987 */
+			// @see #MT-9987
 			CKEDITOR.addCss( 'body.cke_infobar_enabled {padding-top: 5px;}' );
 		}
 	});

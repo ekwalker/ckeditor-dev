@@ -609,7 +609,7 @@
 				'.cke_menubutton_disabled.active .cke_menubutton_icon {',
 					'opacity: 0.3;',
 					'filter: alpha(opacity=30);',
-				'}',
+				'}'
 			];
 			CKEDITOR.document.appendStyleText( css.join( '' ) );
 		}

@@ -553,7 +553,7 @@
 			buttons : [
 				CKEDITOR.dialog.okButton.override(
 					{
-						label : videoLang.insert,
+						label : videoLang.insert
 					}),
 				CKEDITOR.dialog.cancelButton
 			],

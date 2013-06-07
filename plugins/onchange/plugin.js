@@ -1,5 +1,4 @@
 /*
- * @file change event plugin for CKEditor
  * Copyright (C) 2011 Alfonso Martínez de Lizarrondo
  *
  * == BEGIN LICENSE ==
@@ -20,7 +19,11 @@
  *
  */
 
- // Keeps track of changes to the content and fires a "change" event
+/**
+ * @file change event plugin for CKEditor
+ */
+
+// Keeps track of changes to the content and fires a "change" event
 CKEDITOR.plugins.add( 'onchange',
 {
 	init : function( editor )
