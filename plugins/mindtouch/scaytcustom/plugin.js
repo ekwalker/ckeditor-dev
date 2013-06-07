@@ -3,7 +3,7 @@
  * Copyright (c) 2006-2012 MindTouch Inc.
  * http://mindtouch.com
  *
- * This file and accompanying files are licensed under the 
+ * This file and accompanying files are licensed under the
  * MindTouch Master Subscription Agreement (MSA).
  *
  * At any time, you shall not, directly or indirectly: (i) sublicense,
@@ -22,33 +22,27 @@
  * Server for which Support Services are not then purchased as provided
  * hereunder; or (vi) reverse engineer, decompile or modify any encrypted
  * or encoded portion of the Software.
- * 
+ *
  * A complete copy of the MSA is available at http://www.mindtouch.com/msa
  */
 
 /**
  * @file SCAYT customization.
  */
-CKEDITOR.plugins.add( 'scaytcustom',
-{
-	requires : [ 'scayt' ],
-
-	init : function( editor )
-	{
-		CKEDITOR.on( 'scaytReady', function()
-			{
-				if ( window.scayt )
-				{
-					window.scayt.prototype.nextNode = CKEDITOR.tools.override( window.scayt.prototype.nextNode, function( originalNextNode )
-						{
-							return function()
-							{
-								var nextNode = originalNextNode.call( this );
-								nextNode.ignoreElementsRegex = /^(select|option|textarea|input|style|pre)$/i;
-								return nextNode;
-							};
-						});
-				}
-			}, editor, null, 1 );
+CKEDITOR.plugins.add('mindtouch/scaytcustom', {
+	requires: 'scayt',
+	init: function(editor) {
+		CKEDITOR.on('scaytReady', function() {
+			if (window.scayt) {
+				// disable scayt inside pre elements
+				window.scayt.prototype.nextNode = CKEDITOR.tools.override(window.scayt.prototype.nextNode, function(originalNextNode) {
+					return function() {
+						var nextNode = originalNextNode.call(this);
+						nextNode.ignoreElementsRegex = /^(select|option|textarea|input|style|pre)$/i;
+						return nextNode;
+					};
+				});
+			}
+		}, editor, null, 1);
 	}
 });

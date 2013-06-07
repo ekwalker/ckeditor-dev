@@ -58,6 +58,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'undo,' +
 		'wysiwygarea,' +
 		'onchange,' +
+		'scayt,' +
 		'mindtouch/autogrow,' +
 		'mindtouch/autosave,' +
 		'mindtouch/ckoverrides,' +
@@ -81,6 +82,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'mindtouch/pre,' +
 		'mindtouch/richcombomenu,' +
 		'mindtouch/save,' +
+		'mindtouch/scaytcustom,' +
 		'mindtouch/statistics,' +
 		'mindtouch/stylescombomenu,' +
 		'mindtouch/stylewrap,' +
@@ -103,7 +105,6 @@ CKEDITOR.editorConfig = function( config ) {
 
 	// SCAYT config
 	var protocol = document.location.protocol;
-	// Default to 'http' for unknown.
 	protocol = protocol.search( /https?:/) != -1 ? protocol : 'http:';
 	config.scayt_autoStartup = true;
 	config.scayt_srcUrl = protocol + '//spellcheck.mindtouch.us/spellcheck/lf/scayt/scayt.js';
