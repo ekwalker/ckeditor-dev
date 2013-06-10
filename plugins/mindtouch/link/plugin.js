@@ -188,6 +188,7 @@
 			}, editor);
 
 			bubble = new CKEDITOR.ui.elementBubble({
+				name: 'link',
 				onUpdate: function(data) {
 					var link = this.getAttachedElement(),
 						image = link.getFirst(),

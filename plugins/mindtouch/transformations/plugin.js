@@ -123,6 +123,7 @@
 	function attachBubble(preElement, editor, transformations) {
 		if (!bubble) {
 			bubble = new CKEDITOR.ui.elementBubble({
+				name: 'transformations',
 				transformations: transformations,
 				className: 'cke_element_bubble_transform',
 				filter: function(element) {

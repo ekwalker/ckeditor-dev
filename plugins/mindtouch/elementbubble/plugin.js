@@ -60,7 +60,7 @@ CKEDITOR.ui.elementBubble = CKEDITOR.tools.createClass({
 		this.bubble.data('cke-element-bubble', 1);
 		this.bubble.hide();
 
-		this.className && this.bubble.addClass(this.className);
+		this.name && this.bubble.addClass('cke_element_bubble__' + this.name);
 
 		this.bubble.unselectable();
 

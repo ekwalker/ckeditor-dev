@@ -45,6 +45,7 @@
 			}, editor);
 
 			bubble = new CKEDITOR.ui.elementBubble({
+				name: 'video',
 				onUpdate: function() {
 					var element = this.getElement(),
 						video = editor.restoreRealElement(this.getAttachedElement()),
