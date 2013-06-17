@@ -228,8 +228,14 @@
 		requires: 'mindtouch/tools,table,tabletools',
 		init: function(editor) {
 			var plugin = this,
-				lang = editor.lang['mindtouch/table'],
 				picker;
+
+			var lang = editor.lang['mindtouch/table'];
+			CKEDITOR.tools.extend(editor.lang.table, lang);
+			CKEDITOR.tools.extend(editor.lang.table.cell, lang.cell);
+			CKEDITOR.tools.extend(editor.lang.table.row, lang.row);
+
+			lang = editor.lang.table;
 
 			// update allowedContent for table and cell properties dialogs
 			editor.getCommand('table').allowedContent += ';table[frame,rules,id]{border,border-width,border-style,border-color,background,background-image,background-color}(*)';
@@ -263,13 +269,6 @@
 			editor.addFeature( cmd );
 
 			addDialog.call(CKEDITOR.dialog, 'rowProperties', this.path + 'dialogs/tableRow.js');
-
-			var lang = editor.lang['mindtouch/table'];
-			CKEDITOR.tools.extend(editor.lang.table, lang);
-			CKEDITOR.tools.extend(editor.lang.table.cell, lang.cell);
-			CKEDITOR.tools.extend(editor.lang.table.row, lang.row);
-
-			lang = editor.lang.table;
 
 			var tableButton;
 			editor.on( 'uiSpace', function( event ) {
