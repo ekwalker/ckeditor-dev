@@ -125,7 +125,6 @@
 			bubble = new CKEDITOR.ui.elementBubble({
 				name: 'transformations',
 				transformations: transformations,
-				className: 'cke_element_bubble_transform',
 				filter: function(element) {
 					if (element.is('pre') && /(^|\s+)script(\s+|-|$)/.test(element.getAttribute('class'))) {
 						return true;
@@ -406,10 +405,10 @@
 		transformations : {},
 		onLoad: function() {
 			CKEDITOR.document.appendStyleText(
-				'.cke_element_bubble_transform .cke_element_bubble_transform_item {' +
+				'.cke_element_bubble__transformations .cke_element_bubble_transform_item {' +
 				'	padding-right: 5px;' +
 				'}' +
-				'.cke_element_bubble_transform span.cke_element_bubble_transform_item {' +
+				'.cke_element_bubble__transformations span.cke_element_bubble_transform_item {' +
 				'	font-weight: bold;' +
 				'}');
 

@@ -100,7 +100,7 @@
 
 	CKEDITOR.plugins.add('mindtouch/floatingtoolbar', {
 		beforeInit: function (editor) {
-			if (editor.config.floating_toolbar !== false) {
+			if (editor.config.floating_toolbar !== false && editor.elementMode !== CKEDITOR.ELEMENT_MODE_INLINE) {
 				var top = editor.config.floating_toolbar_top || 0,
 					css = [
 						'#' + toolbarSpaceId + ' .cke_floatingtoolbar { position: fixed !important; top: ' + top + 'px; }',
@@ -126,7 +126,7 @@
 		},
 
 		init: function (editor) {
-			if (editor.config.floating_toolbar !== false) {
+			if (editor.config.floating_toolbar !== false && editor.elementMode !== CKEDITOR.ELEMENT_MODE_INLINE) {
 				editor.config.sharedSpaces = editor.config.sharedSpaces || {};
 				editor.config.sharedSpaces.top = toolbarSpaceId;
 

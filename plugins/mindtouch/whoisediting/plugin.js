@@ -235,6 +235,7 @@
 					buttons: [
 						CKEDITOR.dialog.okButton.override({
 							label: lang.cancel,
+							'class': 'cke_dialog_ui_button_canceleditor',
 							onClick: function() {
 								editor.fire('cancel', {
 									removeDraft: false
@@ -242,12 +243,14 @@
 							}
 						}),
 						CKEDITOR.dialog.cancelButton.override({
-							label: lang.continueEditing
+							label: lang.continueEditing,
+							'class': 'cke_dialog_ui_button_continueedit',
 						}),
 						{
 							id: 'readOnly',
 							type: 'button',
 							label: lang.continueReadOnly,
+							'class': 'cke_dialog_ui_button_readonly',
 							onClick: function(evt) {
 								var dialog = evt.data.dialog;
 								editor.setReadOnly(true);
