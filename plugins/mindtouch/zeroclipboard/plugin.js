@@ -263,7 +263,7 @@
 		clipboard.addEventListener('complete', function(client, args) {
 			zClipboardData = args.text;
 
-			if (editor.getCommand(name).state != CKEDITOR.TRISTATE_DISABLED) {
+			if (editor.getCommand(name).state != CKEDITOR.TRISTATE_DISABLED && !editor.readOnly) {
 				editor.getCommand('paste').enable();
 			}
 

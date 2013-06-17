@@ -145,6 +145,7 @@
 
 				editor.on('destroy', function (ev) {
 					win.removeListener('scroll', dockToolbar);
+					toolbarContainer.remove();
 				});
 
 				editor.on('mode', scrollToTop, null, null, 1);
