@@ -244,7 +244,7 @@
 						}),
 						CKEDITOR.dialog.cancelButton.override({
 							label: lang.continueEditing,
-							'class': 'cke_dialog_ui_button_continueedit',
+							'class': 'cke_dialog_ui_button_continueedit'
 						}),
 						{
 							id: 'readOnly',

@@ -10,6 +10,7 @@ var CKBUILDER_CONFIG = {
 		'README.md',
 		'.gitignore',
 		'.gitattributes',
+		'.gitmodules',
 		'.idea',
 		'.mailmap',
 		'.DS_Store',
