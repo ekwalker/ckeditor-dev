@@ -597,7 +597,7 @@
 							id : 'width',
 							type : 'text',
 							hidden : true,
-							'default' : 400,
+							'default' : 640,
 							label : commonLang.width,
 							setup : function( videoNode )
 							{
@@ -619,7 +619,7 @@
 							id : 'height',
 							type : 'text',
 							hidden : true,
-							'default' : 300,
+							'default' : 360,
 							label : commonLang.height,
 							setup : function( videoNode )
 							{

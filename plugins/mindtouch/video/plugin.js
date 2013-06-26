@@ -76,7 +76,7 @@
 		icons: 'video', // %REMOVE_LINE_CORE%
 		requires: 'dialog,mindtouch/elementbubble,fakeobjects,mindtouch/link',
 		onLoad: function() {
-			var placeholderPath = Deki.PathCommon + '/images/icon-video.png';
+			var placeholderPath = Deki.PathCommon + '/images/icon-video-1280.png';
 			CKEDITOR.addCss(
 				'img.cke_video' +
 				'{' +
@@ -90,8 +90,8 @@
 					'background-size: 100% 100%;' +
 					'filter: progid:DXImageTransform.Microsoft.AlphaImageLoader(src="' + placeholderPath + '", sizingMethod="scale");' +
 					'-ms-filter: "progid:DXImageTransform.Microsoft.AlphaImageLoader(src="' + placeholderPath + '", sizingMethod="scale")";' +
-					'width: 400px;' +
-					'height: 300px;' +
+					'width: 640px;' +
+					'height: 360px;' +
 				'}'
 			);
 
