@@ -318,12 +318,16 @@
 			}
 
 			editor.on('selectionChange', function(evt) {
-				var element = CKEDITOR.plugins.link.getSelectedLink(editor);
+				var element = CKEDITOR.plugins.link.getSelectedLink(editor),
+					videoCmd = editor.getCommand('mindtouch/video');
 
 				if (element && element.is('a') && element.hasAttribute('href') && !element.isReadOnly()) {
 					attachBubble(element, editor);
+					// don't allow to insert video into the links (EDT-476)
+					videoCmd && videoCmd.state != CKEDITOR.TRISTATE_DISABLED && videoCmd.disable();
 				} else {
 					bubble && bubble.isAttached() && bubble.detach();
+					videoCmd && videoCmd.enable();
 				}
 			}, null, null, 1);
 		},

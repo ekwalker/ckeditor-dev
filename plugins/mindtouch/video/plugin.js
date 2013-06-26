@@ -147,12 +147,16 @@
 			});
 
 			editor.on('selectionChange', function(evt) {
-				var element = evt.data.selection.getStartElement();
+				var element = evt.data.selection.getStartElement(),
+					linkCmd = editor.getCommand('mindtouch/link');
 
 				if (element && element.is('img') && element.data('cke-real-element-type') == 'video' && !element.isReadOnly()) {
 					attachBubble(element, editor);
+					// don't allow to add link to the video (EDT-476)
+					linkCmd && linkCmd.state != CKEDITOR.TRISTATE_DISABLED && linkCmd.disable();
 				} else {
 					bubble && bubble.isAttached() && bubble.detach();
+					linkCmd && linkCmd.enable();
 				}
 			}, null, null, 1);
 		},
