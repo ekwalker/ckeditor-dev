@@ -73,7 +73,7 @@
 			createSly.call( this );
 		}
 
-		this.initEvents();
+		this.addPlaceholder();
 	};
 
 	Video.prototype =
@@ -87,6 +87,7 @@
 		
 		onShow : function()
 		{
+			this.initEvents();
 			this.initSly();
 			this.update();
 
@@ -101,6 +102,7 @@
 		{
 			this.reset();
 			this.sly && this.sly.destroy();
+			this.removeEvents();
 		},
 
 		initSly : function()
@@ -138,48 +140,10 @@
 		
 		initEvents : function()
 		{
-			var self = this;
+			var self = this,
+				timer;
 
-			this.initVideoUrlInput();
-
-			// double click to insert video
-			this.$videos.delegate( 'li', 'dblclick', function()
-				{
-					var url = $( this ).data( 'video-url' );
-					self.setVideoUrl.call( self, url );
-					self.dialog.getButton( 'ok' ).click();
-				});
-
-			CKEDITOR.document.getWindow().on( 'resize', function()
-				{
-					self.isResized = false;
-					self.resize();
-					self.sly && self.sly.reload();
-				});
-		},
-
-		initVideoUrlInput : function()
-		{
-			var self = this;
-
-			try
-			{
-				this.$query.attr(
-					{
-						'autocomplete' : 'off',
-						'placeholder' : this.lang.placeholder
-					});
-			}
-			catch ( e ) {}
-
-			// placeholder polyfill
-			if( !( 'placeholder' in this.$query[ 0 ] ) && !( 'placeHolder' in this.$query[ 0 ] ) )
-			{
-				this.$query.after( '<div class="placeholder">' + this.lang.placeholder + '</div>' );
-			}
-
-			var timer;
-			var onInput = function()
+			this.onInput = function()
 			{
 				if ( timer )
 				{
@@ -196,13 +160,13 @@
 
 			if ( this.checkOnInputSupport() )
 			{
-				this.$query.bind( 'input', onInput );
+				this.$query.bind( 'input', this.onInput );
 			}
 			else
 			{
 				// fallback for old browsers 
-				var lastValue = '',
-					checkInputTimer;
+				var lastValue = '';
+				this.checkInputTimer = null;
 
 				var checkInputChange = function()
 				{
@@ -217,11 +181,57 @@
 
 				this.$query.focus(function()
 				{
-					checkInputTimer = setInterval( checkInputChange, 200 );
+					self.checkInputTimer = setInterval( checkInputChange, 200 );
 				}).blur(function()
 				{
-					clearInterval( checkInputTimer );
+					clearInterval( self.checkInputTimer );
 				});
+			}
+
+			// double click to insert video
+			this.onInsert = function()
+			{
+				var url = $( this ).data( 'video-url' );
+				self.setVideoUrl.call( self, url );
+				self.dialog.getButton( 'ok' ).click();
+			};
+
+			this.onResize = function()
+			{
+				self.isResized = false;
+				self.resize();
+				self.sly && self.sly.reload();
+			};
+
+			this.$videos.delegate( 'li', 'dblclick', this.onInsert );
+
+			CKEDITOR.document.getWindow().on( 'resize', this.onResize );
+		},
+
+		removeEvents : function()
+		{
+			this.$query.unbind( 'input', this.onInput );
+			clearInterval( this.checkInputTimer );
+			this.$videos.undelegate( 'li', 'dblclick', this.onInsert );
+			CKEDITOR.document.getWindow().removeListener( 'resize', this.onResize );
+		},
+
+		addPlaceholder : function()
+		{
+			try
+			{
+				this.$query.attr(
+					{
+						'autocomplete' : 'off',
+						'placeholder' : this.lang.placeholder
+					});
+			}
+			catch ( e ) {}
+
+			// placeholder polyfill
+			if( !( 'placeholder' in this.$query[ 0 ] ) && !( 'placeHolder' in this.$query[ 0 ] ) )
+			{
+				this.$query.after( '<div class="placeholder">' + this.lang.placeholder + '</div>' );
 			}
 		},
 
@@ -405,20 +415,14 @@
 
 		resize : function()
 		{
-			if ( this.isResized )
+			if ( this.isResized || !this.$videos.is(':visible') )
 			{
 				return false;
 			}
 
 			var viewportSize = CKEDITOR.document.getWindow().getViewPaneSize(),
 				dialogSize = this.dialog.getSize(),
-				height = 450;
-
-			if ( viewportSize.height > 550 )
-			{
-				height = viewportSize.height -
-					( dialogSize.height - $( this.dialog.parts.contents.$ ).height() + 50 );
-			}
+				height = Math.min(500, viewportSize.height - ( dialogSize.height - $( this.dialog.parts.contents.$ ).height() ));
 
 			this.dialog.resize( 600, height );
 			this.dialog.layout();
