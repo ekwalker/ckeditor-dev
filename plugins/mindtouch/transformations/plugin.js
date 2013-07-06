@@ -170,7 +170,7 @@
 						selectedElement = CKEDITOR.dom.element.get(selectedElement.$[selectedElement.$.selectedIndex]);
 					}
 
-					var value = selectedElement.data('transform');
+					var value = selectedElement.getAttribute('value');
 
 					if (!value) {
 						return false;
@@ -194,15 +194,19 @@
 					var lang = this.editor.lang['mindtouch/transformations'],
 						element = this.getElement();
 
-					var selectBox = this.doc.createElement('select'),
-						linksBox = this.doc.createElement('span'),
+					var select = this.doc.createElement('select'),
+						links = this.doc.createElement('span'),
 						link, option, text, name, transform, func;
+
+					select.setAttribute('name', 'cke_transofrmations');
+					select.addClass('cke_element_bubble_transofrmations');
 
 					// "More..." items
 					text = lang.more;
 					option = this.doc.createElement('option');
+					option.setAttribute('value', '');
 					option.setHtml(text);
-					selectBox.append(option);
+					select.append(option);
 
 					// Transformations select box
 					for (name in this.transformations) {
@@ -214,12 +218,12 @@
 						}
 
 						option = this.doc.createElement('option');
-						option.data('transform', name);
+						option.setAttribute('value', name);
 						option.setHtml(transform.name);
-						selectBox.append(option);
+						select.append(option);
 					}
 
-					selectBox.on('change', this.applyTransform, this);
+					select.on('change', this.applyTransform, this);
 
 					// Links
 					var addItem = function(name, text) {
@@ -231,6 +235,7 @@
 
 						var item = this.doc.createElement(itemName);
 						item.addClass('cke_element_bubble_transform_item');
+						item.addClass('cke_element_bubble_transform__' + name);
 						item.data('transform', name);
 						item.setHtml(text || name);
 
@@ -239,7 +244,7 @@
 							item.on('click', this.applyTransform, this);
 						}
 
-						linksBox.append(item);
+						links.append(item);
 					};
 
 					addItem.call(this, 'none', lang.none);
@@ -257,8 +262,8 @@
 					}
 
 					element.append(this.doc.createText(lang.syntax + '\u00A0'));
-					element.append(linksBox);
-					element.append(selectBox);
+					element.append(links);
+					element.append(select);
 				}
 
 			}, CKEDITOR.document, editor);
