@@ -170,7 +170,7 @@
 						selectedElement = CKEDITOR.dom.element.get(selectedElement.$[selectedElement.$.selectedIndex]);
 					}
 
-					var value = selectedElement.getAttribute('value');
+					var value = selectedElement.data('transform');
 
 					if (!value) {
 						return false;
@@ -198,8 +198,8 @@
 						links = this.doc.createElement('span'),
 						link, option, text, name, transform, func;
 
-					select.setAttribute('name', 'cke_transofrmations');
-					select.addClass('cke_element_bubble_transofrmations');
+					select.setAttribute('name', 'cke_transofrmations_select');
+					select.addClass('cke_transofrmations_select');
 
 					// "More..." items
 					text = lang.more;
@@ -219,6 +219,7 @@
 
 						option = this.doc.createElement('option');
 						option.setAttribute('value', name);
+						option.data('transform', name);
 						option.setHtml(transform.name);
 						select.append(option);
 					}
