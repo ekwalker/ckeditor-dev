@@ -130,6 +130,11 @@ blockquote p {
 	margin: 1em 0;
 }
 
+/* @see EDT-490 */
+p.comment {
+	line-height: 2em;
+}
+
 /* @see EDT-444 */
 .cke_browser_ie pre.script,
 .cke_browser_ie pre.script-jem,
