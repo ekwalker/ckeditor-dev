@@ -198,8 +198,8 @@
 						links = this.doc.createElement('span'),
 						link, option, text, name, transform, func;
 
-					select.setAttribute('name', 'cke_transofrmations_select');
-					select.addClass('cke_transofrmations_select');
+					select.setAttribute('name', 'cke_transformations_select');
+					select.addClass('cke_transformations_select');
 
 					// "More..." items
 					text = lang.more;
