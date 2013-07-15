@@ -78,6 +78,7 @@ var CKBUILDER_CONFIG = {
 		'mindtouch/dialog': 1,
 		'mindtouch/elementbubble': 1,
 		'mindtouch/enterkey': 1,
+		'mindtouch/extensions': 1,
 		'mindtouch/format': 1,
 		'mindtouch/floatingtoolbar': 1,
 		'mindtouch/image': 1,
