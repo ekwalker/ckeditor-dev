@@ -953,10 +953,15 @@ CKEDITOR.STYLE_OBJECT = 3;
 
 		newBlock.replace( block );
 
-		if ( newBlockIsPre ) {
-			// Merge previous <pre> blocks.
-			mergePre( newBlock );
-		} else if ( removeBlock )
+		/**
+		 * Don't merge pre blocks
+		 * @author MindTouch
+		 */
+		// if ( newBlockIsPre ) {
+		// 	// Merge previous <pre> blocks.
+		// 	mergePre( newBlock );
+		// } else if ( removeBlock )
+		if ( removeBlock )
 			removeNoAttribsElement( newBlock );
 	}
 

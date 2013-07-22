@@ -249,7 +249,13 @@
 
 				if ( !block && startBlockLimit && !this.enforceRealBlocks && checkLimits[ startBlockLimit.getName() ] && range.checkStartOfBlock() && range.checkEndOfBlock() && !startBlockLimit.equals( range.root ) )
 					block = startBlockLimit;
-				else if ( !block || ( this.enforceRealBlocks && block.getName() == 'li' ) ) {
+				/**
+				 * Support of definition list
+				 * @author MindTouch
+				 */
+				// else if ( !block || ( this.enforceRealBlocks && block.getName() == 'li' ) ) {
+				else if ( !block || ( this.enforceRealBlocks && block.is( 'li', 'dd' ) ) ) {
+				/* END */
 					// Create the fixed block.
 					block = this.range.document.createElement( blockTag );
 
@@ -261,7 +267,13 @@
 					range.insertNode( block );
 
 					removePreviousBr = removeLastBr = true;
-				} else if ( block.getName() != 'li' ) {
+				/**
+				 * Support of definition list
+				 * @author MindTouch
+				 */				
+				// } else if ( block.getName() != 'li' ) {
+				} else if ( !block.is( 'li', 'dd' ) ) {
+				/* END */
 					// If the range doesn't includes the entire contents of the
 					// block, we must split it, isolating the range in a dedicated
 					// block.
