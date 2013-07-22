@@ -62,6 +62,28 @@
 		var tbody = new CKEDITOR.dom.element( table.$.tBodies[ 0 ] ),
 			tbodyPosition = tbody.getDocumentPosition();
 
+		/**
+		 * Calculate height of all table parties
+		 * Use thead to set the top boundaries if it exists
+		 * @author MindTouch
+		 * @see EDT-389
+		 */
+		var height = 0;
+		for ( var i = 0; i < table.$.tBodies.length; i++ ) {
+			height += table.$.tBodies[ i ].offsetHeight;
+		}
+
+		if ( table.$.tHead ) {
+			var thead = new CKEDITOR.dom.element( table.$.tHead );
+			tbodyPosition = thead.getDocumentPosition();
+			height += table.$.tHead.offsetHeight;
+		}
+
+		if ( table.$.tFoot ) {
+			height += table.$.tFoot.offsetHeight;
+		}
+		/* END */
+
 		// Loop thorugh all cells, building pillars after each one of them.
 		for ( var i = 0, len = $tr.cells.length; i < len; i++ ) {
 			// Both the current cell and the successive one will be used in the
@@ -102,7 +124,8 @@
 				x: pillarLeft,
 				y: tbodyPosition.y,
 				width: pillarWidth,
-				height: tbody.$.offsetHeight,
+				height : height, // @author MindTouch
+				// height: tbody.$.offsetHeight,
 				rtl: rtl } );
 		}
 
@@ -365,8 +388,14 @@
 					var target = evt.getTarget(),
 						table, pillars;
 
-					if ( !target.is( 'table' ) && !target.getAscendant( 'tbody', 1 ) )
+					/**
+					 * @author MindTouch
+					 * @see EDT-397
+					 */
+					// if ( !target.is( 'table' ) && !target.getAscendant( 'tbody', 1 ) )
+					if ( !target.is( 'table' ) && !target.getAscendant( { 'tbody':1, 'thead':1, 'tfoot':1 }, 1 ) )
 						return;
+					/* END */
 
 					table = target.getAscendant( 'table', 1 );
 

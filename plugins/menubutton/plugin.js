@@ -13,20 +13,40 @@ CKEDITOR.plugins.add( 'menubutton', {
 				if ( _.state === CKEDITOR.TRISTATE_DISABLED )
 					return;
 
-				_.previousState = _.state;
+				/**
+				 * Don't save the state if menu is opened
+				 * to off the button after the second click
+				 *
+				 * @author MindTouch
+				 *
+				 */
+				if ( !_.on ) {
+					_.previousState = _.state;
+				}
+				/* END */
 
 				// Check if we already have a menu for it, otherwise just create it.
 				var menu = _.menu;
 				if ( !menu ) {
 					menu = _.menu = new CKEDITOR.menu( editor, {
-						panel: {
+						/**
+						 * Allow to define panel configuration
+						 * @author MindTouch
+						 */
+						panel: CKEDITOR.tools.extend({}, _.panelDefinition, {
 							className: 'cke_menu_panel',
 							attributes: { 'aria-label': editor.lang.common.options }
-						}
+						})
+						/* END */
 					});
 
 					menu.onHide = CKEDITOR.tools.bind( function() {
 						this.setState( this.modes && this.modes[ editor.mode ] ? _.previousState : CKEDITOR.TRISTATE_DISABLED );
+						/**
+						 * @author MindTouch
+						 */
+						_.on = false;
+						/* END */
 					}, this );
 
 					// Initialize the menu items at this point.
@@ -36,6 +56,11 @@ CKEDITOR.plugins.add( 'menubutton', {
 
 				if ( _.on ) {
 					menu.hide();
+					/**
+					 * @author MindTouch
+					 */
+					menu.editor.focus();
+					/* END */
 					return;
 				}
 
@@ -45,6 +70,11 @@ CKEDITOR.plugins.add( 'menubutton', {
 				// when JAWS is running. (#9842)
 				setTimeout( function() {
 					menu.show( CKEDITOR.document.getById( _.id ), 4 );
+					/**
+					 * @author MindTouch
+					 */
+					_.on = true;
+					/* END */
 				},0);
 			};
 
@@ -73,6 +103,13 @@ CKEDITOR.plugins.add( 'menubutton', {
 				this.hasArrow = true;
 
 				this.click = clickFn;
+
+				/**
+				 * Save panel definition
+				 * @author MindTouch
+				 */
+				this._.panelDefinition = panelDefinition || {};
+				/* END */
 			},
 
 			statics: {

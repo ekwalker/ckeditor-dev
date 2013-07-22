@@ -242,6 +242,26 @@
 	};
 
 	function changeListType( editor, groupObj, database, listsCreated ) {
+		/**
+		 * It is necessary to change list type of all list items
+		 * with the same level
+		 * Why it matters: if a bulleted list exists with nested lists,
+		 * it's currently impossible to just change one level of that list to numbers
+		 * @see #0006389
+		 * @author MindTouch
+		 */
+		if ( groupObj.contents.length == 1 ) {
+			var itemNode = groupObj.contents[ 0 ],
+				parent = itemNode.getParent();
+			
+			if ( parent && listNodeNames[ parent.getName() ] ) {
+				parent.renameNode( this.type );
+				parent.removeCustomData( 'list_group_object' );
+				return;
+			}
+		}
+		/* END */
+		
 		// This case is easy...
 		// 1. Convert the whole list into a one-dimensional array.
 		// 2. Change the list type by modifying the array.
@@ -533,6 +553,15 @@
 						blockLimit = path.blockLimit,
 						element;
 
+						
+					/**
+					 * dd as blocklimit
+					 * @see EDT-344
+					 * @author MindTouch 
+					 */
+					blockLimit = path.block && path.block.is( 'dd' ) ? path.block : blockLimit;
+					/* END */
+
 					// First, try to group by a list ancestor.
 					for ( var i = pathElementsCount - 1; i >= 0 && ( element = pathElements[ i ] ); i-- ) {
 						if ( listNodeNames[ element.getName() ] && blockLimit.contains( element ) ) // Don't leak outside block limit (#3940).
@@ -751,7 +780,7 @@
 	}
 
 	CKEDITOR.plugins.add( 'list', {
-		lang: 'af,ar,bg,bn,bs,ca,cs,cy,da,de,el,en,en-au,en-ca,en-gb,eo,es,et,eu,fa,fi,fo,fr,fr-ca,gl,gu,he,hi,hr,hu,is,it,ja,ka,km,ko,ku,lt,lv,mk,mn,ms,nb,nl,no,pl,pt,pt-br,ro,ru,si,sk,sl,sq,sr,sr-latn,sv,th,tr,ug,uk,vi,zh,zh-cn', // %REMOVE_LINE_CORE%
+		lang: 'af,ar,bg,bn,bs,ca,cs,cy,da,de,el,en,en-au,en-ca,en-gb,eo,es,et,eu,fa,fi,fo,fr,fr-ca,gl,gu,he,hi,hr,hu,id,is,it,ja,ka,km,ko,ku,lt,lv,mk,mn,ms,nb,nl,no,pl,pt,pt-br,ro,ru,si,sk,sl,sq,sr,sr-latn,sv,th,tr,ug,uk,vi,zh,zh-cn', // %REMOVE_LINE_CORE%
 		icons: 'bulletedlist,bulletedlist-rtl,numberedlist,numberedlist-rtl', // %REMOVE_LINE_CORE%
 		requires: 'indent',
 		init: function( editor ) {

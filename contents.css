@@ -24,6 +24,11 @@ body
 	line-height: 1.6em;
 }
 
+/**
+ * Use skin styles for blockquote
+ * @author MindTouch
+ */
+/*
 blockquote
 {
 	font-style: italic;
@@ -47,6 +52,7 @@ blockquote
 	padding-right: 20px;
 	border-right-width: 5px;
 }
+*/
 
 a
 {
@@ -100,4 +106,83 @@ pre
 
 .marker {
     background-color: Yellow;
+}
+
+/*
+MindTouch styles
+*/
+
+html {
+	overflow-y: auto;
+}
+
+/* Fixed editor background css */
+body {
+	background: #fff;
+}
+
+/* @see MT-10386 */
+pre {
+	word-wrap: normal;
+}
+
+blockquote p {
+	margin: 1em 0;
+}
+
+/* @see EDT-490 */
+p.comment {
+	line-height: 2em;
+}
+
+/* @see EDT-444 */
+.cke_browser_ie pre.script,
+.cke_browser_ie pre.script-jem,
+.cke_browser_ie pre.script-js,
+.cke_browser_ie pre.script-css {
+	width: auto;
+}
+
+/* @see EDT-323 */
+.cke_browser_ie td {
+	box-sizing: border-box;
+}
+
+.mt-style-conditional {
+	background: #e8fffb;
+	border: 1px dashed #666;
+	padding: .3em;
+}
+
+.scayt-enabled pre .scayt-ignore {
+	background-image: none !important;
+}
+
+/* Panel styles */
+.cke_menubutton__preltpregtpre_format pre {
+	float: left;
+	cursor: default;
+	margin-right: 0.2em;
+	font-family: monospace;
+	line-height: 16px;
+}
+
+.cke_browser_ie6 .cke_menubutton__preltpregtpre_format pre,
+.cke_browser_ie7 .cke_menubutton__preltpregtpre_format pre,
+.cke_browser_ie8 .cke_menubutton__preltpregtpre_format pre {
+	line-height: 13px;
+}
+
+.cke_menubutton_on {
+	background-color: #D3D3D3;
+	display: block;
+}
+
+.cke_hc .cke_menubutton_on {
+	border: 2px solid;
+	padding: 0;
+}
+
+.cke_menubutton_on .cke_menubutton_icon {
+	background-color: #D0D2D0;
 }
