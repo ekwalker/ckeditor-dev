@@ -170,25 +170,24 @@
 		}
 	};
 
-	function getSelectedImage(editor, element) {
-		if (!element) {
+	function getSelectedImage( editor, element ) {
+		if ( !element ) {
 			var sel = editor.getSelection();
-			element = (sel.getType() == CKEDITOR.SELECTION_ELEMENT) && sel.getSelectedElement();
+			element = sel.getSelectedElement();
 		}
 
-		if (element && element.is('img') && !element.data('cke-realelement') && !element.isReadOnly()) {
+		if ( element && element.is( 'img' ) && !element.data( 'cke-realelement' ) && !element.isReadOnly() )
 			return element;
-		}
-
-		return null;
 	}
 
-	function getImageAlignment(element) {
-		var align = element.getStyle('float');
+	function getImageAlignment( element ) {
+		var align = element.getStyle( 'float' );
 
-		if (align == 'inherit' || align == 'none') align = 0;
+		if ( align == 'inherit' || align == 'none' )
+			align = 0;
 
-		if (!align) align = element.getAttribute('align');
+		if ( !align )
+			align = element.getAttribute( 'align' );
 
 		return align;
 	}
