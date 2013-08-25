@@ -412,7 +412,8 @@
 				};
 
 				var initUploader = function() {
-					var body = editor.document.getBody();
+					var doc = editor.document,
+						body = doc.getBody();
 
 					// prevent bubbling event to window when files are not transfered
 					// to allow drag/drop operations available into editor
@@ -420,7 +421,16 @@
 					body.on('dragover', stopPropagation);
 					body.on('drop', stopPropagation);
 
-					up = Deki.Plugin.PageAttachFiles.InitUploader(editor.document.getWindow().$);
+					if ( CKEDITOR.env.ie )
+					{
+						// use document as drop element in IE
+						// @see EDT-496
+						up = Deki.Plugin.PageAttachFiles.InitUploader( doc.$ );
+					}
+					else
+					{
+						up = Deki.Plugin.PageAttachFiles.InitUploader( doc.getWindow().$ );
+					}
 
 					Deki.Plugin.Subscribe('PageAttachFiles.attach', onAttach);
 				};
