@@ -109,6 +109,9 @@ CKEDITOR.editorConfig = function( config ) {
 	config.scayt_autoStartup = true;
 	config.scayt_srcUrl = protocol + '//spellcheck.mindtouch.us/spellcheck/lf/scayt/scayt.js';
 	config.scayt_contextCommands = 'ignore|ignoreall';
+	config.scayt_maxSuggestions = 8;
+	config.scayt_moreSuggestions = 'off';
+	config.scayt_customerid = '1:wiN6M-YQYOz2-PTPoa2-3yaA92-PmWom-3CEx53-jHqwR3-NYK6b-XR5Uh1-M7YAp4';
 
 	config.resize_enabled = false;
 	

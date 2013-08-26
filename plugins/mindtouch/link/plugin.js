@@ -42,6 +42,11 @@
 		requiredContent: 'a[href]',
 		canUndo: false,
 		exec: function(editor) {
+			if (editor.config.mindtouch.pageId == 0) {
+				CKEDITOR.plugins.mindtouchsave.confirmSave(editor, pluginName);
+				return true;
+			}
+
 			this.editor = editor;
 
 			var selection = editor.getSelection(),
@@ -172,6 +177,11 @@
 
 	var quickLinkCmd = CKEDITOR.tools.clone(linkCmd);
 	quickLinkCmd.exec = function(editor) {
+		if (editor.config.mindtouch.pageId == 0) {
+			CKEDITOR.plugins.mindtouchsave.confirmSave(editor, 'quicklink');
+			return true;
+		}
+
 		this.editor = editor;
 
 		var params = this._.parseLink.apply(this, [null]);
@@ -247,7 +257,7 @@
 	var mindtouchLink = {
 		lang: 'en', // %REMOVE_LINE_CORE%
 		icons: 'mindtouchlink', // %REMOVE_LINE_CORE%
-		requires: 'link,mindtouch/dialog,mindtouch/elementbubble',
+		requires: 'link,mindtouch/dialog,mindtouch/elementbubble,mindtouch/save',
 		init: function(editor) {
 			editor.addCommand(pluginName, linkCmd);
 			editor.addCommand('quicklink', quickLinkCmd);

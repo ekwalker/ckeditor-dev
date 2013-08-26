@@ -31,6 +31,24 @@
  */
 
 (function() {
+	CKEDITOR.plugins.mindtouchsave = {
+		confirmSave : function(editor, callbackCommand) {
+			var onPageSaved = function() {
+				callbackCommand && editor.execCommand(callbackCommand);
+			};
+			
+			var removeDialogListeners = function(evt) {
+				evt.listenerData.removeListener('ok', onPageSaved);
+				evt.listenerData.removeListener('hide', removeDialogListeners);
+			};
+			
+			editor.openDialog('confirmsave', function( dialog ) {
+				dialog.on('ok', onPageSaved);
+				dialog.on('hide', removeDialogListeners, null, dialog);
+			});
+		}
+	};
+
 	function unmaximize(ev) {
 		var editor = ev.editor;
 
@@ -157,7 +175,7 @@
 							callbacks.success && callbacks.success.call(this);
 						} else {
 							var errorNode = CKEDITOR.dom.element.createFromHtml(data.body.errors, CKEDITOR.document);
-							errorNode.replace(CKEDITOR.document.getById('sessionMsg'));
+							errorNode.replace(CKEDITOR.dom.element.get($('.dekiFlash').get(0)));
 
 							errorNode.getWindow().$.scrollTo(0, errorNode.getDocumentPosition().y);
 
@@ -291,6 +309,7 @@
 						}
 
 						msgElement.setHtml(html);
+						dialog.layout();
 					},
 					contents: [{
 						id: 'info',

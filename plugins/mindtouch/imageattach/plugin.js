@@ -206,28 +206,12 @@
 		return result.success;
 	}
 
-	function confirmSave(editor, callbackCommand) {
-		var onPageSaved = function() {
-			callbackCommand && editor.execCommand(callbackCommand);
-		};
-
-		var removeDialogListeners = function(evt) {
-			evt.listenerData.removeListener('ok', onPageSaved);
-			evt.listenerData.removeListener('hide', removeDialogListeners);
-		};
-
-		editor.openDialog('confirmsave', function(dialog) {
-			dialog.on('ok', onPageSaved);
-			dialog.on('hide', removeDialogListeners, null, dialog);
-		});
-	}
-
 	var pasteImageCmd = {
 		canUndo: false,
 		execCounter: 0,
 		exec: function(editor) {
 			if (editor.config.mindtouch.pageId == 0) {
-				confirmSave(editor, 'pasteimage');
+				CKEDITOR.plugins.mindtouchsave.confirmSave(editor, 'pasteimage');
 				return true;
 			}
 
@@ -337,7 +321,7 @@
 							for (var i = 0; i < items.length; i++) {
 								if (items[i].type.indexOf('image') !== -1) {
 									if (editor.config.mindtouch.pageId == 0) {
-										confirmSave(editor);
+										CKEDITOR.plugins.mindtouchsave.confirmSave(editor);
 										return true;
 									}
 
@@ -412,7 +396,8 @@
 				};
 
 				var initUploader = function() {
-					var body = editor.document.getBody();
+					var doc = editor.document,
+						body = doc.getBody();
 
 					// prevent bubbling event to window when files are not transfered
 					// to allow drag/drop operations available into editor
@@ -420,7 +405,16 @@
 					body.on('dragover', stopPropagation);
 					body.on('drop', stopPropagation);
 
-					up = Deki.Plugin.PageAttachFiles.InitUploader(editor.document.getWindow().$);
+					if ( CKEDITOR.env.ie )
+					{
+						// use document as drop element in IE
+						// @see EDT-496
+						up = Deki.Plugin.PageAttachFiles.InitUploader( doc.$ );
+					}
+					else
+					{
+						up = Deki.Plugin.PageAttachFiles.InitUploader( doc.getWindow().$ );
+					}
 
 					Deki.Plugin.Subscribe('PageAttachFiles.attach', onAttach);
 				};
