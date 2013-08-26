@@ -206,28 +206,12 @@
 		return result.success;
 	}
 
-	function confirmSave(editor, callbackCommand) {
-		var onPageSaved = function() {
-			callbackCommand && editor.execCommand(callbackCommand);
-		};
-
-		var removeDialogListeners = function(evt) {
-			evt.listenerData.removeListener('ok', onPageSaved);
-			evt.listenerData.removeListener('hide', removeDialogListeners);
-		};
-
-		editor.openDialog('confirmsave', function(dialog) {
-			dialog.on('ok', onPageSaved);
-			dialog.on('hide', removeDialogListeners, null, dialog);
-		});
-	}
-
 	var pasteImageCmd = {
 		canUndo: false,
 		execCounter: 0,
 		exec: function(editor) {
 			if (editor.config.mindtouch.pageId == 0) {
-				confirmSave(editor, 'pasteimage');
+				CKEDITOR.plugins.mindtouchsave.confirmSave(editor, 'pasteimage');
 				return true;
 			}
 
@@ -337,7 +321,7 @@
 							for (var i = 0; i < items.length; i++) {
 								if (items[i].type.indexOf('image') !== -1) {
 									if (editor.config.mindtouch.pageId == 0) {
-										confirmSave(editor);
+										CKEDITOR.plugins.mindtouchsave.confirmSave(editor);
 										return true;
 									}
 

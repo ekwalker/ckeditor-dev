@@ -42,6 +42,11 @@
 		],
 		canUndo: false,
 		exec: function(editor) {
+			if (editor.config.mindtouch.pageId == 0) {
+				CKEDITOR.plugins.mindtouchsave.confirmSave(editor, pluginName);
+				return true;
+			}
+
 			this.editor = editor;
 
 			var imageElement = getSelectedImage(editor);
@@ -194,7 +199,7 @@
 
 	CKEDITOR.plugins.add(pluginName, {
 		icons: 'mindtouchimage', // %REMOVE_LINE_CORE%
-		requires: 'image,mindtouch/dialog',
+		requires: 'image,mindtouch/dialog,mindtouch/save',
 		init: function(editor) {
 			editor.addCommand(pluginName, imageCmd);
 
