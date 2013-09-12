@@ -61,8 +61,6 @@
 					return;
 				}
 
-				commentElement.data('cke-commentdelete', false);
-
 				var selection = editor.getSelection(),
 					startElement = selection && selection.getStartElement(),
 					comment = startElement && startElement.getAscendant('p', true),
@@ -90,11 +88,18 @@
 
 			CKEDITOR.document.getBody().append(commentDelete);
 
-			var hideDeleteButton = function() {
+			var showCommentIcon = function() {
 				if (commentElement) {
-					commentElement.data('cke-commentdelete', false);
-					commentElement = null;
+					commentElement.removeStyle('background-position');
+					// for ie
+					commentElement.removeStyle('background-position-x');
+					commentElement.removeStyle('background-position-y');
 				}
+			};
+
+			var hideDeleteButton = function() {
+				showCommentIcon();
+				commentElement = null;
 				commentDelete && commentDelete.hide();
 			};
 
@@ -104,17 +109,18 @@
 
 					if (comment && comment.hasClass('comment')) {
 						if (commentElement && !commentElement.equals(comment)) {
-							commentElement.data('cke-commentdelete', false);
+							showCommentIcon();
 						}
 
 						commentElement = comment;
-						commentElement.data('cke-commentdelete', 1);
 
 						var pos = commentElement.getDocumentPosition(CKEDITOR.document);
 						commentDelete.setStyles({
 							left: pos.x + 2 + 'px',
 							top: pos.y + 2 + 'px'
 						});
+
+						commentElement.setStyle('background-position', '0 -25px');
 						commentDelete.show();
 					} else {
 						hideDeleteButton();
@@ -141,17 +147,15 @@
 
 			editor.on('selectionChange', hideDeleteButton);
 
+			editor.on('beforeSetMode', function(evt) {
+				if (evt.data != 'wysiwyg') {
+					hideDeleteButton();
+				}
+			});
+
 			editor.on('destroy', function() {
 				commentDelete && commentDelete.remove();
 			});
-		},
-		onLoad: function() {
-			var css = [
-				'body.deki-content-edit p.comment[data-cke-commentdelete] {',
-				'	background-position: 0 -25px;',
-				'}'
-			];
-			CKEDITOR.addCss(css.join(''));
 		}
 	});
 })();
