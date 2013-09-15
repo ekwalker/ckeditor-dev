@@ -143,23 +143,19 @@
 
 				if (!this._.selectedElement) {
 					// Create element if current selection is collapsed.
-					var ranges = selection && selection.getRanges(true),
-						range = ranges && ranges.length == 1 && ranges[0];
+					var range = selection && selection.getRanges(1)[0];
 
 					if (range && range.collapsed) {
 						var textNode = new CKEDITOR.dom.text(text, editor.document);
 						range.insertNode(textNode);
 						range.selectNodeContents(textNode);
-						selection.selectRanges(ranges);
 					}
 
 					// Apply style.
-					var style = new CKEDITOR.style({
-						element: 'a',
-						attributes: attributes
-					});
+					var style = new CKEDITOR.style({element: 'a', attributes: attributes});
 					style.type = CKEDITOR.STYLE_INLINE; // need to override... dunno why.
-					style.apply(editor.document);
+					style.applyToRange(range);
+					range.select();
 				} else {
 					// We're only editing an existing link, so just overwrite the attributes.
 					var element = this._.selectedElement;
@@ -169,6 +165,9 @@
 
 					delete this._.selectedElement;
 				}
+
+				// workaround to get focus
+				CKEDITOR.env.webkit && editor.document.focus();
 
 				editor.fire('saveSnapshot');
 			}

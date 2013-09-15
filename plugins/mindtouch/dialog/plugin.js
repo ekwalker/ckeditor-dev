@@ -69,14 +69,18 @@ CKEDITOR.plugins.mindtouchdialog = {
 			'buttons': this.dialogParams.buttons,
 			'args': this.dialogParams.params,
 			'callback': function() {
-				editor.focus();
-
-				// Give a while before unlock, waiting for focus to return to the editable. (#172)
-				setTimeout( function() { editor.focusManager.unlock(); }, 0 );
-
 				if (arguments[0]) {
 					this.dialogParams.callback.apply(this.dialogParams.scope, arguments);
 				}
+
+				setTimeout(function() {
+					editor.focus();
+
+					// Give a while before unlock, waiting for focus to return to the editable. (#172)
+					setTimeout(function() {
+						editor.focusManager.unlock();
+					}, 0);
+				}, 0);
 			},
 			'forceCallback': true,
 			'scope': this
