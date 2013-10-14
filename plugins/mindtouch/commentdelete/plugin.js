@@ -31,130 +31,163 @@
  */
 
 (function() {
-	CKEDITOR.plugins.add('mindtouch/commentdelete', {
-		lang: 'en',
-		init: function(editor) {
-			var commentDelete = CKEDITOR.document.createElement('a', {
-				attributes: {
-					id: 'cke_comment_delete',
-					href: 'void("Delete comment")',
-					title: editor.lang['mindtouch/commentdelete'].title
+	var commentDelete = function(editor) {
+		var button;
+
+		function init() {
+			button = CKEDITOR.document.createElement('a', {
+				attributes : {
+					id : 'cke_comment_delete',
+					href : 'void("Delete comment")',
+					title : editor.lang['mindtouch/commentdelete'].title
 				},
-				styles: {
-					display: 'block',
-					position: 'absolute',
-					left: '0',
-					top: '0',
-					display: 'none',
-					width: '16px',
-					height: '16px',
-					background: 'transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIhSURBVDjLlZPrThNRFIWJicmJz6BWiYbIkYDEG0JbBiitDQgm0PuFXqSAtKXtpE2hNuoPTXwSnwtExd6w0pl2OtPlrphKLSXhx07OZM769qy19wwAGLhM1ddC184+d18QMzoq3lfsD3LZ7Y3XbE5DL6Atzuyilc5Ciyd7IHVfgNcDYTQ2tvDr5crn6uLSvX+Av2Lk36FFpSVENDe3OxDZu8apO5rROJDLo30+Nlvj5RnTlVNAKs1aCVFr7b4BPn6Cls21AWgEQlz2+Dl1h7IdA+i97A/geP65WhbmrnZZ0GIJpr6OqZqYAd5/gJpKox4Mg7pD2YoC2b0/54rJQuJZdm6Izcgma4TW1WZ0h+y8BfbyJMwBmSxkjw+VObNanp5h/adwGhaTXF4NWbLj9gEONyCmUZmd10pGgf1/vwcgOT3tUQE0DdicwIod2EmSbwsKE1P8QoDkcHPJ5YESjgBJkYQpIEZ2KEB51Y6y3ojvY+P8XEDN7uKS0w0ltA7QGCWHCxSWWpwyaCeLy0BkA7UXyyg8fIzDoWHeBaDN4tQdSvAVdU1Aok+nsNTipIEVnkywo/FHatVkBoIhnFisOBoZxcGtQd4B0GYJNZsDSiAEadUBCkstPtN3Avs2Msa+Dt9XfxoFSNYF/Bh9gP0bOqHLAm2WUF1YQskwrVFYPWkf3h1iXwbvqGfFPSGW9Eah8HSS9fuZDnS32f71m8KFY7xs/QZyu6TH2+2+FAAAAABJRU5ErkJggg==) scroll no-repeat 0 0'
+				styles : {
+					display : 'block',
+					position : 'absolute',
+					left : '1px',
+					top : '1px',
+					display : 'none',
+					width : '16px',
+					height : '16px',
+					background : 'transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAIhSURBVDjLlZPrThNRFIWJicmJz6BWiYbIkYDEG0JbBiitDQgm0PuFXqSAtKXtpE2hNuoPTXwSnwtExd6w0pl2OtPlrphKLSXhx07OZM769qy19wwAGLhM1ddC184+d18QMzoq3lfsD3LZ7Y3XbE5DL6Atzuyilc5Ciyd7IHVfgNcDYTQ2tvDr5crn6uLSvX+Av2Lk36FFpSVENDe3OxDZu8apO5rROJDLo30+Nlvj5RnTlVNAKs1aCVFr7b4BPn6Cls21AWgEQlz2+Dl1h7IdA+i97A/geP65WhbmrnZZ0GIJpr6OqZqYAd5/gJpKox4Mg7pD2YoC2b0/54rJQuJZdm6Izcgma4TW1WZ0h+y8BfbyJMwBmSxkjw+VObNanp5h/adwGhaTXF4NWbLj9gEONyCmUZmd10pGgf1/vwcgOT3tUQE0DdicwIod2EmSbwsKE1P8QoDkcHPJ5YESjgBJkYQpIEZ2KEB51Y6y3ojvY+P8XEDN7uKS0w0ltA7QGCWHCxSWWpwyaCeLy0BkA7UXyyg8fIzDoWHeBaDN4tQdSvAVdU1Aok+nsNTipIEVnkywo/FHatVkBoIhnFisOBoZxcGtQd4B0GYJNZsDSiAEadUBCkstPtN3Avs2Msa+Dt9XfxoFSNYF/Bh9gP0bOqHLAm2WUF1YQskwrVFYPWkf3h1iXwbvqGfFPSGW9Eah8HSS9fuZDnS32f71m8KFY7xs/QZyu6TH2+2+FAAAAABJRU5ErkJggg==) scroll no-repeat 0 0'
 				}
 			});
 
-			var commentElement;
-			commentDelete.on('click', function(ev) {
+			button.on('click', function(ev) {
 				ev.data.getTarget().hide();
 				ev.data.preventDefault(true);
 
-				if (!commentElement) {
-					return;
+				if (button) {
+					var comment = button.getCustomData('comment');
+					if (comment) {
+						this.detach();
+						removeComment(comment);
+					}
 				}
+			}, this);
 
-				var selection = editor.getSelection(),
-					startElement = selection && selection.getStartElement(),
-					comment = startElement && startElement.getAscendant('p', true),
-					range;
-
-				if (comment && comment.equals(commentElement)) {
-					range = new CKEDITOR.dom.range(editor.document);
-					range.moveToPosition(commentElement, CKEDITOR.POSITION_BEFORE_START);
-				}
-
-				editor.fire('saveSnapshot');
-
-				commentElement.remove();
-				commentElement = null;
-
-				range && range.select();
-				editor.focus();
-
-				editor.fire('saveSnapshot');
-			});
-
-			commentDelete.on('dragstart', function(ev) {
+			button.on('dragstart', function(ev) {
 				ev.data.preventDefault(true);
 			});
 
-			CKEDITOR.document.getBody().append(commentDelete);
+			CKEDITOR.document.getBody().append(button);
 
-			var showCommentIcon = function() {
-				if (commentElement) {
-					commentElement.removeStyle('background-position');
-					// for ie
-					commentElement.removeStyle('background-position-x');
-					commentElement.removeStyle('background-position-y');
+			editor.on('destroy', function() {
+				button && button.remove();
+			});
+		}
+
+		function removeComment(comment) {
+			editor.focus();
+			editor.fire('saveSnapshot');
+
+			var selection = editor.getSelection(),
+				startElement = selection && selection.getStartElement(),
+				currentElement = startElement && startElement.getAscendant('p', true),
+				range = selection.getRanges( 1 )[0];
+
+			if (currentElement && currentElement.equals(comment)) {
+				var moveToElement = comment.getNext() || comment.getPrevious();
+
+				if (moveToElement) {
+					range.moveToElementEditStart(moveToElement);
+				} else {
+					range.moveToPosition(comment, CKEDITOR.POSITION_BEFORE_START);
 				}
-			};
+			}
 
-			var hideDeleteButton = function() {
-				showCommentIcon();
-				commentElement = null;
-				commentDelete && commentDelete.hide();
-			};
+			comment.remove();
 
-			var checkMouseTimer,
-				checkMouse = function( target ) {
+			range.select();
+			editor.fire('saveSnapshot');
+		}
+
+		this.attachTo = function(comment) {
+			if (!button) {
+				init.call(this);
+			}
+
+			var prevComment = button.getCustomData('comment');
+			if (prevComment) {
+				if (prevComment.equals(comment)) {
+					return;
+				} else {
+					this.detach();
+				}
+			}
+
+			var pos = comment.getDocumentPosition(CKEDITOR.document);
+			button.setStyles({
+				left : pos.x + 2 + 'px',
+				top : pos.y + 2 + 'px'
+			});
+
+			editor.fire('updateSnapshot');
+
+			comment.addClass('cke_comment_hover');
+
+			button.setCustomData('comment', comment);
+			button.show();
+		};
+
+		this.detach = function() {
+			var comment;
+
+			if (button) {
+				comment = button.getCustomData('comment');
+				button.hide();
+			}
+
+			if (comment) {
+				comment.removeClass('cke_comment_hover');
+				button.removeCustomData('comment');
+
+				editor.fire('updateSnapshot');
+			}
+		};
+	};
+
+	CKEDITOR.plugins.add('mindtouch/commentdelete', {
+		lang : 'en',
+		init : function(editor) {
+			var commentDeleteButton = new commentDelete(editor),
+				checkMouseTimer,
+				checkMouse = function(target) {
 					var comment = target && target.getAscendant('p', true);
 
 					if (comment && comment.hasClass('comment')) {
-						if (commentElement && !commentElement.equals(comment)) {
-							showCommentIcon();
-						}
-
-						commentElement = comment;
-
-						var pos = commentElement.getDocumentPosition(CKEDITOR.document);
-						commentDelete.setStyles({
-							left: pos.x + 2 + 'px',
-							top: pos.y + 2 + 'px'
-						});
-
-						commentElement.setStyle('background-position', '0 -25px');
-						commentDelete.show();
+						commentDeleteButton.attachTo(comment);
 					} else {
-						hideDeleteButton();
+						commentDeleteButton.detach();
 					}
 
-					window.clearTimeout( checkMouseTimer );
+					window.clearTimeout(checkMouseTimer);
 					checkMouseTimer = null;
 				};
 
 			editor.on('contentDom', function() {
+				editor.document.appendStyleText('.cke_comment_hover { background-position: 0 -25px !important; }');
+
 				var editable = editor.editable();
-				editable.attachListener( editable.isInline() ? editable : editor.document, 'mousemove', function(ev) {			
-					if ( editor.readOnly || checkMouseTimer ) {
+				editable.attachListener(editable.isInline() ? editable : editor.document, 'mousemove', function(ev) {
+					if (editor.readOnly || checkMouseTimer) {
 						return;
 					}
 
 					var target = ev.data.getTarget();
 
-					checkMouseTimer = setTimeout( function() {
-						checkMouse( target );
-					}, 30 );
+					checkMouseTimer = setTimeout(function() {
+						checkMouse(target);
+					}, 30);
 				});
 			});
 
-			editor.on('selectionChange', hideDeleteButton);
-
-			editor.on('beforeSetMode', function(evt) {
-				if (evt.data != 'wysiwyg') {
-					hideDeleteButton();
-				}
+			editor.on('beforeCommandExec', function() {
+				commentDeleteButton.detach();
 			});
 
-			editor.on('destroy', function() {
-				commentDelete && commentDelete.remove();
+			editor.on('key', function() {
+				commentDeleteButton.detach();
 			});
 		}
 	});
