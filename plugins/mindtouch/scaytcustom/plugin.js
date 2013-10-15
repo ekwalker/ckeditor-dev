@@ -42,6 +42,9 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 						return nextNode;
 					};
 				});
+
+				window.scayt.minTime = 500;
+				window.scayt.time = 500;
 			}
 		}, editor, null, 1);
 	}
