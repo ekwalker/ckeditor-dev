@@ -175,7 +175,7 @@
 					if ( lastValue !== newValue )
 					{
 						lastValue = newValue;
-						onInput();
+						self.onInput();
 					}
 				};
 
