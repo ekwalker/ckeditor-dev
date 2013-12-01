@@ -290,7 +290,8 @@
 
 		afterInit: function(editor) {
 			var dataProcessor = editor.dataProcessor,
-				dataFilter = dataProcessor && dataProcessor.dataFilter;
+				dataFilter = dataProcessor && dataProcessor.dataFilter,
+				htmlFilter = dataProcessor && dataProcessor.htmlFilter;
 
 			if (dataFilter && (!CKEDITOR.env.ie || (CKEDITOR.env.ie && CKEDITOR.env.version > 7))) {
 				dataFilter.addRules({
@@ -315,6 +316,43 @@
 							};
 
 							replaceLineBreaks(pre);
+						}
+					}
+				});
+			}
+
+			if (htmlFilter && editor.config.allowedContent === true) {
+				htmlFilter && htmlFilter.addRules({
+					elements: {
+						/**
+						 * remove all node elements inside of special pre elements
+						 * @see EDT-523
+						 */
+						pre: function(element) {
+							// get an array of text nodes + br nodes of element
+							var getText = function(element) {
+								var text = [];
+
+								for (var i = 0; i < element.children.length; i++) {
+									var child = element.children[i];
+
+									if (child.type == CKEDITOR.NODE_ELEMENT && child.name != 'br') {
+										text = text.concat(getText(child));
+									} else {
+										text.push(child);
+									}
+								}
+
+								return text;
+							};
+
+							if (element.attributes['class'] && /(^|\s+)script(-|\s+|$)/.test(element.attributes['class'])) {
+								var text = getText(element);
+								element.children.splice(0, element.children.length);
+								for (var i = 0; i < text.length; i++) {
+									element.add(text[i]);
+								}
+							}
 						}
 					}
 				});
