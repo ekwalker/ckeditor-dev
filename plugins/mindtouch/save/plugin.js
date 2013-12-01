@@ -295,6 +295,13 @@
 
 			editor.setKeystroke(CKEDITOR.CTRL + 83 /*S*/, 'mindtouchsave');
 
+			// enable save command in source mode
+			// @see EDT-571
+			var saveCommand = editor.getCommand('save');
+			if (saveCommand) {
+				saveCommand.modes.source = saveCommand.modes.wysiwyg;
+			}
+
 			editor.on('saveFailed', function() {
 				if (!Deki || !Deki.Ui) {
 					return;
