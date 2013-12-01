@@ -30,7 +30,50 @@
  * @file Save plugin.
  */
 
-(function() {
+(function(global) {
+	// window.saveAs
+	// Shims the saveAs method, using saveBlob in IE10. 
+	// And for when Chrome and FireFox get round to implementing saveAs we have their vendor prefixes ready. 
+	// But otherwise this creates a object URL resource and opens it on an anchor tag which contains the "download" attribute (Chrome)
+	// ... or opens it in a new tab (FireFox)
+	// @author Andrew Dodson
+	// @copyright MIT, BSD. Free to clone, modify and distribute for commercial and personal use.
+
+	window.saveAs || (window.saveAs = (window.navigator.msSaveBlob ? function(b, n) { return window.navigator.msSaveBlob(b, n); } : false) || window.webkitSaveAs || window.mozSaveAs || window.msSaveAs || (function() {
+
+		// URL's
+		window.URL || (window.URL = window.webkitURL);
+
+		if (!window.URL) {
+			return false;
+		}
+
+		return function(blob, name) {
+			var url = URL.createObjectURL(blob);
+
+			// Test for download link support
+			if ("download" in document.createElement('a')) {
+				var a = document.createElement('a');
+				a.setAttribute('href', url);
+				a.setAttribute('download', name);
+
+				// Create Click event
+				var clickEvent = document.createEvent("MouseEvent");
+				clickEvent.initMouseEvent("click", true, true, window, 0,
+					clickEvent.screenX, clickEvent.screenY, clickEvent.clientX, clickEvent.clientY,
+					clickEvent.ctrlKey, clickEvent.altKey, clickEvent.shiftKey, clickEvent.metaKey,
+					0, null);
+
+				// dispatch click event to simulate download
+				a.dispatchEvent(clickEvent);
+
+			} else {
+				// fallover, open resource in new tab.
+				window.open(url, '_blank', '');
+			}
+		};
+	})());
+
 	CKEDITOR.plugins.mindtouchsave = {
 		confirmSave : function(editor, callbackCommand) {
 			var onPageSaved = function() {
@@ -73,6 +116,8 @@
 					success: this.save,
 					error: function() {
 						editor.unlock && editor.unlock();
+						editor.fire( 'saveFailed' );
+						return true;
 					}
 				};
 				Deki.Plugin.Editor.checkPermissions(callbacks, this);
@@ -184,7 +229,7 @@
 					}
 				},
 				error: function() {
-					Deki.Ui.Message(wfMsg('error'), wfMsg('internal-error'));
+					Deki.Ui.Flash(global.wfMsg('internal-error'));
 				},
 				complete: function() {
 					callbacks.complete && callbacks.complete.call(this);
@@ -249,6 +294,54 @@
 			});
 
 			editor.setKeystroke(CKEDITOR.CTRL + 83 /*S*/, 'mindtouchsave');
+
+			editor.on('saveFailed', function() {
+				if (!Deki || !Deki.Ui) {
+					return;
+				}
+
+				try {
+					var isBlobSupported = !!new Blob();
+				} catch (e) {}
+
+				var message;
+
+				if (isBlobSupported) {
+					var download = CKEDITOR.tools.addFunction(function() {
+						var data = editor.getData(),
+							blob = new Blob([data], { type: "text/html;charset=utf-8" }),
+							pageName = Deki.PageName || editor.config.mindtouch.pageTitle,
+							fileName = pageName.replace(/[^A-Za-z0-9]/ig, '_') + '.html';
+
+						window.saveAs(blob, fileName);
+						return false;
+					});
+
+					message = '<a href="javascript:void(\'Download\');" onclick="return CKEDITOR.tools.callFunction(\'' + download + '\');">' + editor.lang['mindtouch/save'].saveToFileLink + '</a>';
+				} else {
+					var message = editor.lang['mindtouch/save'].saveToFileHint,
+						copyShortcut = (CKEDITOR.env.mac ? '&#8984;' : 'CTRL') + '+C',
+						hintFn = CKEDITOR.tools.addFunction(function() {
+							if (editor.mode != 'source') {
+								editor.on('mode', function(ev) {
+									ev.removeListener();
+									editor.execCommand('selectAll');
+								});
+								editor.execCommand('source');
+							} else {
+								editor.execCommand('selectAll');
+							}
+
+							return false;
+						});
+
+					message = message.replace('%1', 'javascript:void(\'Switch to source mode and select all\');')
+						.replace('%2', 'onclick="return CKEDITOR.tools.callFunction(\'' + hintFn + '\');"')
+						.replace('%3', copyShortcut);
+				}
+
+				Deki.Ui.Flash(message);
+			}, null, null, 1000);
 
 			CKEDITOR.dialog.add('confirmcancel', function(editor) {
 				return {
@@ -398,4 +491,4 @@
 			CKEDITOR.document.appendStyleText('.cke .cke_button__mindtouchsave .cke_button_label, .cke .cke_button__mindtouchcancel .cke_button_label { display: inline; line-height: 16px; }');
 		}
 	});
-})();
+})(window);

@@ -242,9 +242,19 @@
 					days = hours / 24,
 					years = days / 365;
 
-				var label = seconds < 45 && lang.timeago.seconds || seconds < 90 && lang.timeago.minute || minutes < 45 && lang.timeago.minutes.replace('%1', Math.round(minutes)) || minutes < 90 && lang.timeago.hour || hours < 24 && lang.timeago.hours.replace('%1', Math.round(hours)) || hours < 48 && lang.timeago.day || days < 30 && lang.timeago.days.replace('%1', Math.floor(days)) || days < 60 && lang.timeago.month || days < 365 && lang.timeago.months.replace('%1', Math.floor(days / 30)) || years < 2 && lang.timeago.year || lang.timeago.years.replace('%1', Math.floor(years));
+				var label = seconds < 45 && lang.timeago.seconds ||
+					seconds < 90 && lang.timeago.minute ||
+					minutes < 45 && lang.timeago.minutes.replace('%1', Math.round(minutes)) ||
+					minutes < 90 && lang.timeago.hour ||
+					hours < 24 && lang.timeago.hours.replace('%1', Math.round(hours)) ||
+					hours < 48 && lang.timeago.day ||
+					days < 30 && lang.timeago.days.replace('%1', Math.floor(days)) ||
+					days < 60 && lang.timeago.month ||
+					days < 365 && lang.timeago.months.replace('%1', Math.floor(days / 30)) ||
+					years < 2 && lang.timeago.year ||
+					lang.timeago.years.replace('%1', Math.floor(years));
 
-				label = ' (' + label + ' ' + lang.timeago.suffixAgo + ')';
+				label += ' ' + lang.timeago.suffixAgo;
 
 				return label;
 			};
@@ -255,11 +265,12 @@
 
 				updateLabelInterval && window.clearInterval(updateLabelInterval);
 				updateLabelInterval = window.setInterval(function() {
-					editor.ui.infobar.updateLabel('autosave', 'timeAgo', lang.localSave + timeAgo());
+					editor.ui.infobar.updateLabel('autosave', 'timeAgo', lang.localSave + ' (' + timeAgo() + ')');
 				}, 15000);
 			};
 
 			var startAutosave = function() {
+				autosave();
 				autosaveInterval = window.setInterval(autosave, editor.config.autosave_interval * 1000);
 				editor.on('saveSnapshot', autosave, null, null, 100);
 			};
@@ -312,7 +323,7 @@
 						editor.editable().removeListener('click', continueFn);
 						CKEDITOR.document.removeListener('keydown', onEsc);
 						infoPanel.hide();
-						updateTimeAgo(lang.localSave + timeAgo());
+						updateTimeAgo(lang.localSave + ' (' + timeAgo() + ')');
 						editor.focus();
 						return false;
 					};
@@ -431,6 +442,13 @@
 				draft.remove();
 				draft.setKey(editor.config.mindtouch.pageId);
 				draft.save();
+			});
+
+			editor.on('saveFailed', function() {
+				if (Deki && Deki.Ui && draft.getTimestamp()) {
+					var message = lang.contentsAutosaved.replace('%1', timeAgo());
+					Deki.Ui.Flash(message);
+				}
 			});
 		},
 

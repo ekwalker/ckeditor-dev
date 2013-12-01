@@ -15,5 +15,8 @@ CKEDITOR.plugins.setLang('mindtouch/save', 'en', {
 		'saveFailed': 'An error occurred while saving the page. Please check page title and try again.',
 		'saving': 'Saving...',
 		'changeTitle': 'This page needs a different title than %1. Please make the correction and try again.'
-	}
+	},
+
+	'saveToFileLink' : 'Save the page content to a file',
+	'saveToFileHint' : 'To copy the page contents <a href="%1" %2>switch editor to the source mode, select all contents</a> and press %3'
 });
