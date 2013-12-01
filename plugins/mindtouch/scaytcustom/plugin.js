@@ -43,9 +43,73 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 					};
 				});
 
+				// @see EDT-521
+				window.scayt.prototype._setContent = CKEDITOR.tools.override(window.scayt.prototype._setContent, function(originalFn) {
+					return function(func) {
+						var focused = null;
+
+						// if user highlighting text, set focused to false
+						// to prevent inserting of bookmarks by scayt
+						if (this._selectionStart) {
+							focused = this._focused;
+							this._focused = false;
+						}
+
+						originalFn.call(this, func);
+
+						// restore the previous value
+						if (focused !== null) {
+							this._focused = focused;
+						}
+					};
+				});
+
 				window.scayt.minTime = 500;
 				window.scayt.time = 500;
 			}
 		}, editor, null, 1);
+
+		editor.on('contentDom', function() {
+			var isKeyboardSelection = function(ev) {
+				if (ev.name in { keydown: 1, keyup: 1 }) {
+					switch (ev.data.getKeystroke()) {
+						case CKEDITOR.SHIFT + 33: /* PAGE UP */
+						case CKEDITOR.SHIFT + 34: /* PAGE DOWN */
+						case CKEDITOR.SHIFT + 35: /* END */
+						case CKEDITOR.SHIFT + 36: /* HOME */
+						case CKEDITOR.SHIFT + 37: /* LEFT */
+						case CKEDITOR.SHIFT + 38: /* UP */
+						case CKEDITOR.SHIFT + 39: /* RIGHT */
+						case CKEDITOR.SHIFT + 40: /* DOWN */
+							return true;
+							break;
+						default:
+							break;
+					}
+				}
+
+				return false;
+			};
+
+			// set the flag when user highlighting text
+			var onSelectionStart = function(ev) {
+				var scayt = CKEDITOR.plugins.scayt.getScayt(editor);
+				if (scayt && (isKeyboardSelection(ev) || ev.name == 'mousedown')) {
+					scayt._selectionStart = true;
+				}
+			};
+
+			var onSelectionEnd = function(ev) {
+				var scayt = CKEDITOR.plugins.scayt.getScayt(editor);
+				if (scayt) {
+					scayt._selectionStart = false;
+				}
+			};
+
+			editor.document.on('mousedown', onSelectionStart);
+			editor.document.on('keydown', onSelectionStart);
+			editor.document.on('mouseup', onSelectionEnd);
+			editor.document.on('keyup', onSelectionEnd);
+		});
 	}
 });
