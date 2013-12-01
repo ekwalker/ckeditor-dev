@@ -43,13 +43,14 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 					};
 				});
 
-				// @see EDT-521
 				window.scayt.prototype._setContent = CKEDITOR.tools.override(window.scayt.prototype._setContent, function(originalFn) {
 					return function(func) {
-						var focused = null;
+						var focused = null,
+							isDirty = editor.checkDirty();
 
-						// if user highlighting text, set focused to false
+						// if user is highlighting text, set "focused" to false
 						// to prevent inserting of bookmarks by scayt
+						// @see EDT-521
 						if (this._selectionStart) {
 							focused = this._focused;
 							this._focused = false;
@@ -60,6 +61,12 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 						// restore the previous value
 						if (focused !== null) {
 							this._focused = focused;
+						}
+
+						// if editor was not dirty reset the dirty state
+						// @see EDT-546
+						if (!isDirty && editor.checkDirty()) {
+							editor.resetDirty();
 						}
 					};
 				});
