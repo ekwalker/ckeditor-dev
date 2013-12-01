@@ -267,6 +267,23 @@ CKEDITOR.editor.prototype.unlock = function() {
 			editor.on( 'mode', function() {
 				editor.focus();
 			});
+
+			var htmlFilter = editor.dataProcessor && editor.dataProcessor.htmlFilter;
+			htmlFilter && htmlFilter.addRules({
+				/**
+				* add custom class to page break element
+				* @see EDT-529
+				*/
+				attributes : {
+					'class' : function( value, element ) {
+						if ( value.indexOf( 'cke_pagebreak' ) > -1 ) {
+							value += ' mt-clear';
+						}
+
+						return value;
+					}
+				}
+			}, 1);
 		}
 	});
 })();
