@@ -64,8 +64,12 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 					};
 				});
 
+				// @see EDT-527
 				window.scayt.minTime = 500;
 				window.scayt.time = 500;
+
+				// @see EDT-544
+				window.scayt.prototype.nextBlockInterval = 0;
 			}
 		}, editor, null, 1);
 
