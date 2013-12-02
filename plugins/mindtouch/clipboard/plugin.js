@@ -50,7 +50,11 @@
 			editor.on( 'paste', function( evt ) {
 				var sel = editor.getSelection();
 				if ( sel && sel.getStartElement().hasAscendant( 'pre', true ) ) {
-					evt.data.dataValue = evt.data.dataValue.replace( /\n/g, '<br>' );
+					// @see EDT-567
+					evt.data.dataValue = evt.data.dataValue.replace( /<p><br><\/p>/g, '<p></p>' )
+						.replace( /<\/p><p>/g, '<br>' )
+						.replace( /<\/?p>/g, '' )
+						.replace( /\n/g, '<br>' );
 				}
 			});
 
