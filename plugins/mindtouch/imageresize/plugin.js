@@ -112,7 +112,7 @@
 		function onMouseDown(evt) {
 			cancel(evt);
 			resizeStart(evt.sender);
-			doc.on('mouseup', onMouseUp, this);
+			doc.getWindow().on('mouseup', onMouseUp, this);
 			CKEDITOR.document.on('mouseup', onMouseUp, this);
 		}
 
@@ -128,7 +128,9 @@
 				infoStyles = {},
 				left, top;
 
-			if (!currentCorner || !isResizing) return 0;
+			if (!currentCorner || !isResizing) {
+				return 0;
+			}
 
 			// tooltip position
 			infoStyles.left = x + 10;
@@ -431,10 +433,14 @@
 					resizer = new imageResizer(editor);
 				}
 
-				// in some cases we need to wait while image will be loaded
-				timeout = window.setTimeout(function() {
+				if (element.$.width === 0 && element.$.height === 0) {
+					element.on('load', function(evt) {
+						evt.removeListener();
+						resizer.attachTo(element);
+					});
+				} else {
 					resizer.attachTo(element);
-				}, 0);
+				}
 			}, null, null, 1);
 
 			var onCommandExec = function() {
