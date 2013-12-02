@@ -116,7 +116,7 @@
 					success: this.save,
 					error: function() {
 						editor.unlock && editor.unlock();
-						editor.fire( 'saveFailed' );
+						editor.fire('saveFailed');
 						return true;
 					}
 				};
@@ -301,6 +301,30 @@
 			if (saveCommand) {
 				saveCommand.modes.source = saveCommand.modes.wysiwyg;
 			}
+
+			// @see EDT-577
+			var element = editor.element;
+			if (editor.elementMode == CKEDITOR.ELEMENT_MODE_REPLACE && element.is('textarea')) {
+				var form = element.$.form && new CKEDITOR.dom.element(element.$.form);
+				if (form) {
+					// exec save command instead of submitting of form
+					function onSubmit(evt) {
+						editor.execCommand('mindtouchsave');
+						evt.data.preventDefault(true);
+					}
+					form.on('submit', onSubmit, null, null, 1);
+
+					// remove listener - save command will submit the form
+					editor.on('save', function() {
+						form.removeListener('submit', onSubmit);
+					});
+
+					editor.on('destroy', function() {
+						form.removeListener('submit', onSubmit);
+					});
+				}
+			}
+
 
 			editor.on('saveFailed', function() {
 				if (!Deki || !Deki.Ui) {
