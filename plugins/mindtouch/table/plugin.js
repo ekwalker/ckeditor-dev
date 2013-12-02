@@ -282,6 +282,17 @@
 				}
 			});
 
+			// @see EDT-554
+			editor.addRemoveFormatFilter && editor.addRemoveFormatFilter( function( element ) {
+				if ( element.is( 'table' ) && editor._.removeAttributes && CKEDITOR.tools.indexOf( editor._.removeAttributes, 'style' ) > -1 ) {
+					// set the default table style
+					element.setAttribute( 'style', 'width: 100%; table-layout: fixed;' );
+					return false;
+				}
+
+				return true;
+			});
+
 			editor.ui.add('TableOneClick', CKEDITOR.UI_PANELBUTTON, {
 				label: lang.toolbar,
 				title: lang.toolbar,
