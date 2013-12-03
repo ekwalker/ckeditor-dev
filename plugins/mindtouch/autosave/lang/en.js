@@ -6,6 +6,7 @@ CKEDITOR.plugins.setLang('mindtouch/autosave', 'en', {
 	'editVersion': 'Edit version %1',
 	'localSave': 'Local save',
 	'or': 'or',
+	'contentsAutosaved' : 'The page contents were autosaved to the browser\'s local storage %1',
 	'timeago': {
 		'day': 'a day',
 		'days': '%1 days',
