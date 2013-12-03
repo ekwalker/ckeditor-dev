@@ -586,8 +586,10 @@
 							type : 'text',
 							label : videoLang.videoUrl,
 							hidden : true,
-							required : true,
-							validate : CKEDITOR.dialog.validate.notEmpty( videoLang.noUrl ),
+							onChange : function()
+							{
+								this.getDialog().getButton( 'ok' )[ this.getValue().length ? 'enable' : 'disable' ]();
+							},
 							setup : function( videoNode )
 							{
 								this.setValue( videoNode.getAttribute( 'media' ) );

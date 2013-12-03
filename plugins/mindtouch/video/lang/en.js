@@ -8,7 +8,6 @@ CKEDITOR.plugins.setLang('mindtouch/video', 'en', {
 	'loading': 'Loading...',
 	'helpLink': 'Learn more about embedding videos',
 	'notFound': 'No videos found',
-	'noUrl': 'Video source URL is missing',
 	'searchFailed': 'Search failed',
 	'selectVideo': 'Select a video:',
 	'video': 'Video',
