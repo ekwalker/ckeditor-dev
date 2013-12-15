@@ -60,7 +60,10 @@ CKEDITOR.STYLE_INLINE = 2;
 CKEDITOR.STYLE_OBJECT = 3;
 
 (function() {
-	var blockElements = { address:1,div:1,h1:1,h2:1,h3:1,h4:1,h5:1,h6:1,p:1,pre:1,section:1,header:1,footer:1,nav:1,article:1,aside:1,figure:1,dialog:1,hgroup:1,time:1,meter:1,menu:1,command:1,keygen:1,output:1,progress:1,details:1,datagrid:1,datalist:1 },
+	// add blockquote to blockElements
+	// @author MindTouch
+	// var blockElements = { address:1,div:1,h1:1,h2:1,h3:1,h4:1,h5:1,h6:1,p:1,pre:1,section:1,header:1,footer:1,nav:1,article:1,aside:1,figure:1,dialog:1,hgroup:1,time:1,meter:1,menu:1,command:1,keygen:1,output:1,progress:1,details:1,datagrid:1,datalist:1 },
+	var blockElements = { address:1,div:1,h1:1,h2:1,h3:1,h4:1,h5:1,h6:1,p:1,pre:1,section:1,header:1,footer:1,nav:1,article:1,aside:1,figure:1,dialog:1,hgroup:1,time:1,meter:1,menu:1,command:1,keygen:1,output:1,progress:1,details:1,datagrid:1,datalist:1,blockquote:1 },
 		objectElements = { a:1,embed:1,hr:1,img:1,li:1,object:1,ol:1,table:1,td:1,tr:1,th:1,ul:1,dl:1,dt:1,dd:1,form:1,audio:1,video:1 };
 
 	var semicolonFixRegex = /\s*(?:;\s*|$)/,
@@ -891,7 +894,11 @@ CKEDITOR.STYLE_OBJECT = 3;
 		{
 			if ( !block.isReadOnly() ) {
 				var newBlock = getElement( this, doc, block );
-				replaceBlock( block, newBlock );
+				// merge pre blocks only if range is not collapsed
+				// @see EDT-77
+				// @author MindTouch
+				replaceBlock( block, newBlock, !range.collapsed );
+				// replaceBlock( block, newBlock );
 			}
 		}
 
@@ -928,7 +935,7 @@ CKEDITOR.STYLE_OBJECT = 3;
 	// Replace the original block with new one, with special treatment
 	// for <pre> blocks to make sure content format is well preserved, and merging/splitting adjacent
 	// when necessary. (#3188)
-	function replaceBlock( block, newBlock ) {
+	function replaceBlock( block, newBlock, allowMergePre ) {
 		// Block is to be removed, create a temp element to
 		// save contents.
 		var removeBlock = !newBlock;
@@ -953,14 +960,12 @@ CKEDITOR.STYLE_OBJECT = 3;
 
 		newBlock.replace( block );
 
-		/**
-		 * Don't merge pre blocks
-		 * @author MindTouch
-		 */
-		// if ( newBlockIsPre ) {
-		// 	// Merge previous <pre> blocks.
-		// 	mergePre( newBlock );
-		// } else if ( removeBlock )
+		if ( newBlockIsPre ) {
+			// Merge previous <pre> blocks.
+			// Merge only not collapsed range
+			// @author MindTouch
+			allowMergePre && mergePre( newBlock );
+		} else if ( removeBlock )
 		if ( removeBlock )
 			removeNoAttribsElement( newBlock );
 	}
@@ -978,12 +983,32 @@ CKEDITOR.STYLE_OBJECT = 3;
 		// a '\n' at the beginning, and previousBlock might contain a '\n'
 		// towards the end. These new lines are not normally displayed but they
 		// become visible after merging.
-		var mergedHtml = replace( previousBlock.getHtml(), /\n$/, '' ) + '\n\n' +
+		// Use <br> instead of \n
+		// @see EDT-289
+		// @author MindTouch
+		var lineBreak = ( CKEDITOR.env.ie && CKEDITOR.env.version < 8 ) ? '\n' : '<br>';
+		var mergedHtml = replace( previousBlock.getHtml(), /\n$/, '' ) + lineBreak +
 			replace( preBlock.getHtml(), /^\n/, '' );
+		// var mergedHtml = replace( previousBlock.getHtml(), /\n$/, '' ) + '\n\n' +
+		// 	replace( preBlock.getHtml(), /^\n/, '' );
 
 		// Krugle: IE normalizes innerHTML from <pre>, breaking whitespaces.
-		if ( CKEDITOR.env.ie )
-			preBlock.$.outerHTML = '<pre>' + mergedHtml + '</pre>';
+		if ( CKEDITOR.env.ie ) {
+			// Save attributes
+			// @author MindTouch
+			// preBlock.$.outerHTML = '<pre>' + mergedHtml + '</pre>';
+			var temp = preBlock.getDocument().createElement( 'div' ),
+				preBlockId = preBlock.getAttribute( 'id' ),
+				tempId = CKEDITOR.tools.getNextId();
+			preBlock.copyAttributes( temp );
+			preBlock.$.outerHTML = '<pre id="' + tempId + '">' + mergedHtml + '</pre>';
+			preBlock = preBlock.getDocument().getById( tempId );
+			temp.copyAttributes( preBlock );
+			if ( preBlockId )
+				preBlock.setAttribute( 'id', preBlockId );
+			else
+				preBlock.removeAttribute( 'id' );
+		}
 		else
 			preBlock.setHtml( mergedHtml );
 
@@ -1081,7 +1106,12 @@ CKEDITOR.STYLE_OBJECT = 3;
 		preHtml = preHtml.replace( /([ \t\n\r]+|&nbsp;)/g, ' ' );
 		// 5. Convert any <BR /> to \n. This must not be done earlier because
 		//    the \n would then get compressed.
-		preHtml = preHtml.replace( /<br\b[^>]*>/gi, '\n' );
+		// Use <br> instead of \n inside pre elements
+		// @author MindTouch
+		if ( CKEDITOR.env.ie && CKEDITOR.env.version < 8 ) {
+			preHtml = preHtml.replace( /<br\b[^>]*>/gi, '\n' );
+		}
+		// preHtml = preHtml.replace( /<br\b[^>]*>/gi, '\n' );
 
 		// Krugle: IE normalizes innerHTML to <pre>, breaking whitespaces.
 		if ( CKEDITOR.env.ie ) {
