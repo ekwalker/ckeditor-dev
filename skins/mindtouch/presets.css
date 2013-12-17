@@ -101,6 +101,28 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	margin-right: .5em;
 }
 
+.cke_browser_webkit
+{
+	white-space: normal; /* @see #7992 */
+}
+
+.cke_editor_editarea textarea.cke_source
+{
+	min-height: auto; /* @see EDT-413 */
+}
+
+.cke_editor_editarea textarea.cke_source:focus
+{
+	border: none; /* @see EDT-503 */
+}
+
+/* @see EDT-491 */
+.cke_toolbar .cke_combo__fontsize .cke_combo_text
+{
+	width: auto;
+	padding-right: 2px;
+}
+
 /* ie specific styles */
 .cke_infobar .cke_infopanel_group span
 {
