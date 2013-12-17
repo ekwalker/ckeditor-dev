@@ -4,7 +4,7 @@
  */
 
 var CKBUILDER_CONFIG = {
-	skin: 'moono',
+	skin: 'mindtouch',
 	ignore: [
 		'dev',
 		'README.md',

@@ -101,6 +101,8 @@ CKEDITOR.editorConfig = function( config ) {
 	config.bodyId = 'topic';
 	config.bodyClass = 'deki-content-edit ' + CKEDITOR.env.cssClass;
 
+	config.skin = 'mindtouch';
+
 	config.allowedContent = true;
 
 	// SCAYT config
