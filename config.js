@@ -152,62 +152,24 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name : 'Conditional Text (Pro-Member only)', element : 'div', attributes : { 'if' : 'user.seated', 'class' : 'mt-style-conditional' }, wrap : true, group : 'conditional', label : 'Conditional Text', priority : 20 }
 	];
 
-	config.toolbar_Advanced =
+	config.toolbar =
 		[
 			['MindTouchSave','MindTouchCancel'],
 			['ViewMenu'],
-			['NewPage','-','WhoIsEditing'],
-			['Cut','Copy','Paste','PasteText','PasteFromWord','PasteImage'],
+			['WhoIsEditing'],
+			['Cut','Copy','Paste','PasteText','PasteFromWord'],
 			['Transformations'],
-			['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
-			['TextColor','BGColor'],
+			['Undo','Redo','-','Find','Replace','-','SelectAll'],
+			['HorizontalRule','SpecialChar','PageBreak'],
 			'/',
 			['Font','FontSize'],
-			['Bold','Italic','Underline','Strike','-','Subscript','Superscript','Code','PlainText'],
-			['NumberedList','BulletedList','-','DefinitionList','DefinitionTerm','DefinitionDescription','-','Outdent','Indent','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','-','BidiLtr', 'BidiRtl'],
-			['HorizontalRule','SpecialChar','PageBreak'],
+			['TextColor','BGColor'],
+			['Bold','Italic','Underline','Strike','-','Subscript','Superscript','Code','PlainText','RemoveFormat'],
+			['NumberedList','BulletedList','DefinitionList','-','Outdent','Indent'],
+			['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
 			'/',
 			['Normal','H1','H2','H3','Hx','StylesMenu'],
 			['MindTouchLink','Unlink','Anchor','TableOneClick','MindTouchImage','Video','MindTouchTemplates']
-		];
-	
-	config.toolbar_Default =
-		[
-			['MindTouchSave','MindTouchCancel'],
-			['ViewMenu'],
-			['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
-			['Cut','Copy','Paste','PasteText','PasteFromWord'],
-			['Transformations'],
-			'/',
-			['Font','FontSize'],
-			['Bold','Italic','Underline','Strike','Subscript','Superscript','Code','PlainText'],
-			['NumberedList','BulletedList','-','DefinitionList','DefinitionTerm','DefinitionDescription','-','Outdent','Indent'],
-			['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
-			['TextColor','BGColor'],
-			'/',
-			['Normal','H1','H2','H3','Hx','StylesMenu'],
-			['InsertMenu','MindTouchLink','Unlink','TableOneClick','MindTouchImage','Video','MindTouchTemplates']
-		];
-
-	config.toolbar_Simple =
-		[
-			['MindTouchSave','MindTouchCancel'],
-			['ViewMenu'],
-			['PasteText','PasteFromWord'],
-			['Bold','Italic','Underline','Strike','Code','PlainText'],
-			['NumberedList','BulletedList'],
-			['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
-			['TextColor','BGColor','-','RemoveFormat'],
-			'/',
-			['Normal','H1','H2','H3','Hx','StylesMenu'],
-			['InsertMenu','MindTouchLink','TableOneClick','MindTouchImage','Video','MindTouchTemplates']
-		];
-
-	config.toolbar_Basic =
-		[
-			['MindTouchSave','MindTouchCancel'],
-			['ViewMenu'],
-			['InsertMenu','MindTouchLink','Unlink','TableOneClick','MindTouchImage','Video','MindTouchTemplates']
 		];
 
 	if ( CKEDITOR.customEditorConfigFn ) {
