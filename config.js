@@ -108,7 +108,6 @@ CKEDITOR.editorConfig = function( config ) {
 	// SCAYT config
 	var protocol = document.location.protocol;
 	protocol = protocol.search( /https?:/) != -1 ? protocol : 'http:';
-	config.scayt_autoStartup = true;
 	config.scayt_srcUrl = protocol + '//spellcheck.mindtouch.us/spellcheck/lf/scayt/scayt.js';
 	config.scayt_contextCommands = 'ignore|ignoreall';
 	config.scayt_maxSuggestions = 8;
