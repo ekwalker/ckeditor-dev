@@ -143,6 +143,7 @@
 				button.removeCustomData('comment');
 
 				editor.fire('updateSnapshot');
+				editor.selectionChange(1);
 			}
 		};
 	};
@@ -166,10 +167,12 @@
 				};
 
 			editor.on('contentDom', function() {
-				editor.document.appendStyleText('.cke_comment_hover { background-position: 0 -25px !important; }');
+				var editable = editor.editable(),
+					doc = editor.document;
 
-				var editable = editor.editable();
-				editable.attachListener(editable.isInline() ? editable : editor.document, 'mousemove', function(ev) {
+				doc.appendStyleText('.cke_comment_hover { background-position: 0 -25px !important; }');
+
+				editable.attachListener(editable.isInline() ? editable : doc, 'mousemove', function(ev) {
 					if (editor.readOnly || checkMouseTimer) {
 						return;
 					}
@@ -179,6 +182,10 @@
 					checkMouseTimer = setTimeout(function() {
 						checkMouse(target);
 					}, 30);
+				});
+
+				editable.attachListener(CKEDITOR.env.ie ? editable : doc.getDocumentElement(), 'mouseup', function() {
+					commentDeleteButton.detach();
 				});
 			});
 

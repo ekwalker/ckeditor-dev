@@ -111,7 +111,6 @@ Special outer level classes used in this file:
 .cke_toolbar .cke_toolgroup .cke_button__viewmenu:hover,
 .cke_toolbar .cke_toolgroup .cke_button__whoisediting:hover
 {
-	background: #fff !important;
 	border-color: #fff;
 	box-shadow: 0 0 1px rgba(0, 0, 0, .6);
 	color: #333;

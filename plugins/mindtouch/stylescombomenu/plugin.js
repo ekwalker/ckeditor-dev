@@ -135,6 +135,7 @@
 					var selection = editor.getSelection(),
 						element = selection.getSelectedElement(),
 						elementPath = new CKEDITOR.dom.elementPath(element || selection.getStartElement()),
+						isBlockquote = elementPath.contains('blockquote'),
 						items = {};
 
 					for (var i = 0; i < styles.length; i++) {
@@ -142,7 +143,10 @@
 							type = style.type,
 							state = CKEDITOR.TRISTATE_OFF;
 
-						if (style.checkActive(elementPath)) {
+						// special case for blockquote style (see EDT-588)
+						if (style.element == 'blockquote' && isBlockquote) {
+							state = CKEDITOR.TRISTATE_ON;
+						} else if (style.checkActive(elementPath) && !isBlockquote) {
 							state = CKEDITOR.TRISTATE_ON;
 						} else if (type == CKEDITOR.STYLE_OBJECT && !style.checkApplicable(elementPath)) {
 							state = CKEDITOR.TRISTATE_DISABLED;
