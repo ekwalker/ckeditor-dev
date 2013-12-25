@@ -47,6 +47,10 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	visibility: visible !important;
 }
 
+.cke_browser_ie .cke_inner .cke_infobar {
+	margin-left: -.8em;
+}
+
 .cke_top .cke_infobar .cke_infopanel_group
 {
 	padding: 0 .75em;
@@ -76,7 +80,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 
 .deki-extension-list a
 {
-	background: url(icons.png) no-repeat 0 -1918px !important;
+	background: url(icons-off.png) no-repeat 0 -1918px !important;
 	color: #444;
 	cursor: pointer;
 	font-weight: bold;
