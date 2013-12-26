@@ -1,4 +1,5 @@
 /*
+ * @file change event plugin for CKEditor
  * Copyright (C) 2011 Alfonso Martínez de Lizarrondo
  *
  * == BEGIN LICENSE ==
@@ -19,11 +20,7 @@
  *
  */
 
-/**
- * @file change event plugin for CKEditor
- */
-
-// Keeps track of changes to the content and fires a "change" event
+ // Keeps track of changes to the content and fires a "change" event
 CKEDITOR.plugins.add( 'onchange',
 {
 	init : function( editor )
@@ -31,6 +28,9 @@ CKEDITOR.plugins.add( 'onchange',
 		var timer,
 			theMutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver,
 			observer;
+		
+		// http://dvcs.w3.org/hg/domcore/raw-file/tip/Overview.html#mutation-observers
+		// http://hacks.mozilla.org/2012/05/dom-mutationobserver-reacting-to-dom-changes-without-killing-browser-performance/
 
 		// Avoid firing the event too often
 		function somethingChanged()
@@ -88,12 +88,16 @@ CKEDITOR.plugins.add( 'onchange',
 				if ( observer )
 				{
 					// A notification is fired right now, but we don't want it so soon
-					setTimeout( function() {
-						observer.observe( editor.document.getBody().$, {
-							attributes: true,
-							childList: true,
-							characterData: true
-						  });
+					var interval = setInterval( function() {
+						if ( typeof editor.document === 'object' ) {
+							observer.observe( editor.document.getBody().$, {
+								attributes: true,
+								childList: true,
+								characterData: true,
+								subtree: true
+							});
+							clearInterval(interval);
+						}
 					}, 100);
 				}
 
