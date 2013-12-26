@@ -159,6 +159,32 @@
 					linkCmd && linkCmd.enable();
 				}
 			}, null, null, 1);
+
+			if (CKEDITOR.env.gecko) {
+				// firefox changes only width/height attribute on resizing
+				// so we have to update inline style when image is resized
+				// @see EDT-595
+				var observer = new MutationObserver(function(mutations) {
+					mutations.forEach(function(mutation) {
+						var target = new CKEDITOR.dom.element(mutation.target);
+						if (target.$ && target.is('img') && target.hasClass('cke_video')) {
+							var attrName = mutation.attributeName,
+								attr = target.getAttribute(attrName),
+								style = parseInt(target.getStyle(attrName), 10);
+
+							if (!isNaN(attr) && attr !== style) {
+								target.setStyle(attrName, attr + 'px');
+							}
+						}
+					});
+				});
+
+				editor.on('contentDom', function() {
+					setTimeout(function() {					
+						observer.observe(editor.document.getBody().$, {attributes: true, subtree: true, attributeFilter: ['width', 'height']});
+					}, 100);
+				});
+			}
 		},
 
 		afterInit: function(editor) {
