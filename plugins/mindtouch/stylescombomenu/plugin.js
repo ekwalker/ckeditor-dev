@@ -45,9 +45,6 @@
 			editor.addMenuGroup('style_conditional', 3);
 			editor.addMenuGroup('style_executable', 4);
 
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 77 /*M*/, 'comment');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.ALT + 83 /*S*/, 'dekiscript');
-
 			editor.on( 'stylesSet', function( evt ) {
 				var stylesDefinitions = evt.data.styles;
 
@@ -74,37 +71,39 @@
 						style._button = buttonName;
 						style._.enterMode = config.enterMode;
 
-						var command = styleDefinition.command;
-						if (command && !editor.getCommand(command)) {
-							var cmd = editor.addCommand(command, new CKEDITOR.styleCommand(style));
-							editor.addFeature(cmd);
+						var styleCommand = function(style) {
+							style = CKEDITOR.tools.clone(style);
+
+							if (style._.definition.group == 'conditional' && (!style._.definition.attributes || !style._.definition.attributes.title)) {
+								style._.definition.attributes = style._.definition.attributes || {};
+								style._.definition.attributes.title = style._name;
+							}
+
+							editor.focus();
+							editor.fire('saveSnapshot');
+
+							var elementPath = new CKEDITOR.dom.elementPath(editor.getSelection().getStartElement());
+							editor[style.checkActive(elementPath) ? 'removeStyle' : 'applyStyle'](style);
+							editor.forceNextSelectionCheck();
+							editor.selectionChange(1);
+							editor.fire('saveSnapshot');
+						};
+
+						if (styleDefinition.keystroke) {
+							editor.on('key', function(evt) {
+								var data = evt.listenerData;
+								if (evt.data.keyCode == data.keystroke) {
+									styleCommand(data.style);
+								}
+							}, this, {keystroke: styleDefinition.keystroke, style: style});
 						}
 
 						editor.addMenuItem(buttonName, {
 							group: 'style_' + group,
 							label: styleName,
 							style: style,
-							command: command || null,
 							onClick: function() {
-								if (this.command) {
-									editor.execCommand(this.command);
-									return;
-								}
-
-								editor.focus();
-								editor.fire('saveSnapshot');
-
-								var style = CKEDITOR.tools.clone(this.style),
-									selection = editor.getSelection(),
-									elementPath = new CKEDITOR.dom.elementPath(selection.getStartElement());
-
-								if (style._.definition.group == 'conditional' && (!style._.definition.attributes || !style._.definition.attributes.title)) {
-									style._.definition.attributes = style._.definition.attributes || {};
-									style._.definition.attributes.title = style._name;
-								}
-
-								editor[style.checkActive(elementPath) ? 'removeStyle' : 'applyStyle'](style);
-								editor.fire('saveSnapshot');
+								styleCommand(this.style);
 							}
 						});
 

@@ -82,23 +82,26 @@
 			editor.fire('saveSnapshot');
 
 			var selection = editor.getSelection(),
-				startElement = selection && selection.getStartElement(),
-				currentElement = startElement && startElement.getAscendant('p', true),
-				range = selection.getRanges( 1 )[0];
+				startElement = selection.getStartElement(),
+				currentElement = startElement && startElement.getAscendant('p', true);
 
 			if (currentElement && currentElement.equals(comment)) {
-				var moveToElement = comment.getNext() || comment.getPrevious();
+				var range = selection.getRanges( 1 )[0],
+					moveToElement = comment.getNext() || comment.getPrevious();
 
 				if (moveToElement) {
-					range.moveToElementEditStart(moveToElement);
+					comment.remove();
 				} else {
-					range.moveToPosition(comment, CKEDITOR.POSITION_BEFORE_START);
+					moveToElement = editor.document.createElement(editor.config.enterMode == CKEDITOR.ENTER_P ? 'p' : 'div');
+					moveToElement.replace(comment);
 				}
+
+				range.moveToElementEditStart(moveToElement);
+				range.select();
+			} else {
+				comment.remove();
 			}
 
-			comment.remove();
-
-			range.select();
 			editor.fire('saveSnapshot');
 		}
 
@@ -124,7 +127,9 @@
 
 			editor.fire('updateSnapshot');
 
-			comment.addClass('cke_comment_hover');
+			comment.data('cke-comment-hover', 1);
+			// IE8: force to redraw
+			comment.$.className = comment.$.className;
 
 			button.setCustomData('comment', comment);
 			button.show();
@@ -139,7 +144,10 @@
 			}
 
 			if (comment) {
-				comment.removeClass('cke_comment_hover');
+				comment.data('cke-comment-hover', false);
+				// IE8: force to redraw
+				comment.$.className = comment.$.className;
+
 				button.removeCustomData('comment');
 
 				editor.fire('updateSnapshot');
@@ -170,7 +178,7 @@
 				var editable = editor.editable(),
 					doc = editor.document;
 
-				doc.appendStyleText('.cke_comment_hover { background-position: 0 -25px !important; }');
+				doc.appendStyleText('.comment[data-cke-comment-hover] { background-position: 0 -25px !important; }');
 
 				editable.attachListener(editable.isInline() ? editable : doc, 'mousemove', function(ev) {
 					if (editor.readOnly || checkMouseTimer) {
@@ -183,11 +191,11 @@
 						checkMouse(target);
 					}, 30);
 				});
-
-				editable.attachListener(CKEDITOR.env.ie ? editable : doc.getDocumentElement(), 'mouseup', function() {
-					commentDeleteButton.detach();
-				});
 			});
+
+			editor.on('saveSnapshot', function() {
+				commentDeleteButton.detach();
+			}, null, null, 1);
 
 			editor.on('beforeCommandExec', function() {
 				commentDeleteButton.detach();

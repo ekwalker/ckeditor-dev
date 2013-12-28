@@ -140,9 +140,9 @@ CKEDITOR.editorConfig = function( config ) {
 		{ name : 'None', element : 'p', attributes : { 'class' : '' }, group : 'default', priority : 10 },
 		{ name : '<pre>&lt;pre&gt;</pre> Format', element : 'pre', attributes : { 'class' : '' }, group : 'default', label : 'Formatted', priority : 30 },
 		{ name : 'Blockquote', element : 'blockquote', group : 'default', priority : 30, command : 'blockquote' },
-		{ name : 'Comment', element : 'p', attributes : { 'class' : 'comment' }, group : 'default', priority : 30, command : 'comment' },
+		{ name : 'Comment', element : 'p', attributes : { 'class' : 'comment' }, group : 'default', priority : 30, keystroke : CKEDITOR.CTRL + CKEDITOR.ALT + 77 /*M*/ },
 
-		{ name : 'DekiScript', element : 'pre', attributes : { 'class' : 'script' }, group : 'executable', priority : 40, command : 'dekiscript' },
+		{ name : 'DekiScript', element : 'pre', attributes : { 'class' : 'script' }, group : 'executable', priority : 40, keystroke : CKEDITOR.CTRL + CKEDITOR.ALT + 83 /*S*/ },
 		{ name : 'JavaScript (JEM)', element : 'pre', attributes : { 'class' : 'script-jem' }, group : 'executable', priority : 40 },
 		{ name : 'CSS', element : 'pre', attributes : { 'class' : 'script-css' }, group : 'executable', priority : 40 },
 
