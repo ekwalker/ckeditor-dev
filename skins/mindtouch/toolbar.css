@@ -118,13 +118,17 @@ Special outer level classes used in this file:
 }
 
 .cke_toolgroup a:last-child:hover,
-.cke_toolgroup a:first-child:hover
+.cke_toolgroup a.hover:last-child,
+.cke_toolgroup a:first-child:hover,
+.cke_toolgroup a.hover:first-child
 {
 	border-color: #fff;
 }
 
 .cke_toolgroup a.cke_button_disabled:last-child:hover,
-.cke_toolgroup a.cke_button_disabled:first-child:hover
+.cke_toolgroup a.cke_button_disabled.hover:last-child,
+.cke_toolgroup a.cke_button_disabled:first-child:hover,
+.cke_toolgroup a.cke_button_disabled.hover:first-child
 {
 	border-color: #aaa !important;
 }
