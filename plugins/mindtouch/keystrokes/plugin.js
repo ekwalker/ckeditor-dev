@@ -197,9 +197,8 @@
 	};
 
 	var removePagebreakOrHr = function(keyCode) {
-		var editor = this;
-
-		var selection = editor.getSelection(),
+		var editor = this,
+			selection = editor.getSelection(),
 			ranges = selection && selection.getRanges(true),
 			range = ranges && ranges[0],
 			node = null;
@@ -355,6 +354,74 @@
 					case 46: /* DEL */
 						if (!CKEDITOR.env.webkit && removePagebreakOrHr.call(editor, keyCode)) {
 							evt.cancel();
+						}
+						
+						// @see EDT-582
+						// change the default firefox behavior on backspace/delete at the start/end of pre block
+						if (CKEDITOR.env.gecko) {
+							var selection = editor.getSelection(),
+								range = selection && selection.getRanges()[0];
+
+							if (range.collapsed) {
+								var startElement = selection.getStartElement();
+								if (startElement && startElement.is('pre') && range[keyCode == 8 ? 'checkStartOfBlock' : 'checkEndOfBlock']()) {
+									var sibling = startElement[keyCode == 8 ? 'getPrevious' : 'getNext']();
+									if (sibling && sibling.is && sibling.is('pre')) {
+										// if current block and its sibling (prev for backspace and next for del keys)
+										// are pre blocks, merge the first line of current (backspace) or the sibling (delete) block
+										var from, to;
+										if (keyCode == 8) {
+											from = startElement;
+											to = sibling;
+										} else {
+											from = sibling;
+											to = startElement;
+										}
+
+										editor.fire('saveSnapshot');
+
+										// looking for the first br node
+										var br = from;
+										while (br && !br.is('br')) {
+											br = br.getNextSourceNode(false, CKEDITOR.NODE_ELEMENT, from);
+										}
+
+										range.setStartAt(from, CKEDITOR.POSITION_AFTER_START);
+										
+										// if there are few lines we'll extract only the first one
+										// or we'll use the whole block otherwise
+										if (br) {
+											range.setEndAt(br, CKEDITOR.POSITION_BEFORE_START);
+										} else {
+											range.setEndAt(from, CKEDITOR.POSITION_BEFORE_END);
+										}
+
+										range.select();
+
+										var contentToMerge = range.extractContents();
+
+										br && br.remove();
+
+										range.moveToElementEditEnd(to);
+										range.select();
+
+										// if there is br element at the end of the block
+										// where we'll merge the line, remove it
+										br = to.getLast();
+										br && br.is && br.is('br') && br.remove();
+
+										contentToMerge.appendTo(to);
+
+										if (!from.getChildCount()) {
+											from.remove();
+										}
+
+										editor.fire('saveSnapshot');
+
+										evt.cancel();
+									}
+								}
+							}
 						}
 						break;
 				}
