@@ -192,6 +192,8 @@
 
 				if ( comment ) {
 					newBlock.removeClass( 'comment' );
+					editor.forceNextSelectionCheck();
+					editor.selectionChange( 1 );
 				} else if ( dl ) {
 					newBlock.renameNode( block.is( 'dt' ) ? 'dd' : 'dt' );
 					range.moveToElementEditStart( newBlock );

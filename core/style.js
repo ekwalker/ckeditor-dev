@@ -922,7 +922,12 @@ CKEDITOR.STYLE_OBJECT = 3;
 					var newBlock = this._.enterMode == CKEDITOR.ENTER_BR ? null :
 					               range.document.createElement( this._.enterMode == CKEDITOR.ENTER_P ? 'p' : 'div' );
 
-					newBlock && block.copyAttributes( newBlock );
+					/**
+					 * Don't keep attributes of pre block
+					 * @see EDT-24
+					 * @author MindTouch
+					 */
+					// newBlock && block.copyAttributes( newBlock );
 					replaceBlock( block, newBlock );
 				} else
 					removeFromElement.call( this, block );
