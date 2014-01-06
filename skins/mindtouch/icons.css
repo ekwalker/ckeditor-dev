@@ -215,7 +215,8 @@
 	background: url(icons-off.png) no-repeat 0 -1568px !important;
 	padding: 0 .1em;
 }
-.cke_button_icon.cke_button__link_icon
+.cke_button_icon.cke_button__link_icon,
+.cke_button_icon.cke_button__createlink_icon
 {
 	background: url(icons-off.png) no-repeat 0 -1600px !important;
 }
