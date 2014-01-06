@@ -52,13 +52,7 @@
 			var imageElement = getSelectedImage(editor);
 
 			this.selectedImage = imageElement;
-			this.link = null;
-
-			var link = this.selectedImage && this.selectedImage.getAscendant('a');
-
-			if (link && link.hasClass('thumb')) {
-				this.link = link;
-			}
+			this.link = this.selectedImage && this.selectedImage.getAscendant('a');
 
 			// build the params object to pass to the dialog
 			var params = {};
@@ -143,25 +137,29 @@
 					}
 
 					if (params.sFullSrc && params.sFullSrc.length) {
-						var linkElement = this.link;
+						var link;
 
-						if (!linkElement) {
-							linkElement = editor.document.createElement('a');
-							linkElement.addClass('thumb');
+						if (this.link && this.link.hasClass('thumb')) {
+							link = this.link;
+						} else if (!this.selectedImage) {
+							link = editor.document.createElement('a');
+							link.addClass('thumb');
 						}
 
-						linkElement.setAttribute('title', params.sAlt || '');
-						linkElement.setAttribute('href', params.sFullSrc);
-						linkElement.data('cke-saved-href', params.sFullSrc);
+						if (link) {
+							link.setAttribute('title', params.sAlt || '');
+							link.setAttribute('href', params.sFullSrc);
+							link.data('cke-saved-href', params.sFullSrc);
+						}
 
-						if (!this.link) {
-							editor.insertElement(linkElement);
-							linkElement.append(imageElement, false);
+						if (!this.link && link) {
+							link.append(imageElement, false);
+							editor.insertElement(link);
 						} else {
 							editor.insertElement(imageElement);
 						}
 					} else {
-						if (this.link) {
+						if (this.link && this.link.hasClass('thumb')) {
 							this.link.remove(true);
 							this.selectedImage && editor.getSelection().selectElement(this.selectedImage);
 						}
