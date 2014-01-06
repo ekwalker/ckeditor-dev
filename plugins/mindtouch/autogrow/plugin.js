@@ -58,7 +58,8 @@
 			'line-height': textarea.getComputedStyle('line-height') || 'normal',
 			'letter-spacing': textarea.getComputedStyle('letter-spacing') || 'normal',
 			'tab-size': textarea.getComputedStyle('tab-size') || '8',
-			'outline': textarea.getComputedStyle('outline') || 'inherit'
+			// @see EDT-607
+			'outline': ((!(CKEDITOR.env.ie && CKEDITOR.env.version < 9)) && textarea.getComputedStyle('outline')) || 'inherit'
 		});
 
 		if (CKEDITOR.env.ie) {
