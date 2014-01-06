@@ -177,6 +177,15 @@
 					}, 0 );
 				}
 			});
+		} else if ( CKEDITOR.env.webkit ) {
+			// Fix problem with disappearing cursor in Chrome 30 (#10945).
+			var html = doc.getDocumentElement();
+
+			html.on( 'mousedown', function( evt ) {
+				if ( evt.data.getTarget().is( 'html' ) ) {
+					editor.editable().focus();
+				}
+			} );
 		}
 
 		// Gecko needs a key event to 'wake up' editing when the document is
