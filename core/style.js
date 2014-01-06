@@ -894,11 +894,7 @@ CKEDITOR.STYLE_OBJECT = 3;
 		{
 			if ( !block.isReadOnly() ) {
 				var newBlock = getElement( this, doc, block );
-				// merge pre blocks only if range is not collapsed
-				// @see EDT-77
-				// @author MindTouch
-				replaceBlock( block, newBlock, !range.collapsed );
-				// replaceBlock( block, newBlock );
+				replaceBlock( block, newBlock );
 			}
 		}
 
@@ -940,7 +936,7 @@ CKEDITOR.STYLE_OBJECT = 3;
 	// Replace the original block with new one, with special treatment
 	// for <pre> blocks to make sure content format is well preserved, and merging/splitting adjacent
 	// when necessary. (#3188)
-	function replaceBlock( block, newBlock, allowMergePre ) {
+	function replaceBlock( block, newBlock ) {
 		// Block is to be removed, create a temp element to
 		// save contents.
 		var removeBlock = !newBlock;
@@ -967,9 +963,8 @@ CKEDITOR.STYLE_OBJECT = 3;
 
 		if ( newBlockIsPre ) {
 			// Merge previous <pre> blocks.
-			// Merge only not collapsed range
 			// @author MindTouch
-			allowMergePre && mergePre( newBlock );
+			// mergePre( newBlock );
 		} else if ( removeBlock )
 		if ( removeBlock )
 			removeNoAttribsElement( newBlock );
