@@ -139,7 +139,7 @@
 					if (params.sFullSrc && params.sFullSrc.length) {
 						var link;
 
-						if (this.link) {
+						if (this.link && this.link.hasClass('thumb')) {
 							link = this.link;
 						} else if (!this.selectedImage) {
 							link = editor.document.createElement('a');
