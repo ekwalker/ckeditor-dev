@@ -280,7 +280,7 @@
 					i;
 
 				for (i = 0; i < length; i++) {
-					count += row.getChild(0).$.colSpan;
+					count += row.getChild(i).$.colSpan;
 				}
 
 				return count;
@@ -288,7 +288,8 @@
 
 			// add or remove cells from the row to fit it to the table columns quantity
 			var adjustCellsCount = function(row, currentRow) {
-				var count = countCells(currentRow),
+				var currentCount = countCells(currentRow),
+					insertCount = countCells(row),
 					length = row.getChildCount(),
 					i;
 
@@ -297,25 +298,28 @@
 					row.getChild(i).hasAttribute('rowSpan') && row.getChild(i).setAttribute('rowSpan', 1);
 				}
 
-				if (length > count) {
-					for (i = length - 1; i >= count; i--) {
-						row.getChild(i).remove();
+				if (insertCount > currentCount) {
+					for (i = 0; i < insertCount - currentCount; i++) {
+						var cell = row.getLast(),
+							colSpan = parseInt(cell.getAttribute('colSpan'), 10);
+
+						if (colSpan && colSpan > 1) {
+							cell.setAttribute('colSpan', colSpan - 1);
+						} else {
+							cell.remove();
+						}
+
 					}
-				} else if (length < count) {
+				} else if (insertCount < currentCount) {
 					var cell = row.getChild(length - 1);
+					cell.removeAttribute('colSpan');
 
-					for (i = 0; i < count - length; i++) {
-						cell.clone().appendTo(row);
+					for (i = 0; i < currentCount - insertCount; i++) {
+						cell = cell.clone();
+						cell.appendBogus();
+						cell.appendTo(row);
 					}
 				}
-
-				// update colSpan
-				length = row.getChildCount();
-				for (i = 0; i < length; i++) {
-					var colSpan = currentRow.getChild(i).getAttribute('colSpan');
-					colSpan && row.getChild(i).setAttribute('colSpan', colSpan);
-				}
-
 
 				return row;
 			};
