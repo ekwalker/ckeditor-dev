@@ -225,26 +225,6 @@
 				editor.getCommand('paste').enable();
 			}
 
-			// move focus out of the editor: EDT-234
-			if (CKEDITOR.env.mac) {
-				var id = 'cke_zeroclipboard_fakelink',
-					link = CKEDITOR.document.getById(id);
-
-				if (!link) {
-					link = CKEDITOR.document.createElement('a');
-					link.setAttribute('href', '#');
-					link.setStyles({
-						'position': 'absolute',
-						'top': 0,
-						'left': '-9999px'
-					});
-					link.setHtml('fake link');
-					CKEDITOR.document.getBody().append(link);
-				}
-
-				link.focus();
-			}
-
 			editor.focus();
 		});
 
