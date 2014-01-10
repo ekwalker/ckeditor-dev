@@ -375,11 +375,24 @@
 								}
 							}
 						} catch (ex) {};
-					} else if (evt.data.$.dataTransfer && evt.data.$.dataTransfer.files && evt.data.$.dataTransfer.files.length) {
-						stop = false;
+					} else if (evt.data.$.dataTransfer) {
+						var dt = evt.data.$.dataTransfer;
+
+						if (typeof dt.files == 'undefined') {
+							stop = false;
+						} else if (dt.files && !!dt.files.length) {
+							stop = false;							
+						} else if (CKEDITOR.env.ie && dt.types) {
+							for (var i = 0; i < dt.types.length; i++) {
+								if (dt.types[i].toLowerCase() == 'files') {
+									stop = false;
+									break;
+								}
+							}
+						}
 					}
 
-					stop && evt.data.stopPropagation();
+					stop && evt.data.$.stopImmediatePropagation();
 				};
 
 
