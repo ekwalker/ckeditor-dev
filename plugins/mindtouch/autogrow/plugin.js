@@ -94,6 +94,12 @@
 				return;
 			}
 
+			editor.on('infobar', function() {
+				setTimeout( function() {
+					editor.execCommand('autogrow');
+				}, 100 );
+			});
+
 			editor.on('mode', function() {
 				if (editor.mode == 'source') {
 					resizeTextarea(editor);

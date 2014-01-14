@@ -27,50 +27,19 @@
  */
 
 (function() {
-	var checkMouseTimer,
-		checkMouse = function( mouse, infobar ) {
-			var doc = CKEDITOR.document,
-				pos = infobar.getDocumentPosition( doc ),
-				width = infobar.$.offsetWidth,
-				height = infobar.$.offsetHeight;
-
-			if ( mouse.x > pos.x && mouse.x < pos.x + width && mouse.y > pos.y && mouse.y < pos.y + height ) {
-				infobar.setStyle( 'visibility', 'hidden' );
-			} else {
-				infobar.setStyle( 'visibility', '' );
-			}
-
-			window.clearTimeout( checkMouseTimer );
-			checkMouseTimer = null;
-		},
-		onMouseMove = function( ev ) {
-			var editor = this;
-			
-			if ( editor.readOnly || checkMouseTimer ) {
-				return;
-			}
-
-			// IE<9 requires this event-driven object to be created
-			// outside of the setTimeout statement.
-			// Otherwise it loses the event object with its properties.
-			var mouse = ev.data.getPageOffset();
-
-			if ( ev.listenerData && ev.listenerData.context ) {
-				var pos = ev.listenerData.context.getDocumentPosition( CKEDITOR.document );
-				mouse.x += pos.x;
-				mouse.y += pos.y;
-			}
-
-			checkMouseTimer = setTimeout( function() {
-				checkMouse( mouse, editor.ui.infobar.getContainer() );
-			}, 30 ); // balances performance and accessibility
-		};
-
 	CKEDITOR.plugins.add( 'mindtouch/infobar', {
 		requires: 'mindtouch/infopanel',
 		init: function( editor ) {
+			var fireInfobar = function() {
+				CKEDITOR.tools.setTimeout( function() {
+					editor.fire( 'infobar', this );
+				}, 0, this );
+			};
+
 			editor.ui.infobar = new CKEDITOR.ui.infoPanel(CKEDITOR.document, {
-				className: 'cke_infobar'
+				className: 'cke_infobar',
+				onShow: fireInfobar,
+				onHide: fireInfobar
 			});
 
 			editor.on( 'uiSpace', function( evt ) {
@@ -79,23 +48,6 @@
 					evt.data.html += editor.ui.infobar.renderHtml(evt.editor );
 				}
 			});
-
-			editor.on( 'uiReady', function() {
-				CKEDITOR.document.on( 'mousemove', onMouseMove, editor );
-			});
-
-			editor.on( 'contentDom', function() {
-				var editable = editor.editable();
-				editable.attachListener( editable.isInline() ? editable : editor.document, 'mousemove', onMouseMove, editor, { context: editor.ui.space( 'contents' ) } );
-			});
-
-			editor.on( 'dataReady', function() {
-				editor.editable().addClass( 'cke_infobar_enabled' );
-			});
-
-			editor.on( 'destroy', function() {
-				CKEDITOR.document.removeListener( 'mousemove', onMouseMove );
-			});
 		},
 		onLoad : function() {
 			var css = [
@@ -103,15 +55,9 @@
 				'.cke_infobar .cke_infopanel_group a { text-decoration: underline; color: #333; cursor: pointer; }',
 				'.cke_infobar .cke_infopanel_group { float: left; background: transparent url(data:image/gif;base64,R0lGODlhAQANAIABAJmZmf///yH5BAEKAAEALAAAAAABAA0AAAIDhI9XADs=) scroll no-repeat right center; padding: 0 1em; }',
 				'.cke_infobar span { cursor: default; -ms-filter: alpha(opacity=70); opacity: 0.70; }',
-				'.cke_hc .cke_infobar span { opacity: 1.0; -ms-filter: alpha(opacity=100); }',
-				// @see #MT-9987
-				'.cke textarea.cke_source.cke_infobar_enabled { padding-top: 25px; }'
-
+				'.cke_hc .cke_infobar span { opacity: 1.0; -ms-filter: alpha(opacity=100); }'
 			];
 			CKEDITOR.document.appendStyleText( css.join( '' ) );
-
-			// @see #MT-9987
-			CKEDITOR.addCss( 'body.cke_infobar_enabled {padding-top: 5px;}' );
 		}
 	});
 })();
