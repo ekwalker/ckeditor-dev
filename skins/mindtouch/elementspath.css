@@ -42,6 +42,7 @@ The following is a visual representation of its main elements:
 	color: #4c4c4c;
 	text-shadow: none;
 	font-weight: bold;
+	line-height: 17px;
 }
 
 .cke_path .cke_path_item:before
