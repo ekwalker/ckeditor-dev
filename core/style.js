@@ -1089,8 +1089,15 @@ CKEDITOR.STYLE_OBJECT = 3;
 
 	// Converting from a non-PRE block to a PRE block in formatting operations.
 	function toPre( block, newBlock ) {
-		var bogus = block.getBogus();
-		bogus && bogus.remove();
+		/**
+		 * Don't remove bogus node in webkit browsers
+		 * @see EDT-621
+		 * @author MindTouch
+		 */
+		if ( !CKEDITOR.env.webkit ) {
+			var bogus = block.getBogus();
+			bogus && bogus.remove();
+		}
 
 		// First trim the block content.
 		var preHtml = block.getHtml();
