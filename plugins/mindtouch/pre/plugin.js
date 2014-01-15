@@ -264,9 +264,9 @@
 
 				var update = function() {
 					var sel = editor.getSelection(),
-						startElement = sel && sel.getStartElement().getAscendant( 'pre', true );
+						startElement = sel && sel.getStartElement();
 
-					if ( startElement ) {
+					if ( startElement && startElement.getAscendant( 'pre', true ) ) {
 						updateWidth.call( editor, startElement );
 						editor.execCommand( 'autogrow' );
 					}
