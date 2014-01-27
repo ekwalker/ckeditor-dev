@@ -35,7 +35,7 @@
 
 (function() {
 	// Definition of elements at which div operation should stopped.
-	var divLimitDefinition = {};
+	var divLimitDefinition = {body:1};
 
 	// DTD of 'div' element
 	var dtd = CKEDITOR.dtd.div;
@@ -123,12 +123,14 @@
 				// include contents of blockLimit elements.
 				if (block.getName() in divLimitDefinition) {
 					var j, childNodes = block.getChildren();
-					for (j = 0; j < childNodes.count(); j++)
-					addSafely(containedBlocks, childNodes.getItem(j), database);
+					for (j = 0; j < childNodes.count(); j++) {
+						addSafely(containedBlocks, childNodes.getItem(j), database);
+					}
 				} else {
 					// Bypass dtd disallowed elements.
-					while (!dtd[block.getName()] && !block.equals(ranges[i].root))
-					block = block.getParent();
+					while (!dtd[block.getName()] && !block.equals(ranges[i].root)) {
+						block = block.getParent();
+					}
 					addSafely(containedBlocks, block, database);
 				}
 			}
@@ -144,8 +146,9 @@
 
 			// Calculate the common parent node of all contained elements.
 			ancestor = currentNode.getParent();
-			for (j = 1; j < blockGroups[i].length; j++)
-			ancestor = ancestor.getCommonAncestor(blockGroups[i][j]);
+			for (j = 1; j < blockGroups[i].length; j++) {
+				ancestor = ancestor.getCommonAncestor(blockGroups[i][j]);
+			}
 
 			divElement = new CKEDITOR.dom.element('div', editor.document);
 
@@ -153,8 +156,9 @@
 			for (j = 0; j < blockGroups[i].length; j++) {
 				currentNode = blockGroups[i][j];
 
-				while (!currentNode.getParent().equals(ancestor))
-				currentNode = currentNode.getParent();
+				while (!currentNode.getParent().equals(ancestor)) {
+					currentNode = currentNode.getParent();
+				}
 
 				// This could introduce some duplicated elements in array.
 				blockGroups[i][j] = currentNode;
@@ -170,7 +174,9 @@
 					currentNode.is && CKEDITOR.dom.element.setMarker(database, currentNode, 'block_processed', true);
 
 					// Establish new container, wrapping all elements in this group.
-					if (!j) divElement.insertBefore(currentNode);
+					if (!j) {
+						divElement.insertBefore(currentNode);
+					}
 
 					divElement.append(currentNode);
 				}
@@ -223,22 +229,6 @@
 						return checkElementRemovable.apply(this, [element, fullMatch]);
 					}
 			});
-
-			divLimitDefinition = (function() {
-
-				// Customzie from specialize blockLimit elements
-				var definition = CKEDITOR.tools.extend({}, CKEDITOR.dtd.$blockLimit);
-
-				// Exclude 'div' itself.
-				delete definition.div;
-
-				// Exclude 'td' and 'th' when 'wrapping table'
-				if (editor.config.div_wrapTable) {
-					delete definition.td;
-					delete definition.th;
-				}
-				return definition;
-			})();
 		},
 
 		init: function(editor) {
@@ -258,7 +248,6 @@
 					while ((range = rangeIterator.getNextRange())) // Only one =
 					{
 						iterator = range.createIterator();
-						iterator.enforceRealBlocks = true;
 
 						var block;
 						while ((block = iterator.getNextParagraph())) // Only one =
