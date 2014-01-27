@@ -304,7 +304,7 @@ CKEDITOR.dialog.add( 'colordialog', function( editor ) {
 						html: '<span>' + lang.highlight + '</span>\
 												<div id="' + hicolorId + '" style="border: 1px solid; height: 74px; width: 74px;"></div>\
 												<div id="' + hicolorTextId + '">&nbsp;</div><span>' + lang.selected + '</span>\
-												<div id="' + selHiColorId + '" style="border: 1px solid; height: 20px; width: 74px;"></div>'
+												<div id="' + selHiColorId + '" style="border: 1px solid; height: 20px; width: 74px; margin-bottom: 2px;"></div>'
 					},
 						{
 						type: 'text',
