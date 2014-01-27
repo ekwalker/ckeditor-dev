@@ -62,8 +62,10 @@ CKEDITOR.storage = CKEDITOR.tools.createClass({
 
 		setData: function(data) {
 			if (this.storage) {
-				this.storage.setItem(this.key, data);
-				return true;
+				try {
+					this.storage.setItem(this.key, data);
+					return true;
+				} catch (ex) {}
 			}
 
 			return false;
@@ -71,9 +73,11 @@ CKEDITOR.storage = CKEDITOR.tools.createClass({
 
 		setParam: function(name, value) {
 			if (this.storage) {
-				this.storage.setItem(this.key + '_' + name, value);
-				this.params[name] = value;
-				return true;
+				try {
+					this.storage.setItem(this.key + '_' + name, value);
+					this.params[name] = value;
+					return true;
+				} catch (ex) {}
 			}
 
 			return false;
