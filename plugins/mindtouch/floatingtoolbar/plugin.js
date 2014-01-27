@@ -57,12 +57,10 @@
 
 			if (scrollTop < maxScrollPos) {
 				$toolbar.addClass('cke_floatingtoolbar');
-			}
-			else {
+			} else {
 				$toolbar.removeClass('cke_floatingtoolbar');
 			}
-		}
-		else if (Math.round($toolbar.offset().top) != toolbarTop) {
+		} else if (Math.round($toolbar.offset().top) != toolbarTop) {
 			$toolbar.removeClass('cke_floatingtoolbar');
 		}
 
@@ -136,6 +134,9 @@
 
 				// @see EDT-293
 				editor.on('resize', dockToolbar, editor);
+
+				// on showing and hiding of the inforbar
+				editor.on('infobar', dockToolbar, editor);
 
 				var win = CKEDITOR.document.getWindow();
 
