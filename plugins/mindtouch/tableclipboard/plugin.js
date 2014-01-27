@@ -469,59 +469,6 @@
 			// override ZeroClipboard behavior
 			editor.on('zcBeforeCopy', onCopyCut);
 			editor.on('zcBeforeCut', onCopyCut);
-
-			if (editor.addMenuItems) {
-				editor.addMenuGroup('tablerowcopypaste', 101);
-				editor.addMenuGroup('tablerowproperties', 102);
-
-				editor.addMenuItems({
-					tablerow: {
-						label: editor.lang.table.row.menu,
-						group: 'tablerow',
-						order: 1,
-						getItems: function() {
-							return {
-								tablerow_insertBefore: CKEDITOR.TRISTATE_OFF,
-								tablerow_insertAfter: CKEDITOR.TRISTATE_OFF,
-								tablerow_delete: CKEDITOR.TRISTATE_OFF,
-								tablerow_cut: CKEDITOR.TRISTATE_OFF,
-								tablerow_copy: CKEDITOR.TRISTATE_OFF,
-								tablerow_pasteBefore: clipboard.isEmpty() ? CKEDITOR.TRISTATE_DISABLED : CKEDITOR.TRISTATE_OFF,
-								tablerow_pasteAfter: clipboard.isEmpty() ? CKEDITOR.TRISTATE_DISABLED : CKEDITOR.TRISTATE_OFF,
-								tablerow_properties: CKEDITOR.TRISTATE_OFF
-							};
-						}
-					},
-
-					tablerow_cut: {
-						label: lang.cutRows,
-						group: 'tablerowcopypaste',
-						command: 'rowCut',
-						order: 20
-					},
-
-					tablerow_copy: {
-						label: lang.copyRows,
-						group: 'tablerowcopypaste',
-						command: 'rowCopy',
-						order: 25
-					},
-
-					tablerow_pasteBefore: {
-						label: lang.pasteRowsBefore,
-						group: 'tablerowcopypaste',
-						command: 'rowPasteBefore',
-						order: 30
-					},
-
-					tablerow_pasteAfter: {
-						label: lang.pasteRowsAfter,
-						group: 'tablerowcopypaste',
-						command: 'rowPasteAfter',
-						order: 35
-					}
-				});
-			}
 		}
 	});
 })();
