@@ -41,14 +41,10 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	background: transparent;
 	clear: both;
 	height: 1.6em;
-	margin-left: -.7em;
+	margin-left: -.8em;
 	padding: 0;
 	position: static;
 	visibility: visible !important;
-}
-
-.cke_browser_ie .cke_inner .cke_infobar {
-	margin-left: -.8em;
 }
 
 .cke_top .cke_infobar .cke_infopanel_group
