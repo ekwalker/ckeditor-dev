@@ -80,6 +80,37 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 			}
 		}, editor, null, 1);
 
+		// remove scayt node after enter
+		// for webkit only: the filling char causes the issue
+		// @see EDT-544
+		if ( CKEDITOR.env.webkit ) {
+			editor.on( 'afterCommandExec', function( evt ) {
+				if ( evt.data.name == 'enter' ) {
+					var selection = editor.getSelection(),
+						range = selection && selection.getRanges()[ 0 ],
+						startContainer = range.startContainer;
+
+					if ( startContainer.type == CKEDITOR.NODE_TEXT ) {
+						startContainer = startContainer.getParent();
+					}
+
+					if ( startContainer.is( 'span' ) && startContainer.data( 'scaytid' ) ) {
+						range.setStartBefore( startContainer );
+						startContainer.remove( true );
+						range.collapse( true );
+						range.select();
+
+						var plugin = CKEDITOR.plugins.scayt;
+						if ( plugin.isScaytEnabled( editor ) ) {
+							window.setTimeout( function() {
+								plugin.getScayt( editor ).refresh();
+							}, 10 );
+						}
+					}
+				}
+			});
+		}
+
 		editor.on('contentDom', function() {
 			var isKeyboardSelection = function(ev) {
 				if (ev.name in { keydown: 1, keyup: 1 }) {
