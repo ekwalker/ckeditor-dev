@@ -47,14 +47,17 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 					return function(func) {
 						var focused = null,
 							isDirty = editor.checkDirty(),
-							selection = CKEDITOR.env.webkit && editor.getSelection(),
-							startElement = selection && selection.getStartElement();
+							selectionNode = CKEDITOR.env.webkit && this.getSelectionNode();
+
+						if ( selectionNode ) {
+							selectionNode = new CKEDITOR.dom.node( selectionNode );
+						}
 
 						// if user is editing pre element or highlighting text
 						// set "focused" to false to prevent inserting of bookmarks by scayt
 						// @see EDT-521
 						// @see EDT-624
-						if (this._selectionStart || (startElement && startElement.hasAscendant('pre', true))) {
+						if (this._selectionStart || (selectionNode && selectionNode.hasAscendant('pre', true))) {
 							focused = this._focused;
 							this._focused = false;
 						}
@@ -80,17 +83,18 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 				// @link {https://developer.mozilla.org/en-US/docs/Web/API/Node.normalize}
 				// so we don't normalize if user is editing pre block
 				// @see EDT-624
-				if (CKEDITOR.env.webkit) {
-					window.scayt.prototype.normalize = CKEDITOR.tools.override(window.scayt.prototype.normalize, function(originalFn) {
+				if ( CKEDITOR.env.webkit ) {
+					window.scayt.prototype.normalize = CKEDITOR.tools.override( window.scayt.prototype.normalize, function( originalFn ) {
 						return function() {
-							var selection = editor.getSelection(),
-								startElement = selection && selection.getStartElement();
-
-							if (startElement && startElement.hasAscendant('pre', true)) {
-								return;
+							var selectionNode = this.getSelectionNode();
+							if ( selectionNode ) {
+								selectionNode = new CKEDITOR.dom.node( selectionNode );
+								if ( selectionNode.hasAscendant( 'pre', true ) ) {
+									return;
+								}
 							}
 
-							return originalFn.call(this);
+							return originalFn.call( this );
 						};
 					});
 				}
