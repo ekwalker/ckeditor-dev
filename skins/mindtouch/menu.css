@@ -152,6 +152,16 @@ Special outer level classes used in this file:
 	background-color: #EFF0EF;
 }
 
+/* @see EDT-617 */
+.zcResetHover .cke_menubutton:hover
+{
+	background-color: inherit !important;
+}
+.zcResetHover .cke_menubutton.hover
+{
+	background-color: #EFF0EF !important;
+}
+
 .cke_panel_frame .cke_menubutton_label
 {
 	display: none;
