@@ -8,7 +8,10 @@
 	'use strict';
 
 	var containerTpl = CKEDITOR.addTemplate( 'sharedcontainer', '<div' +
-		' id="cke_{name}"' +
+		// avoid of id duplicates
+		// @author MindTouch
+		' id="cke_{name}_shared_{space}"' +
+		// ' id="cke_{name}"' +
 		' class="cke {id} cke_reset_all cke_chrome cke_editor_{name} cke_shared cke_detached cke_{langDir} ' + CKEDITOR.env.cssClass + '"' +
 		' dir="{langDir}"' +
 		' title="' + ( CKEDITOR.env.gecko ? ' ' : '' ) + '"' +
