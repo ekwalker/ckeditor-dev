@@ -62,8 +62,6 @@ ol,ul,dl
 {
 	/* IE7: reset rtl list margin. (#7334) */
 	*margin-right: 0px;
-	/* preserved spaces for list items with text direction other than the list. (#6249,#8049)*/
-	padding: 0 40px;
 }
 
 h1,h2,h3,h4,h5,h6
@@ -154,35 +152,6 @@ p.comment {
 
 .scayt-enabled pre .scayt-ignore {
 	background-image: none !important;
-}
-
-/* Panel styles */
-.cke_menubutton__preltpregtpre_format pre {
-	float: left;
-	cursor: default;
-	margin-right: 0.2em;
-	font-family: monospace;
-	line-height: 16px;
-}
-
-.cke_browser_ie6 .cke_menubutton__preltpregtpre_format pre,
-.cke_browser_ie7 .cke_menubutton__preltpregtpre_format pre,
-.cke_browser_ie8 .cke_menubutton__preltpregtpre_format pre {
-	line-height: 13px;
-}
-
-.cke_menubutton_on {
-	background-color: #D3D3D3;
-	display: block;
-}
-
-.cke_hc .cke_menubutton_on {
-	border: 2px solid;
-	padding: 0;
-}
-
-.cke_menubutton_on .cke_menubutton_icon {
-	background-color: #D0D2D0;
 }
 
 ::-moz-selection {

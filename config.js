@@ -90,8 +90,8 @@ CKEDITOR.editorConfig = function( config ) {
 		'mindtouch/table,' +
 		'mindtouch/tableclipboard,' +
 		'mindtouch/tableselection,' +
+		'mindtouch/tablehandlers,' +
 		'mindtouch/templates,' +
-		'mindtouch/tools,' +
 		'mindtouch/transformations,' +
 		'mindtouch/video,' +
 		'mindtouch/viewmenu,' +

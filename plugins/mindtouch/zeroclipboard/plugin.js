@@ -202,7 +202,7 @@
 		}
 	}
 
-	function createClipboard(editor, element, name, callback) {
+	function createClipboard(editor, element, name) {
 		var clipboard = new ZeroClipboard.Client();
 		clipboard.setHandCursor(false);
 
@@ -231,12 +231,20 @@
 		clipboard.addEventListener('mouseDown', function(client) {
 			if (editor.getCommand(name).state != CKEDITOR.TRISTATE_DISABLED) {
 				var cancel = (editor.fire('zcBefore' + CKEDITOR.tools.capitalize(name)) === false);
-				!cancel && callback.call(client, client);
+				if (!cancel) {
+					var isCut = (name == 'cut');
+					isCut && editor.fire('saveSnapshot');
+
+					var html = getSelectedHtml(editor, isCut);
+					client.setText(html);
+
+					isCut && editor.fire('saveSnapshot');
+				}
 			}
 		});
 
 		clipboard.glue(element.$, CKEDITOR.document.getBody().$, {
-			zIndex: Math.floor(editor.config.baseFloatZIndex + 1)
+			zIndex: Math.floor(editor.config.baseFloatZIndex + 2)
 		});
 
 		return clipboard;
@@ -272,7 +280,7 @@
 			return info;
 		};
 
-		var extendCommand = function(name, exec) {
+		var extendCommand = function(name) {
 			if (!toolbarClipboards[name]) {
 				var command = editor.getCommand(name),
 					button = command.uiItems[0];
@@ -282,7 +290,7 @@
 				}
 
 				button = doc.getById(button._.id);
-				toolbarClipboards[name] = createClipboard(editor, button, name, exec);
+				toolbarClipboards[name] = createClipboard(editor, button, name);
 			} else {
 				setToolbarStates(editor);
 			}
@@ -337,19 +345,8 @@
 		});
 
 		editor.on('pasteState', function(evt) {
-			!copyEnabled && extendCommand('copy', function(clipboard) {
-				var html = getSelectedHtml(editor);
-				clipboard.setText(html);
-			});
-
-			!cutEnabled && extendCommand('cut', function(clipboard) {
-				editor.fire('saveSnapshot');
-
-				var html = getSelectedHtml(editor, true);
-				clipboard.setText(html);
-
-				editor.fire('saveSnapshot');
-			});
+			!copyEnabled && extendCommand('copy');
+			!cutEnabled && extendCommand('cut');
 		});
 
 		editor.on('contentDom', function() {
@@ -371,10 +368,14 @@
 					item = contextMenu.items[i];
 					switch (item.name) {
 						case 'cut':
-							if (!cutEnabled) item.state = states.cut;
+							if (!cutEnabled) {
+								item.state = states.cut;
+							}
 							break;
 						case 'copy':
-							if (!copyEnabled) item.state = states.copy;
+							if (!copyEnabled) {
+								item.state = states.copy;
+							}
 							break;
 					}
 				}
@@ -422,9 +423,18 @@
 						count = menuItems.count(),
 						i, item;
 
-					var attach = function(menuItem, name, exec) {
+					var attach = function(menuItem, name) {
 						if (!contextMenuClipboards[name]) {
-							contextMenuClipboards[name] = createClipboard(editor, menuItem, name, exec);
+							contextMenuClipboards[name] = createClipboard(editor, menuItem, name);
+							// use this trick to reset hover state of menu item
+							// when cursor is over the flash element
+							// @see EDT-617
+							panel.element.on('mouseleave', function() {
+								panel.getHolderElement().addClass('zcResetHover');
+							});
+							panel.element.on('mouseenter', function() {
+								panel.getHolderElement().removeClass('zcResetHover');
+							});
 						} else {
 							contextMenuClipboards[name].reposition(menuItem.$);
 						}
@@ -434,19 +444,9 @@
 						item = menuItems.getItem(i);
 
 						if (item.hasClass('cke_menubutton__copy') && !copyEnabled) {
-							attach(item, 'copy', function(clipboard) {
-								var html = getSelectedHtml(editor);
-								clipboard.setText(html);
-							});
+							attach(item, 'copy');
 						} else if (item.hasClass('cke_menubutton__cut') && !cutEnabled) {
-							attach(item, 'cut', function(clipboard) {
-								editor.fire('saveSnapshot');
-
-								var html = getSelectedHtml(editor, true);
-								clipboard.setText(html);
-
-								editor.fire('saveSnapshot');
-							});
+							attach(item, 'cut');
 						}
 					}
 				};
