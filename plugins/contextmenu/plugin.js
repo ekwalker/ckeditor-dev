@@ -139,7 +139,16 @@ CKEDITOR.plugins.add( 'contextmenu', {
 		var contextMenu = editor.contextMenu = new CKEDITOR.plugins.contextMenu( editor );
 
 		editor.on( 'contentDom', function() {
-			contextMenu.addTarget( editor.editable(), editor.config.browserContextMenuOnCtrl !== false );
+			/**
+			 * If editor is not in inline mode use document as context menu target instead of body
+			 * @see EDT-589
+			 * @author MindTouch
+			 */
+			var target = editor.editable();
+			if ( !target.isInline() ) {
+				target = editor.document.getDocumentElement();
+			}
+			contextMenu.addTarget( target, editor.config.browserContextMenuOnCtrl !== false );
 		});
 
 		editor.addCommand( 'contextMenu', {

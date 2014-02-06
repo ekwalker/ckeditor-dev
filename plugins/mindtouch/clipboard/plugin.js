@@ -85,6 +85,80 @@
 
 				editor.on( 'insertHtml', fixNestedList, null, null, 100 );
 			}
+
+			if ( CKEDITOR.env.webkit ) {
+				var clipboard = '';
+
+				var saveSelectedText = function() {
+					var sel = editor.getSelection();
+					clipboard = sel ? sel.getSelectedText().replace( /\s+/g, '' ) : '';
+				};
+
+				editor.on( 'key', function( evt ) {
+					switch ( evt.data.keyCode ) {
+						case CKEDITOR.CTRL + 67:
+						case CKEDITOR.CTRL + 88:
+							saveSelectedText();
+							break;
+					}
+				});
+
+				editor.on( 'beforeCommandExec', function( evt ) {
+					if ( evt.data.name in { 'copy':1, 'cut':1 } ) {
+						saveSelectedText();
+					}
+				});
+
+				editor.on( 'zcBeforeCopy', saveSelectedText, null, null, 100 );
+				editor.on( 'zcBeforeCut', saveSelectedText, null, null, 100 );
+
+				/*
+				 * Webkit adds inline styles on copying,
+				 * so if the content was copied not from editor, remove inline styles
+				 * @see #0008224
+				 * @see #0007885
+				 * @see EDT-247
+				 * @see EDT-590
+				 */
+				editor.on( 'paste', function( evt ) {
+					if ( evt.data.type != 'html' ) {
+						return;
+					}
+
+					var div = editor.document.createElement( 'div' ),
+						dataModified = false;
+
+					div.setHtml( evt.data.dataValue );
+
+					// Webkit adds white background color to pre blocks on copying
+					var preElements = div.getElementsByTag( 'pre' ),
+						count = preElements.count(),
+						i, pre;
+
+					for ( i = 0 ; i < count ; i++ ) {
+						pre = preElements.getItem( i );
+						if ( pre.getStyle( 'background-color' ) == 'rgb(255, 255, 255)' ) {
+							pre.removeStyle( 'background-color' );
+							dataModified = true;
+						}
+					}
+
+					// check if the content was copied out of the editor
+					// and if so remove any style attributes
+					if ( div.getText().replace( /\s+/g, '' ) !== clipboard ) {
+						var node = div;
+						while ( node = node.getNextSourceNode( false, CKEDITOR.NODE_ELEMENT ) ) {
+							node.removeAttribute( 'style' );
+						}
+
+						dataModified = true;
+					}
+
+					if ( dataModified ) {
+						evt.data.dataValue = div.getHtml();
+					}
+				});
+			}
 		}
 	});
 })();

@@ -352,7 +352,7 @@
 						break;
 					case 8: /* BACKSPACE */
 					case 46: /* DEL */
-						if (!CKEDITOR.env.webkit && removePagebreakOrHr.call(editor, keyCode)) {
+						if (removePagebreakOrHr.call(editor, keyCode)) {
 							evt.cancel();
 						}
 						

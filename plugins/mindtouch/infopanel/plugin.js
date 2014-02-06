@@ -200,12 +200,16 @@
 		},
 
 		show: function() {
+			if (typeof this.onShow === 'function' && !this.getContainer().isVisible() && this.onShow.call(this)) {
+				return this;
+			}
+
 			this.getContainer().setStyle('display', '');
 			return this;
 		},
 
 		hide: function() {
-			if (typeof this.onHide === 'function' && this.onHide.call(this)) {
+			if (typeof this.onHide === 'function' && this.getContainer().isVisible() && this.onHide.call(this)) {
 				return this;
 			}
 

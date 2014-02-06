@@ -101,22 +101,21 @@ CKEDITOR.plugins.add( 'onchange',
 					}, 100);
 				}
 
-				editor.document.on( 'keydown', function( event )
-					{
-						// Do not capture CTRL hotkeys.
-						if ( event.data.$.ctrlKey ||event.data.$.metaKey )
-							return;
+				editor.editable().on( 'keydown', function( event ) {
+					// Do not capture CTRL hotkeys.
+					if ( event.data.$.ctrlKey ||event.data.$.metaKey )
+						return;
 
-						var keyCode = event.data.$.keyCode;
-						// Filter movement keys and related
-						if (keyCode==8 || keyCode == 13 || keyCode == 32 || ( keyCode >= 46 && keyCode <= 90) || ( keyCode >= 96 && keyCode <= 111) || ( keyCode >= 186 && keyCode <= 222) || keyCode == 229)
-							somethingChanged();
-					});
+					var keyCode = event.data.$.keyCode;
+					// Filter movement keys and related
+					if (keyCode==8 || keyCode == 13 || keyCode == 32 || ( keyCode >= 46 && keyCode <= 90) || ( keyCode >= 96 && keyCode <= 111) || ( keyCode >= 186 && keyCode <= 222) || keyCode == 229)
+						somethingChanged();
+				});
 
-					// Firefox OK
-				editor.document.on( 'drop', somethingChanged);
-					// IE OK
-				editor.document.getBody().on( 'drop', somethingChanged);
+				// Firefox OK
+				editor.document.getDocumentElement().on( 'drop', somethingChanged );
+				// IE OK
+				editor.document.getBody().on( 'drop', somethingChanged );
 			});
 
 		// Detect changes in source mode

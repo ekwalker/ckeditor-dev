@@ -152,18 +152,31 @@ Special outer level classes used in this file:
 	background-color: #EFF0EF;
 }
 
-.cke_menubutton_on {
+.cke_menubutton_on
+{
 	background-color: #D3D3D3;
 	display: block;
 }
 
-.cke_hc .cke_menubutton_on {
+.cke_hc .cke_menubutton_on
+{
 	border: 2px solid;
 	padding: 0;
 }
 
-.cke_menubutton_on .cke_menubutton_icon {
+.cke_menubutton_on .cke_menubutton_icon
+{
 	background-color: #D0D2D0;
+}
+
+/* @see EDT-617 */
+.zcResetHover .cke_menubutton:hover
+{
+	background-color: inherit !important;
+}
+.zcResetHover .cke_menubutton.hover
+{
+	background-color: #EFF0EF !important;
 }
 
 .cke_panel_frame .cke_menubutton_label

@@ -46,12 +46,15 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 				window.scayt.prototype._setContent = CKEDITOR.tools.override(window.scayt.prototype._setContent, function(originalFn) {
 					return function(func) {
 						var focused = null,
-							isDirty = editor.checkDirty();
+							isDirty = editor.checkDirty(),
+							selection = CKEDITOR.env.webkit && editor.getSelection(),
+							startElement = selection && selection.getStartElement();
 
-						// if user is highlighting text, set "focused" to false
-						// to prevent inserting of bookmarks by scayt
+						// if user is editing pre element or highlighting text
+						// set "focused" to false to prevent inserting of bookmarks by scayt
 						// @see EDT-521
-						if (this._selectionStart) {
+						// @see EDT-624
+						if (this._selectionStart || (startElement && startElement.hasAscendant('pre', true))) {
 							focused = this._focused;
 							this._focused = false;
 						}
@@ -71,6 +74,27 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 					};
 				});
 
+				// temporary workaround until it won't be fixed in scayt core
+				// the issue: scayt core normalizes the body on hitting enter key
+				// and may cause the issues on editing pre element (removing of filling char)
+				// @link {https://developer.mozilla.org/en-US/docs/Web/API/Node.normalize}
+				// so we don't normalize if user is editing pre block
+				// @see EDT-624
+				if (CKEDITOR.env.webkit) {
+					window.scayt.prototype.normalize = CKEDITOR.tools.override(window.scayt.prototype.normalize, function(originalFn) {
+						return function() {
+							var selection = editor.getSelection(),
+								startElement = selection && selection.getStartElement();
+
+							if (startElement && startElement.hasAscendant('pre', true)) {
+								return;
+							}
+
+							return originalFn.call(this);
+						};
+					});
+				}
+
 				// @see EDT-527
 				window.scayt.minTime = 500;
 				window.scayt.time = 500;
@@ -79,6 +103,37 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 				window.scayt.prototype.nextBlockInterval = 0;
 			}
 		}, editor, null, 1);
+
+		// remove scayt node after enter
+		// for webkit only: the filling char causes the issue
+		// @see EDT-544
+		if ( CKEDITOR.env.webkit ) {
+			editor.on( 'afterCommandExec', function( evt ) {
+				if ( evt.data.name == 'enter' ) {
+					var selection = editor.getSelection(),
+						range = selection && selection.getRanges()[ 0 ],
+						startContainer = range.startContainer;
+
+					if ( startContainer.type == CKEDITOR.NODE_TEXT ) {
+						startContainer = startContainer.getParent();
+					}
+
+					if ( startContainer.is( 'span' ) && startContainer.data( 'scaytid' ) ) {
+						range.setStartBefore( startContainer );
+						startContainer.remove( true );
+						range.collapse( true );
+						range.select();
+
+						var plugin = CKEDITOR.plugins.scayt;
+						if ( plugin.isScaytEnabled( editor ) ) {
+							window.setTimeout( function() {
+								plugin.getScayt( editor ).refresh();
+							}, 10 );
+						}
+					}
+				}
+			});
+		}
 
 		editor.on('contentDom', function() {
 			var isKeyboardSelection = function(ev) {
@@ -117,10 +172,11 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 				}
 			};
 
-			editor.document.on('mousedown', onSelectionStart);
-			editor.document.on('keydown', onSelectionStart);
-			editor.document.on('mouseup', onSelectionEnd);
-			editor.document.on('keyup', onSelectionEnd);
+			var editable = editor.editable();
+			editable.on('mousedown', onSelectionStart);
+			editable.on('keydown', onSelectionStart);
+			editable.on('mouseup', onSelectionEnd);
+			editable.on('keyup', onSelectionEnd);
 		});
 	}
 });
