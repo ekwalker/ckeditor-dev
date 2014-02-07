@@ -37,8 +37,8 @@
 			return false;
 		}
 
-		var table = startCell.getAscendant( 'table' );
-		table.removeClass( 'cke_table_selected' );
+		var editor = this,
+			table = startCell.getAscendant( 'table' );
 
 		if ( !endCell.getAscendant( 'table' ).equals( table ) ) {
 			return false;
@@ -68,21 +68,25 @@
 		return true;
 	}
 
-	function removeCellsSelection( editor ) {
-		var tables = editor.document.getElementsByTag( 'table' );
+	function removeCellsSelection() {
+		var editor = this,
+			tables = editor.document.getElementsByTag( 'table' ),
+			removed = false;
 
 		for ( var k = 0 ; k < tables.count(); k++ ) {
 			var table = tables.getItem( k );
-			
 			for ( var i = 0 ; i < table.$.rows.length ; i++ ) {
 				for ( var j = 0 ; j < table.$.rows[ i ].cells.length ; j++ ) {
 					var cell = new CKEDITOR.dom.element( table.$.rows[ i ].cells[ j ] );
-					cell.removeClass( 'cke_cell_selected' );
+					if ( cell.hasClass( 'cke_cell_selected' ) ) {
+						cell.removeClass( 'cke_cell_selected' );
+						removed = true;
+					}
 				}
 			}
-
-			table.removeClass( 'cke_table_selected' );
 		}
+
+		removed && editor.getSelection().reset();
 	}
 
 	CKEDITOR.plugins.add('mindtouch/tableselection', {
@@ -92,14 +96,26 @@
 					startCell = null
 					startTable = null;
 
+				// cancel mousemove event on table resizer element
+				var cancelTableResizer = function( ev ) {
+					if ( startCell ) {
+						var temp = ev.data.getTarget().getAscendant( 'div', true );
+						if ( temp && temp.data( 'cke-temp' ) ) {
+							ev.data.preventDefault();
+						}
+					}
+				};
+
 				var release = function( removeSelection ) {
 					editor.setReadOnly( false );
 					startTable && startTable.selectable();
 
-					removeSelection && removeCellsSelection( editor );
+					removeSelection && removeCellsSelection.call( editor );
 
 					startCell = null;
 					startTable = null;
+
+					editor.document.removeListener( 'mousemove', cancelTableResizer );
 				};
 
 				editable.on( 'mousedown', function( ev ) {
@@ -107,6 +123,8 @@
 					startCell = target.getAscendant( { td:1, th:1 }, true );
 					startTable = startCell && startCell.getAscendant( 'table' );
 					startTable && startTable.unselectable();
+
+					editor.document.on( 'mousemove', cancelTableResizer );
 				});
 
 				editable.on( 'mouseup', function( ev ) {
@@ -122,16 +140,40 @@
 				});
 
 				editable.on( 'mouseover', function( ev ) {
-					if ( startCell && startTable ) {
+					if ( startCell ) {
 						var target = ev.data.getTarget(),
 							endCell = target.getAscendant( { td:1, th:1 }, true );
-						if ( !selectCells( startCell, endCell ) ) {
-							startTable.addClass( 'cke_table_selected' );
-						}
+
 						editor.setReadOnly( true );
+
+						if ( selectCells.call( editor, startCell, endCell ) ) {
+							editor.forceNextSelectionCheck();
+							editor.selectionChange( true );
+						}
 					}
 				});
 			});
+
+			editor.on( 'insertElement', removeCellsSelection, editor );
+			editor.on( 'afterPaste', removeCellsSelection, editor );
+			editor.on( 'afterTablePaste', removeCellsSelection, editor );
+
+			// cell selected class should be removed from the snapshot
+			// to prevent saving selection in undo snapshots
+			editor.on( 'getSnapshot', function( ev ) {
+				if ( typeof ev.data == 'string' ) {
+					ev.data = ev.data.replace( /(<.+?\s+)class="((?:|.*?\s+)cke_cell_selected(?:|\s+.*?))"(.*?>)/ig, function( str, tagStart, classNames, tagEnd ) {
+						var regex = new RegExp( '(?:^|\\s+)cke_cell_selected(?=\\s|$)', 'i' );
+						classNames = classNames.replace( regex, '' ).replace( /^\s+/, '' );
+
+						if ( classNames ) {
+							return tagStart + 'class="' + classNames + '"' + tagEnd;
+						} else {
+							return CKEDITOR.tools.rtrim( tagStart ) + tagEnd;
+						}
+					});
+				}
+			}, null, null, 1000 );
 		}
 	});
 
@@ -150,12 +192,12 @@
 				return cells;
 			};
 
-			var selectCells = getSelectedCells( td ).concat( getSelectedCells( th ) );
+			var selectedCells = getSelectedCells( td ).concat( getSelectedCells( th ) );
 
-			if ( selectCells.length ) {
+			if ( selectedCells.length ) {
 				var ranges = [];
-				for ( var i = 0 ; i < selectCells.length ; i++ ) {
-					var cell = selectCells[ i ];
+				for ( var i = 0 ; i < selectedCells.length ; i++ ) {
+					var cell = selectedCells[ i ];
 
 					if ( onlyEditables && !cell.isEditable() ) {
 						continue;
@@ -163,8 +205,8 @@
 
 					var range = new CKEDITOR.dom.range( this.document );
 
-					range.setStartBefore( cell );
-					range.setEndAfter( cell );
+					range.setStartAt( cell, CKEDITOR.POSITION_AFTER_START );
+					range.setEndAt( cell, CKEDITOR.POSITION_BEFORE_END );
 
 					ranges.push( range );
 				}

@@ -162,8 +162,6 @@ p.comment {
 	background-color: #42aae7;
 }
 
-.cke_cell_selected,
-.cke_table_selected td,
-.cke_table_selected th {
+.cke_cell_selected {
 	background-color: #42aae7;
 }
