@@ -51,13 +51,17 @@ Special outer level classes used in this file:
 	/* This is <span>, so transform it into a block.*/
 	display: block;
 	border: 1px solid #b6b6b6;
+	border-top: none;
 	padding: 0;
 	border-radius: 0 0 5px 5px;
 }
 
-#cke_floatingtoolbar #cke_editarea
+.cke_floatingtoolbar .cke_shared
 {
 	border-radius: 5px 5px 0 0;
+	border-top: 1px solid #b6b6b6;
+	border-bottom: none;
+	z-index: 99;
 }
 
 /* The inner boundary of the interface. */

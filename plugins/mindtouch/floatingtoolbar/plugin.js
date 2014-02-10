@@ -30,132 +30,146 @@
  * @fileOverview Floating toolbar plugin.
  */
 
- (function () {
-	var toolbarSpaceId = 'cke_floatingtoolbar';
+(function () {
+	var dockId = CKEDITOR.tools.getNextId(),
+		toolbarId = CKEDITOR.tools.getNextId();
 
-	var dockToolbar = function (ev) {
-		var editor = this,
-			$toolbarContainer = $('#' + toolbarSpaceId),
-			$toolbar = $toolbarContainer.children().first(),
-			top;
+	var fixToolbar = ( function() {
+		var $toolbar, $dock, $inner, prevPosition, prevHeight;
+		return function() {
+			var editor = this,
+				cssLength = CKEDITOR.tools.cssLength;
 
-		top = parseInt($toolbar.css('top'), 10);
-		if (isNaN(top)) {
-			top = editor.config.floating_toolbar_top || 0;
-		}
+			if ( !$toolbar ) {
+				$dock = $( '#' + dockId );
+				$toolbar = $( '#' + toolbarId ).css( 'width', cssLength( $dock.width() ) );
+			}
 
-		var scrollTop = $(CKEDITOR.document.$).scrollTop() + top,
-			toolbarTop = Math.round($toolbarContainer.offset().top);
+			var position = $dock.offset();
+			if ( !prevPosition || prevPosition.left !== position.left ) {
+				$toolbar.css( 'left', cssLength( position.left ) );
+				prevPosition = position;
+			}
 
-		$toolbarContainer.css('height', $toolbar.innerHeight() + 'px');
+			// toolbar height may vary
+			var height = $toolbar.innerHeight();
+			if ( height !== prevHeight ) {
+				$dock.css( 'height', cssLength( height ) );
+				prevHeight = height;
+			}
 
-		if (scrollTop > toolbarTop) {
-			var contents = editor.ui.space( 'contents' ),
-				maxScrollPos = contents.getDocumentPosition().y + $(contents.$).height() - $toolbar.height();
+			var top = editor.config.floating_toolbar_top || 0,
+				scrollTop = $( CKEDITOR.document.$ ).scrollTop() + top,
+				toolbarPosition = 'fixed';
 
-			$toolbar.css('width', $toolbar.width() + 'px');
+			if ( scrollTop > Math.round( position.top ) ) {
+				var contents = editor.ui.space( 'contents' ),
+					maxScrollPos = contents.getDocumentPosition().y + $( contents.$ ).height() - $toolbar.height();
 
-			if (scrollTop < maxScrollPos) {
-				$toolbar.addClass('cke_floatingtoolbar');
+				if ( scrollTop > maxScrollPos ) {
+					toolbarPosition = 'absolute';
+					top = position.top;
+				}
+			} else if ( $toolbar.offset().top != position.top ) {
+				toolbarPosition = 'absolute';
+				top = position.top;
 			} else {
-				$toolbar.removeClass('cke_floatingtoolbar');
+				return;
 			}
-		} else if (Math.round($toolbar.offset().top) != toolbarTop) {
-			$toolbar.removeClass('cke_floatingtoolbar');
-		}
 
-		// @see EDT-293
-		CKEDITOR.env.webkit && $toolbarContainer.find('div.cke_inner').css('position', 'static').css('position', 'relative');
-	};
+			$toolbar.css( { position: toolbarPosition, top: cssLength( top ) } );
 
-	function scrollToTop(ev) {
-		var editor = ev.editor;
+			// @see EDT-293
+			if ( CKEDITOR.env.webkit ) {
+				if ( !$inner ) {
+					$inner = $toolbar.find( 'div.cke_inner' );
+				}
+				$inner.css( 'position', 'static' ).css( 'position', 'relative' );
+			}
+		};
+	})();
 
-		if (editor.config.floating_toolbar !== false) {
-			var win = CKEDITOR.document.getWindow(),
+	var scrollToTop = ( function() {
+		var position;
+		return function() {
+			var editor = this,
+				win = CKEDITOR.document.getWindow(),
 				container = editor.container,
-				position = container.getDocumentPosition(),
-				scroll = win.getScrollPosition(),
-				$toolbar = $('#' + toolbarSpaceId).children().first(),
-				y = position.y - $toolbar.height();
+				scroll = win.getScrollPosition();
 
-			if ($toolbar.css('position') == 'fixed') {
-				var top = parseInt($toolbar.css('top'), 10);
-				if (!isNaN(top)) {
-					y -= top;
+			if ( !position ) {
+				position = container.getDocumentPosition();
+
+				if ( CKEDITOR.env.ie && CKEDITOR.env.version < 9 ) {
+					position.y -= $( '#' + toolbarId ).height();
 				}
 			}
 
-			if (y < 0) {
-				y = 0;
+			if ( scroll.y > position.y ) {
+				win.$.scrollTo( 0, position.y );
 			}
+		};
+	})();
 
-			if (scroll.y > y) {
-				win.$.scrollTo(0, y);
-			}
-		}
-	}
+	CKEDITOR.plugins.add( 'mindtouch/floatingtoolbar', {
+		requires: 'sharedspace',
+		beforeInit: function ( editor ) {
+			// @see EDT-449
+			if ( CKEDITOR.ui.floatPanel && editor.config.floating_toolbar !== false && editor.elementMode !== CKEDITOR.ELEMENT_MODE_INLINE ) {
+				CKEDITOR.ui.floatPanel = CKEDITOR.tools.override( CKEDITOR.ui.floatPanel, function( floatPanel ) {
+					return function( editor, parentElement, definition, level ) {
+						if ( definition.toolbarRelated ) {
+							parentElement = CKEDITOR.document.getById( 'cke_' + editor.name + '_shared_top' );
+						}
 
-	CKEDITOR.plugins.add('mindtouch/floatingtoolbar', {
-		beforeInit: function (editor) {
-			if (editor.config.floating_toolbar !== false && editor.elementMode !== CKEDITOR.ELEMENT_MODE_INLINE) {
-				var top = editor.config.floating_toolbar_top || 0,
-					css = [
-						'#' + toolbarSpaceId + ' .cke_floatingtoolbar { position: fixed !important; top: ' + top + 'px; }',
-						'#' + toolbarSpaceId + ' .cke_shared { display: block; position: relative; z-index: 99; border-bottom: none; }'
-					];
-
-				CKEDITOR.document.appendStyleText(css.join(''));
-
-				// @see EDT-449
-				if (CKEDITOR.ui.floatPanel) {
-					CKEDITOR.ui.floatPanel = CKEDITOR.tools.override(CKEDITOR.ui.floatPanel, function(floatPanel) {
-						return function() {
-							var elementMode = editor.elementMode;
-							// temporarily set inline mode to render panel as child of toolbar
-							editor.elementMode = CKEDITOR.ELEMENT_MODE_INLINE;
-							floatPanel.apply(this, arguments);
-							// restore element mode
-							editor.elementMode = elementMode;
-						};
-					});
-				}
+						floatPanel.call( this, editor, parentElement, definition, level );
+					};
+				});
 			}
 		},
-
-		init: function (editor) {
-			if (editor.config.floating_toolbar !== false && editor.elementMode !== CKEDITOR.ELEMENT_MODE_INLINE) {
+		init: function ( editor ) {
+			if ( editor.config.floating_toolbar !== false && editor.elementMode !== CKEDITOR.ELEMENT_MODE_INLINE ) {
 				editor.config.sharedSpaces = editor.config.sharedSpaces || {};
-				editor.config.sharedSpaces.top = toolbarSpaceId;
+				editor.config.sharedSpaces.top = toolbarId;
 
-				var toolbarContainer = CKEDITOR.dom.element.createFromHtml('<div></div>', CKEDITOR.document);
-				toolbarContainer.setAttribute('id', toolbarSpaceId);
-				toolbarContainer.insertBefore(editor.element);
+				// this container will reserve the space for the toolbar
+				var toolbarDock = CKEDITOR.dom.element.createFromHtml( '<div></div>', CKEDITOR.document );
+				toolbarDock.setAttribute( 'id', dockId );
+				toolbarDock.insertBefore( editor.element );
+
+				// the toolbar will be rendered into this container
+				var toolbarContainer = CKEDITOR.dom.element.createFromHtml( '<div></div>', CKEDITOR.document );
+				toolbarContainer.setAttribute( 'id', toolbarId );
+				toolbarContainer.addClass( 'cke_floatingtoolbar' );
+				toolbarContainer.appendTo( CKEDITOR.document.getBody() );
 
 				// @see EDT-293
-				editor.on('resize', dockToolbar, editor);
+				editor.on( 'resize', fixToolbar, editor );
 
 				// on showing and hiding of the inforbar
-				editor.on('infobar', dockToolbar, editor);
+				editor.on( 'infobar', fixToolbar, editor );
 
 				var win = CKEDITOR.document.getWindow();
 
-				editor.on('uiReady', function (ev) {
-					win.on('scroll', dockToolbar, editor);
+				editor.on( 'uiReady', function ( ev ) {
+					win.on( 'scroll', fixToolbar, editor );
+					win.on( 'resize', fixToolbar, editor );
 				});
 
-				editor.on('destroy', function (ev) {
-					win.removeListener('scroll', dockToolbar);
+				editor.on( 'destroy', function ( ev ) {
+					win.removeListener( 'scroll', fixToolbar );
+					win.removeListener( 'resize', fixToolbar );
 					toolbarContainer.remove();
+					toolbarWrapper.remove();
 				});
 
-				editor.on('mode', scrollToTop, null, null, 1);
-				editor.on('contentDom', scrollToTop, null, null, 1);
-				editor.on('scrollToTop', scrollToTop, null, null, 1);
+				editor.on( 'mode', scrollToTop, editor, null, 1 );
+				editor.on( 'contentDom', scrollToTop, editor, null, 1 );
+				editor.on( 'scrollToTop', scrollToTop, editor, null, 1 );
 
-				editor.on('afterCommandExec', function (ev) {
-					if (ev.data.name == 'toolbarCollapse') {
-						dockToolbar.call(editor);
+				editor.on( 'afterCommandExec', function ( ev ) {
+					if ( ev.data.name == 'toolbarCollapse' ) {
+						fixToolbar.call( editor );
 					}
 				});
 			}
