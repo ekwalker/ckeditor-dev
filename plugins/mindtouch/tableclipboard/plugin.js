@@ -470,6 +470,11 @@
 			editor.on('zcBeforeCopy', onCopyCut);
 			editor.on('zcBeforeCut', onCopyCut);
 
+			// @see EDT-637
+			editor.on('blur', function() {
+				clipboard.reset();
+			});
+
 			if (editor.addMenuItems) {
 				editor.addMenuGroup('tablerowcopypaste', 101);
 				editor.addMenuGroup('tablerowproperties', 102);
