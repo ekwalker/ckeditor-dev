@@ -333,38 +333,45 @@
 				});
 			}
 
-			if (htmlFilter && editor.config.allowedContent === true) {
-				htmlFilter && htmlFilter.addRules({
-					elements: {
-						/**
-						 * remove all node elements inside of special pre elements
-						 * @see EDT-523
-						 */
-						pre: function(element) {
-							// get an array of text nodes + br nodes of element
-							var getText = function(element) {
-								var text = [];
+			if ( htmlFilter ) {
+				if ( editor.config.allowedContent === true ) {
+					htmlFilter.addRules({
+						elements: {
+							/**
+							 * remove all node elements inside of special pre elements
+							 * @see EDT-523
+							 */
+							pre: function(element) {
+								if ( element.attributes[ 'class' ] && /(^|\s+)script(-|\s+|$)/.test( element.attributes[ 'class' ] ) ) {
+									var text = [];
+									element.forEach( function( child ) {
+										if ( child.type == CKEDITOR.NODE_TEXT || child.name == 'br' ) {
+											text.push( child );
+										}
+									}, null, true );
 
-								for (var i = 0; i < element.children.length; i++) {
-									var child = element.children[i];
-
-									if (child.type == CKEDITOR.NODE_ELEMENT && child.name != 'br') {
-										text = text.concat(getText(child));
-									} else {
-										text.push(child);
+									element.children.splice( 0, element.children.length );
+									for ( var i = 0; i < text.length; i++ ) {
+										element.add( text[ i ] );
 									}
 								}
-
-								return text;
-							};
-
-							if (element.attributes['class'] && /(^|\s+)script(-|\s+|$)/.test(element.attributes['class'])) {
-								var text = getText(element);
-								element.children.splice(0, element.children.length);
-								for (var i = 0; i < text.length; i++) {
-									element.add(text[i]);
-								}
 							}
+						}
+					});
+				}
+
+				htmlFilter.addRules({
+					elements: {
+						/**
+						 * replace &nbsp; with space inside pre element
+						 * @see EDT-523
+						 */
+						pre: function( element ) {
+							element.forEach( function( child ) {
+								if ( child.type == CKEDITOR.NODE_TEXT ) {
+									child.value = child.value.replace( /&nbsp;/ig, ' ' );
+								}
+							}, null, true );
 						}
 					}
 				});
