@@ -58,9 +58,9 @@
 			for ( var j = 0 ; j < table.$.rows[ i ].cells.length ; j++ ) {
 				var cell = new CKEDITOR.dom.element( table.$.rows[ i ].cells[ j ] );
 				if ( i >= fromRowIndex && i <= toRowIndex && j >= fromCellIndex && j <= toCellIndex ) {
-					cell.addClass( 'cke_cell_selected' );
+					cell.data( 'cke-cell-selected', 1 );
 				} else {
-					cell.removeClass( 'cke_cell_selected' );
+					cell.data( 'cke-cell-selected', false );
 				}
 			}
 		}
@@ -78,8 +78,8 @@
 			for ( var i = 0 ; i < table.$.rows.length ; i++ ) {
 				for ( var j = 0 ; j < table.$.rows[ i ].cells.length ; j++ ) {
 					var cell = new CKEDITOR.dom.element( table.$.rows[ i ].cells[ j ] );
-					if ( cell.hasClass( 'cke_cell_selected' ) ) {
-						cell.removeClass( 'cke_cell_selected' );
+					if ( cell.data( 'cke-cell-selected' ) ) {
+						cell.data( 'cke-cell-selected', false );
 						removed = true;
 					}
 				}
@@ -162,16 +162,7 @@
 			// to prevent saving selection in undo snapshots
 			editor.on( 'getSnapshot', function( ev ) {
 				if ( typeof ev.data == 'string' ) {
-					ev.data = ev.data.replace( /(<.+?\s+)class="((?:|.*?\s+)cke_cell_selected(?:|\s+.*?))"(.*?>)/ig, function( str, tagStart, classNames, tagEnd ) {
-						var regex = new RegExp( '(?:^|\\s+)cke_cell_selected(?=\\s|$)', 'i' );
-						classNames = classNames.replace( regex, '' ).replace( /^\s+/, '' );
-
-						if ( classNames ) {
-							return tagStart + 'class="' + classNames + '"' + tagEnd;
-						} else {
-							return CKEDITOR.tools.rtrim( tagStart ) + tagEnd;
-						}
-					});
+					ev.data = ev.data.replace( /\s+data-cke-cell-selected=".*?"/g, '' );
 				}
 			}, null, null, 1000 );
 		}
@@ -185,7 +176,7 @@
 			var getSelectedCells = function( cellList ) {
 				var cells = [];
 				for ( var i = 0 ; i < cellList.count() ; i++ ) {
-					if ( cellList.getItem( i ).hasClass( 'cke_cell_selected' ) ) {
+					if ( cellList.getItem( i ).data( 'cke-cell-selected' ) ) {
 						cells.push( cellList.getItem( i ) );
 					}
 				}
