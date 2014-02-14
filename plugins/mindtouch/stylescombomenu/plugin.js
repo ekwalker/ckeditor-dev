@@ -98,10 +98,13 @@
 							}, this, {keystroke: styleDefinition.keystroke, style: style});
 						}
 
+						styleDefinition.title = styleDefinition.title || '';
+
 						editor.addMenuItem(buttonName, {
 							group: 'style_' + group,
 							label: styleName,
 							style: style,
+							title: CKEDITOR.tools.htmlEncode(styleDefinition.title),
 							onClick: function() {
 								styleCommand(this.style);
 							}
