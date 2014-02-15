@@ -54,18 +54,21 @@
 		fromRowIndex = Math.min( startRow.$.rowIndex, endRow.$.rowIndex );
 		toRowIndex = Math.max( startRow.$.rowIndex, endRow.$.rowIndex );
 
+		var selectedCellsCount = 0;
+
 		for ( var i = 0 ; i < table.$.rows.length ; i++ ) {
 			for ( var j = 0 ; j < table.$.rows[ i ].cells.length ; j++ ) {
 				var cell = new CKEDITOR.dom.element( table.$.rows[ i ].cells[ j ] );
 				if ( i >= fromRowIndex && i <= toRowIndex && j >= fromCellIndex && j <= toCellIndex ) {
 					cell.data( 'cke-cell-selected', 1 );
+					selectedCellsCount++;
 				} else {
 					cell.data( 'cke-cell-selected', false );
 				}
 			}
 		}
 
-		return true;
+		return !!selectedCellsCount;
 	}
 
 	function removeCellsSelection() {
@@ -93,6 +96,7 @@
 		init: function(editor) {
 			editor.on( 'contentDom', function() {
 				var editable = editor.editable(),
+					cancelClickEvent = false,
 					startCell = null
 					startTable = null;
 
@@ -107,8 +111,7 @@
 				};
 
 				var release = function( removeSelection ) {
-					editor.setReadOnly( false );
-					startTable && startTable.selectable();
+					CKEDITOR.env.webkit && editor.setReadOnly( false );
 
 					removeSelection && removeCellsSelection.call( editor );
 
@@ -122,9 +125,9 @@
 					var target = ev.data.getTarget();
 					startCell = target.getAscendant( { td:1, th:1 }, true );
 					startTable = startCell && startCell.getAscendant( 'table' );
-					startTable && startTable.unselectable();
 
 					editor.document.on( 'mousemove', cancelTableResizer );
+					cancelClickEvent = false;
 				});
 
 				editable.on( 'mouseup', function( ev ) {
@@ -136,7 +139,8 @@
 				});
 
 				editable.on( 'click', function() {
-					release( true );
+					// IE fires click event right after user finishes select cells
+					!cancelClickEvent && release( true );
 				});
 
 				editable.on( 'mouseover', function( ev ) {
@@ -144,11 +148,18 @@
 						var target = ev.data.getTarget(),
 							endCell = target.getAscendant( { td:1, th:1 }, true );
 
-						editor.setReadOnly( true );
+						CKEDITOR.env.webkit && editor.setReadOnly( true );
 
 						if ( selectCells.call( editor, startCell, endCell ) ) {
 							editor.forceNextSelectionCheck();
 							editor.selectionChange( true );
+							cancelClickEvent = true;
+
+							// reselect ranges to create ranges of selected cells
+							var selection = editor.getSelection();
+							if ( selection ) {
+								selection.selectRanges( selection.getRanges() );
+							}
 						}
 					}
 				});
@@ -210,19 +221,4 @@
 			return originalGetRanges.call( this, onlyEditables );
 		}
 	});
-
-	CKEDITOR.dom.element.prototype.selectable = function() {
-		this.setStyles( CKEDITOR.tools.cssVendorPrefix( 'user-select', '' ) );
-		if ( CKEDITOR.env.ie || CKEDITOR.env.opera ) {
-			this.removeAttribute( 'unselectable' );
-
-			var element,
-				elements = this.getElementsByTag( "*" );
-
-			for ( var i = 0, count = elements.count() ; i < count ; i++ ) {
-				element = elements.getItem( i );
-				element.removeAttribute( 'unselectable' );
-			}
-		}
-	};
 })();
