@@ -144,10 +144,15 @@
 	CKEDITOR.plugins.add( 'mindtouch/tableselection', {
 		init: function( editor ) {
 			editor.on( 'contentDom', function() {
-				var editable = editor.editable(),
-					cancelClickEvent = false;
+				var editable = editor.editable();
 
 				editable.on( 'mousedown', function( ev ) {
+					if ( ev.data.$.button === 2 ) {
+						return;
+					}
+
+					release.call( editor, true );
+
 					var target = ev.data.getTarget();
 					mouseStartCell = target.getAscendant( { td:1, th:1 }, true );
 					cancelClickEvent = false;
@@ -160,17 +165,7 @@
 				});
 
 				editable.on( 'mouseup', function( ev ) {
-					var target = ev.data.getTarget()
-						table = target && target.getAscendant( 'table', true ),
-						startTable = mouseStartCell && mouseStartCell.getAscendant( 'table' ),
-						removeSelection = !table || !table.equals( startTable );
-
-					release.call( editor, removeSelection );
-				});
-
-				editable.on( 'click', function() {
-					// IE fires click event even if mouse was moved
-					!cancelClickEvent && release.call( editor, true );
+					release.call( editor );
 				});
 
 				editable.on( 'mouseover', function( ev ) {
