@@ -31,6 +31,10 @@
  */
 
 (function() {
+	var mouseStartCell = null,
+		keyStartCell = null,
+		keyEndCell = null;
+
 	function selectCells( startCell, endCell ) {
 		if ( !startCell || !startCell.is || !startCell.is( 'td', 'th' ) ||
 			 !endCell || !endCell.is || !endCell.is( 'td', 'th' ) ) {
@@ -68,102 +72,271 @@
 			}
 		}
 
+		if ( selectedCellsCount > 0 ) {
+			editor.forceNextSelectionCheck();
+			editor.selectionChange( true );
+
+			// reselect ranges to create ranges of selected cells
+			var selection = editor.getSelection();
+			if ( selection ) {
+				selection.selectRanges( selection.getRanges() );
+			}
+
+		}
+
 		return !!selectedCellsCount;
 	}
 
-	function removeCellsSelection() {
+	function removeCellsSelection( selectFirst ) {
 		var editor = this,
-			tables = editor.document.getElementsByTag( 'table' ),
-			removed = false;
+			editable = editor.editable(),
+			tables = editable.getElementsByTag( 'table' );
 
 		for ( var k = 0 ; k < tables.count(); k++ ) {
-			var table = tables.getItem( k );
+			var table = tables.getItem( k ),
+				firstCell = null;
 			for ( var i = 0 ; i < table.$.rows.length ; i++ ) {
 				for ( var j = 0 ; j < table.$.rows[ i ].cells.length ; j++ ) {
 					var cell = new CKEDITOR.dom.element( table.$.rows[ i ].cells[ j ] );
 					if ( cell.data( 'cke-cell-selected' ) ) {
 						cell.data( 'cke-cell-selected', false );
-						removed = true;
+						firstCell = firstCell || cell;
+					}
+				}
+			}
+
+			if ( firstCell ) {
+				var selection = editor.getSelection();
+				if ( selection ) {
+					selection.reset();
+
+					if ( selectFirst ) {
+						var range = selection.getRanges()[ 0 ];
+						range.selectNodeContents( firstCell );
+						range.select();
 					}
 				}
 			}
 		}
-
-		removed && editor.getSelection().reset();
 	}
 
-	CKEDITOR.plugins.add('mindtouch/tableselection', {
-		init: function(editor) {
+	// cancel mousemove event on table resizer element
+	function cancelTableResizer( ev ) {
+		if ( mouseStartCell ) {
+			var temp = ev.data.getTarget().getAscendant( 'div', true );
+			if ( temp && temp.data( 'cke-temp' ) ) {
+				ev.data.preventDefault();
+			}
+		}
+	};
+
+	function release( removeSelection, selectFirst ) {
+		var editor = this,
+			editable = editor.editable();
+
+		CKEDITOR.env.webkit && editor.setReadOnly( false );
+		mouseStartCell = keyStartCell = keyEndCell = null;
+		removeSelection && removeCellsSelection.call( editor, selectFirst );		
+		editable.removeListener( 'mousemove', cancelTableResizer );
+		editable.$.style.webkitUserSelect = '';
+	};
+
+	CKEDITOR.plugins.add( 'mindtouch/tableselection', {
+		init: function( editor ) {
 			editor.on( 'contentDom', function() {
 				var editable = editor.editable(),
-					cancelClickEvent = false,
-					startCell = null
-					startTable = null;
-
-				// cancel mousemove event on table resizer element
-				var cancelTableResizer = function( ev ) {
-					if ( startCell ) {
-						var temp = ev.data.getTarget().getAscendant( 'div', true );
-						if ( temp && temp.data( 'cke-temp' ) ) {
-							ev.data.preventDefault();
-						}
-					}
-				};
-
-				var release = function( removeSelection ) {
-					CKEDITOR.env.webkit && editor.setReadOnly( false );
-
-					removeSelection && removeCellsSelection.call( editor );
-
-					startCell = null;
-					startTable = null;
-
-					editor.document.removeListener( 'mousemove', cancelTableResizer );
-				};
+					cancelClickEvent = false;
 
 				editable.on( 'mousedown', function( ev ) {
 					var target = ev.data.getTarget();
-					startCell = target.getAscendant( { td:1, th:1 }, true );
-					startTable = startCell && startCell.getAscendant( 'table' );
-
-					editor.document.on( 'mousemove', cancelTableResizer );
+					mouseStartCell = target.getAscendant( { td:1, th:1 }, true );
 					cancelClickEvent = false;
+
+					if ( mouseStartCell ) {
+						var editable = editor.editable();
+						editable.$.style.webkitUserSelect = 'none';
+						editable.on( 'mousemove', cancelTableResizer );
+					}
 				});
 
 				editable.on( 'mouseup', function( ev ) {
 					var target = ev.data.getTarget()
 						table = target && target.getAscendant( 'table', true ),
+						startTable = mouseStartCell && mouseStartCell.getAscendant( 'table' ),
 						removeSelection = !table || !table.equals( startTable );
 
-					release( removeSelection );
+					release.call( editor, removeSelection );
 				});
 
 				editable.on( 'click', function() {
-					// IE fires click event right after user finishes select cells
-					!cancelClickEvent && release( true );
+					// IE fires click event even if mouse was moved
+					!cancelClickEvent && release.call( editor, true );
 				});
 
 				editable.on( 'mouseover', function( ev ) {
-					if ( startCell ) {
+					if ( mouseStartCell ) {
 						var target = ev.data.getTarget(),
-							endCell = target.getAscendant( { td:1, th:1 }, true );
+							endCell = target && target.getAscendant( { td:1, th:1 }, true );
 
 						CKEDITOR.env.webkit && editor.setReadOnly( true );
 
-						if ( selectCells.call( editor, startCell, endCell ) ) {
-							editor.forceNextSelectionCheck();
-							editor.selectionChange( true );
+						if ( selectCells.call( editor, mouseStartCell, endCell ) ) {
 							cancelClickEvent = true;
-
-							// reselect ranges to create ranges of selected cells
-							var selection = editor.getSelection();
-							if ( selection ) {
-								selection.selectRanges( selection.getRanges() );
-							}
 						}
 					}
 				});
 			});
+
+			editor.on( 'key', function( ev ) {
+				var keyCode = ev.data.keyCode;
+				switch ( keyCode ) {
+					case CKEDITOR.SHIFT + 37: /* LEFT */
+					case CKEDITOR.SHIFT + 38: /* UP */
+					case CKEDITOR.SHIFT + 39: /* RIGHT */
+					case CKEDITOR.SHIFT + 40: /* DOWN */
+						if ( !keyStartCell ) {
+							var selection = editor.getSelection(),
+								range = selection && selection.getRanges()[ 0 ],
+								cell = range && range.startContainer.getAscendant( { td:1, th:1 }, true );
+
+							if ( cell ) {
+								var isFirstLine = false,
+									isLastLine = false;
+
+								var bookmark = range.createBookmark( true ),
+									node = cell.clone( true );
+
+								range.moveToBookmark( bookmark );
+
+								var lines = [],
+									index = 0,
+									bookmarks = [],
+									block
+									prevBlock = null;
+
+								while ( node = node.getNextSourceNode() ) {
+									// make sure the current line is string
+									lines[ index ] = lines[ index ] || '';
+
+									if ( !node.getName || !( node.getName() in CKEDITOR.dtd.$block ) ) {
+										block = node.getAscendant( CKEDITOR.dtd.$block );
+										if ( block && prevBlock && !block.equals( prevBlock ) ) {
+											index++;
+											lines[ index ] = '';
+										}
+
+										prevBlock = block;
+									}
+
+									if ( node.type == CKEDITOR.NODE_TEXT ) {
+										lines[ index ] += node.getText();
+									} else if ( node.is && node.is( 'br' ) ) {
+										index++;
+									} else if ( node.data && node.data( 'cke-bookmark' ) ) {
+										bookmarks.push( index );
+									}
+								}
+
+								if ( typeof bookmarks[ 0 ] !== 'undefined' ) {
+									isFirstLine = ( bookmarks[ 0 ] === 0 );
+									isLastLine = ( bookmarks[ 0 ] === lines.length - 1 );
+								}
+
+								if ( typeof bookmarks[ 1 ] !== 'undefined' ) {
+									isLastLine = ( bookmarks[ 1 ] === lines.length - 1 );
+								}
+
+								if ( isFirstLine || isLastLine ) {
+									var canSelect = false;
+
+									switch ( keyCode ) {
+										case CKEDITOR.SHIFT + 37:
+											if ( isFirstLine && range.checkStartOfBlock() ) {
+												canSelect = true;
+											}
+											break;
+										case CKEDITOR.SHIFT + 38:
+											if ( isFirstLine ) {
+												canSelect = true;
+											}
+											break;
+										case CKEDITOR.SHIFT + 39:
+											if ( isLastLine && range.checkEndOfBlock() ) {
+												canSelect = true;
+											}
+											break;
+										case CKEDITOR.SHIFT + 40:
+											if ( isLastLine ) {
+												canSelect = true;
+											}
+											break;
+									}
+
+									if ( canSelect ) {
+										keyStartCell = keyEndCell = cell;
+									}
+								}
+							}
+						} else {
+							var table = keyStartCell.getAscendant( 'table', true ),
+								endRow = keyEndCell.getParent(),
+								rowIndex = endRow.$.rowIndex,
+								cellIndex = keyEndCell.$.cellIndex;
+
+							switch ( ev.data.keyCode ) {
+								case CKEDITOR.SHIFT + 37: cellIndex--; break;
+								case CKEDITOR.SHIFT + 38: rowIndex--; break;
+								case CKEDITOR.SHIFT + 39: cellIndex++; break;
+								case CKEDITOR.SHIFT + 40: rowIndex++; break;
+							}
+
+							rowIndex = Math.max( rowIndex, 0 );
+							rowIndex = Math.min( table.$.rows.length - 1 );
+							cellIndex = Math.max( cellIndex, 0 );
+							cellIndex = Math.min( cellIndex, endRow.$.cells.length - 1 );
+
+							keyEndCell = new CKEDITOR.dom.element( table.$.rows[ rowIndex ].cells[ cellIndex ] );
+						}
+
+						if ( selectCells.call( editor, keyStartCell, keyEndCell ) ) {
+							ev.cancel();
+						}
+						break;
+					default:
+						var controlKeys = {};
+						controlKeys[ CKEDITOR.CTRL + 17 ] = 1;
+						controlKeys[ CKEDITOR.ALT + 18 ] = 1;
+						controlKeys[ CKEDITOR.SHIFT + 16 ] = 1;
+
+						editor.fire( 'saveSnapshot' );
+
+						if ( !( keyCode in controlKeys ) ) {
+							release.call( editor, true, true );
+						}
+
+						if ( keyCode in { 8: 1, 46: 1 } ) {
+							var selection = editor.getSelection(),
+								cells = ( selection && CKEDITOR.plugins.tabletools.getSelectedCells( selection ) ) || [],
+								cell;
+
+							if ( cells.length > 1 ) {
+								for ( var i = 0 ; i < cells.length ; i++ ) {
+									cell = cells[ i ];
+									while ( cell.getChildCount() ) {
+										cell.getLast().remove();
+									}
+
+									if ( !CKEDITOR.env.ie ) {
+										cell.append( cell.getDocument().createElement( 'br' ) );
+									}
+								}
+							}
+						}
+
+						editor.fire( 'saveSnapshot' );
+				}
+			});
+
 
 			editor.on( 'insertElement', removeCellsSelection, editor );
 			editor.on( 'afterPaste', removeCellsSelection, editor );
@@ -206,7 +379,6 @@
 					}
 
 					var range = new CKEDITOR.dom.range( this.document );
-
 					range.setStartAt( cell, CKEDITOR.POSITION_AFTER_START );
 					range.setEndAt( cell, CKEDITOR.POSITION_BEFORE_END );
 
