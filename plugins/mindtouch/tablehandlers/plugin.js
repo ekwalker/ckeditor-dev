@@ -31,6 +31,12 @@
  */
 
 (function() {
+	var handlersTpl = CKEDITOR.addTemplate( 'tableHandlers', '<div class="cke_table_handlers cke_table_handlers_{name}" data-cke-tablehandlers=1 style="display:none;">' +
+		'<a title="{titleInsertBefore}" class="{scope}InsertBefore" onclick="return CKEDITOR.tools.callFunction({fn}, \'{scope}InsertBefore\')"></a>' +
+		'<a title="{titleDelete}" class="{scope}Delete" onclick="return CKEDITOR.tools.callFunction({fn}, \'{scope}Delete\')"></a>' +
+		'<a title="{titleInsertAfter}" class="{scope}InsertAfter" onclick="return CKEDITOR.tools.callFunction({fn}, \'{scope}InsertAfter\')"></a>' +
+		'</div>' );
+
 	function cancel(evt) {
 		(evt.data || evt).preventDefault();
 	}
@@ -127,12 +133,14 @@
 			var scope = name == 'row' ? 'row' : 'column',
 				lang = this.editor.lang.table[scope];
 
-			handlers[name] = CKEDITOR.dom.element.createFromHtml(
-				'<div class="cke_table_handlers cke_table_handlers_' + name + '" data-cke-tablehandlers=1 style="display:none;">' +
-				'<a title="' + lang.insertBefore + '" class="' + scope + 'InsertBefore" onclick="return CKEDITOR.tools.callFunction(' + handlerFn + ', \'' + scope + 'InsertBefore\')"></a>' +
-				'<a title="' + lang['delete' + CKEDITOR.tools.capitalize(scope)] + '" class="' + scope + 'Delete" onclick="return CKEDITOR.tools.callFunction(' + handlerFn + ', \'' + scope + 'Delete\')"></a>' +
-				'<a title="' + lang.insertAfter + '" class="' + scope + 'InsertAfter" onclick="return CKEDITOR.tools.callFunction(' + handlerFn + ', \'' + scope + 'InsertAfter\')"></a>' +
-				'</div>', doc);
+			handlers[name] = CKEDITOR.dom.element.createFromHtml( handlersTpl.output({
+				name: name,
+				scope: scope,
+				fn: handlerFn,
+				titleInsertBefore: lang.insertBefore,
+				titleInsertAfter: lang.insertAfter,
+				titleDelete: lang['delete' + CKEDITOR.tools.capitalize(scope)]
+			}));
 
 			doc.getBody().append(handlers[name]);
 
@@ -151,33 +159,34 @@
 		});
 	}
 
-	CKEDITOR.plugins.add('mindtouch/tablehandlers', {
-		init: function(editor) {
-			if (CKEDITOR.env.gecko && !editor.config.disableNativeTableHandles) {
+	CKEDITOR.plugins.add( 'mindtouch/tablehandlers', {
+		init: function( editor ) {
+			if ( CKEDITOR.env.gecko && !editor.config.disableNativeTableHandles ) {
 				return;
 			}
 
 			var handlers;
 
-			editor.on('selectionChange', function(evt) {
-				var cells = editor.plugins.tabletools.getSelectedCells(evt.data.selection),
-					cell = cells.length && cells[0];
+			editor.on( 'selectionChange', function( evt ) {
+				var cells = editor.plugins.tabletools.getSelectedCells( evt.data.selection ),
+					cell = ( cells.length == 1 ) && cells[ 0 ];
 
-				if (!cell || cell.getAscendant('table').isReadOnly()) {
-					handlers && handlers.detach();
-					return;
+				handlers = handlers || new tableHandlers( editor );
+
+				if ( cell && !cell.getAscendant( 'table' ).isReadOnly() ) {
+					handlers.attachTo( cell );
+				} else {
+					handlers.detach();
 				}
-
-				if (!handlers) {
-					handlers = new tableHandlers(editor);
-				}
-
-				handlers.attachTo(cell);
 			}, null, null, 1);
 
-			editor.on('contentDomUnload', function() {
+			editor.on( 'contentDomUnload', function() {
 				handlers && handlers.detach();
 			});
+
+			editor.on( 'destroy', function() {
+				handlers = null;
+			}, null, null, 100 );
 		},
 		onLoad: function() {
 			var path = this.path,

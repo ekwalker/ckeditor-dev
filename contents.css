@@ -153,3 +153,16 @@ p.comment {
 .scayt-enabled pre .scayt-ignore {
 	background-image: none !important;
 }
+
+::-moz-selection {
+	background-color: #42aae7;
+}
+
+::selection {
+	background-color: #42aae7;
+}
+
+td[data-cke-cell-selected],
+th[data-cke-cell-selected] {
+	background-color: #42aae7;
+}
