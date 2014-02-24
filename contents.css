@@ -3,132 +3,68 @@ Copyright (c) 2003-2013, CKSource - Frederico Knabben. All rights reserved.
 For licensing, see LICENSE.html or http://ckeditor.com/license
 */
 
-body
-{
-	/* Font */
-	font: 12px/1.5 Arial, Helvetica, sans-serif;
-
-	/* Text color */
-	color: #333;
-
-	/* Remove the background color to make it transparent */
-	background-color: #fff;
-
-	margin: 20px;
+html {
+    overflow-y: auto;
 }
 
-.cke_editable
-{
-	font-size: 13px;
-	line-height: 1.6em;
+html,
+body {
+    background: #fff;
+    font-size: 12px;
+    line-height: 1.5;
 }
 
-/**
- * Use skin styles for blockquote
- * @author MindTouch
- */
-/*
-blockquote
-{
-	font-style: italic;
-	font-family: Georgia, Times, "Times New Roman", serif;
-	padding: 2px 0;
-	border-style: solid;
-	border-color: #ccc;
-	border-width: 0;
+body.cke_editable {
+    cursor: text;
+    height: auto; 
 }
 
-.cke_contents_ltr blockquote
-{
-	padding-left: 20px;
-	padding-right: 8px;
-	border-left-width: 5px;
+body.page-mode-editor {
+    height: auto;
+    min-height: 100%;
 }
 
-.cke_contents_rtl blockquote
-{
-	padding-left: 8px;
-	padding-right: 20px;
-	border-right-width: 5px;
-}
-*/
-
-a
-{
-	color: #0782C1;
+hr {
+    border: 0;
+    border-top: 1px solid #ccc;
 }
 
-ol,ul,dl
-{
-	/* IE7: reset rtl list margin. (#7334) */
-	*margin-right: 0px;
-}
-
-h1,h2,h3,h4,h5,h6
-{
-	line-height: 1.2em;
-}
-
-hr
-{
-	border: 0px;
-	border-top: 1px solid #ccc;
-}
-
-img.right {
-    border: 1px solid #ccc;
+img.rwrap {
     float: right;
-    margin-left: 15px;
-    padding: 5px;
 }
 
-img.left {
-    border: 1px solid #ccc;
+img.lwrap {
     float: left;
-    margin-right: 15px;
-    padding: 5px;
 }
 
 img:hover {
-	opacity: .9;
-	filter: alpha(opacity = 90);
-}
-
-pre
-{
-	white-space: pre-wrap; /* CSS 2.1 */
-	word-wrap: break-word; /* IE7 */
-}
-
-.marker {
-    background-color: Yellow;
-}
-
-/*
-MindTouch styles
-*/
-
-html {
-	overflow-y: auto;
-}
-
-/* Fixed editor background css */
-body {
-	background: #fff;
+    opacity: .8;
+    filter: alpha(opacity = 80);
 }
 
 /* @see MT-10386 */
 pre {
-	word-wrap: normal;
+    white-space: pre-wrap;
+    word-wrap: normal;
 }
 
 blockquote p {
-	margin: 1em 0;
+    margin: .25em 0;
+}
+
+.mt-style-conditional {
+    background: #e8fffb;
+    border: 1px dashed #666;
+    padding: .3em;
+}
+
+.scayt-enabled pre .scayt-ignore {
+    background-image: none !important;
 }
 
 /* @see EDT-490 */
 p.comment {
-	line-height: 2em;
+    line-height: 2em;
 }
 
 /* @see EDT-444 */
@@ -136,49 +72,42 @@ p.comment {
 .cke_browser_ie pre.script-jem,
 .cke_browser_ie pre.script-js,
 .cke_browser_ie pre.script-css {
-	width: auto;
+    width: auto;
 }
 
 /* @see EDT-323 */
 .cke_browser_ie td {
-	box-sizing: border-box;
+    box-sizing: border-box;
 }
 
-.mt-style-conditional {
-	background: #e8fffb;
-	border: 1px dashed #666;
-	padding: .3em;
-}
-
-.scayt-enabled pre .scayt-ignore {
-	background-image: none !important;
-}
-
-/* Panel styles */
+/* toolbar dropdown styles */
 .cke_menubutton__preltpregtpre_format pre {
-	float: left;
-	cursor: default;
-	margin-right: 0.2em;
-	font-family: monospace;
-	line-height: 16px;
+    cursor: default;
+    float: left;
+    font-family: monospace;
+    line-height: 16px;
+    margin-right: 0.2em;
 }
 
 .cke_browser_ie6 .cke_menubutton__preltpregtpre_format pre,
 .cke_browser_ie7 .cke_menubutton__preltpregtpre_format pre,
 .cke_browser_ie8 .cke_menubutton__preltpregtpre_format pre {
-	line-height: 13px;
+    line-height: 13px;
 }
 
 .cke_menubutton_on {
-	background-color: #D3D3D3;
-	display: block;
+    background-color: #ddd;
+    border-top: 1px solid #bbb;
+    border-bottom: 1px solid #bbb;
+    display: block;
 }
 
 .cke_hc .cke_menubutton_on {
-	border: 2px solid;
-	padding: 0;
+    border: 2px solid #666;
+    padding: 0;
 }
 
 .cke_menubutton_on .cke_menubutton_icon {
-	background-color: #D0D2D0;
+    background-color: #D0D2D0;
+    background-color: #bbb;
 }
