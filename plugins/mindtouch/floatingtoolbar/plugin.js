@@ -31,85 +31,80 @@
  */
 
 (function () {
-	var dockId = CKEDITOR.tools.getNextId(),
-		toolbarId = CKEDITOR.tools.getNextId();
+	var dockId, toolbarId,
+		$toolbar, $dock, $inner, prevPosition, prevHeight,
+		editorPosition;
 
-	var fixToolbar = ( function() {
-		var $toolbar, $dock, $inner, prevPosition, prevHeight;
-		return function() {
-			var editor = this,
-				cssLength = CKEDITOR.tools.cssLength;
+	var fixToolbar = function() {
+		var editor = this,
+			cssLength = CKEDITOR.tools.cssLength;
 
-			if ( !$toolbar ) {
-				$dock = $( '#' + dockId );
-				$toolbar = $( '#' + toolbarId ).css( 'width', cssLength( $dock.width() ) );
-			}
+		if ( !$toolbar ) {
+			$dock = $( '#' + dockId );
+			$toolbar = $( '#' + toolbarId ).css( 'width', cssLength( $dock.width() ) );
+		}
 
-			var position = $dock.offset();
-			if ( !prevPosition || prevPosition.left !== position.left ) {
-				$toolbar.css( 'left', cssLength( position.left ) );
-				prevPosition = position;
-			}
+		var position = $dock.offset();
+		if ( !prevPosition || prevPosition.left !== position.left ) {
+			$toolbar.css( 'left', cssLength( position.left ) );
+			prevPosition = position;
+		}
 
-			// toolbar height may vary
-			var height = $toolbar.innerHeight();
-			if ( height !== prevHeight ) {
-				$dock.css( 'height', cssLength( height ) );
-				prevHeight = height;
-			}
+		// toolbar height may vary
+		var height = $toolbar.innerHeight();
+		if ( height !== prevHeight ) {
+			$dock.css( 'height', cssLength( height ) );
+			prevHeight = height;
+		}
 
-			var top = editor.config.floating_toolbar_top || 0,
-				scrollTop = $( CKEDITOR.document.$ ).scrollTop() + top,
-				toolbarPosition = 'fixed';
+		var top = editor.config.floating_toolbar_top || 0,
+			scrollTop = $( CKEDITOR.document.$ ).scrollTop() + top,
+			toolbarPosition = 'fixed';
 
-			if ( scrollTop > Math.round( position.top ) ) {
-				var contents = editor.ui.space( 'contents' ),
-					maxScrollPos = contents.getDocumentPosition().y + $( contents.$ ).height() - $toolbar.height();
+		if ( scrollTop > Math.round( position.top ) ) {
+			var contents = editor.ui.space( 'contents' ),
+				maxScrollPos = contents.getDocumentPosition().y + $( contents.$ ).height() - $toolbar.height();
 
-				if ( scrollTop > maxScrollPos ) {
-					toolbarPosition = 'absolute';
-					top = position.top;
-				}
-			} else if ( $toolbar.offset().top != position.top ) {
+			if ( scrollTop > maxScrollPos ) {
 				toolbarPosition = 'absolute';
 				top = position.top;
-			} else {
-				return;
 			}
+		} else if ( $toolbar.offset().top != position.top ) {
+			toolbarPosition = 'absolute';
+			top = position.top;
+		} else {
+			return;
+		}
 
-			$toolbar.css( { position: toolbarPosition, top: cssLength( top ) } );
+		$toolbar.css( { position: toolbarPosition, top: cssLength( top ) } );
 
-			// @see EDT-293
-			if ( CKEDITOR.env.webkit ) {
-				if ( !$inner ) {
-					$inner = $toolbar.find( 'div.cke_inner' );
-				}
-				$inner.css( 'position', 'static' ).css( 'position', 'relative' );
+		// @see EDT-293
+		if ( CKEDITOR.env.webkit ) {
+			if ( !$inner ) {
+				$inner = $toolbar.find( 'div.cke_inner' );
 			}
-		};
-	})();
+			$inner.css( 'position', 'static' ).css( 'position', 'relative' );
+		}
+	};
 
-	var scrollToTop = ( function() {
-		var position;
-		return function() {
-			var editor = this,
-				win = CKEDITOR.document.getWindow(),
-				container = editor.container,
-				scroll = win.getScrollPosition();
+	var scrollToTop = function() {
+		var editor = this,
+			win = CKEDITOR.document.getWindow(),
+			container = editor.container,
+			scroll = win.getScrollPosition();
 
-			if ( !position ) {
-				position = container.getDocumentPosition();
+		if ( !editorPosition ) {
+			editorPosition = container.getDocumentPosition();
 
-				if ( CKEDITOR.env.ie && CKEDITOR.env.version < 9 ) {
-					position.y -= $( '#' + toolbarId ).height();
-				}
+			if ( CKEDITOR.env.ie && CKEDITOR.env.version < 9 ) {
+				editorPosition.y -= $( '#' + toolbarId ).height();
 			}
+		}
 
-			if ( scroll.y > position.y ) {
-				win.$.scrollTo( 0, position.y );
-			}
-		};
-	})();
+		if ( scroll.y > editorPosition.y ) {
+			win.$.scrollTo( 0, editorPosition.y );
+		}
+	};
 
 	CKEDITOR.plugins.add( 'mindtouch/floatingtoolbar', {
 		requires: 'sharedspace',
@@ -129,6 +124,9 @@
 		},
 		init: function ( editor ) {
 			if ( editor.config.floating_toolbar !== false && editor.elementMode !== CKEDITOR.ELEMENT_MODE_INLINE ) {
+				dockId = CKEDITOR.tools.getNextId();
+				toolbarId = CKEDITOR.tools.getNextId();
+
 				editor.config.sharedSpaces = editor.config.sharedSpaces || {};
 				editor.config.sharedSpaces.top = toolbarId;
 
@@ -160,7 +158,8 @@
 					win.removeListener( 'scroll', fixToolbar );
 					win.removeListener( 'resize', fixToolbar );
 					toolbarContainer.remove();
-					toolbarWrapper.remove();
+					toolbarDock.remove();
+					$toolbar = $dock = $inner = prevPosition = prevHeight = editorPosition = null;
 				});
 
 				editor.on( 'mode', scrollToTop, editor, null, 1 );
