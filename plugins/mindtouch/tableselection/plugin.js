@@ -73,15 +73,9 @@
 		}
 
 		if ( selectedCellsCount > 0 ) {
+			reselectRanges.call( editor );
 			editor.forceNextSelectionCheck();
 			editor.selectionChange( true );
-
-			// reselect ranges to create ranges of selected cells
-			var selection = editor.getSelection();
-			if ( selection ) {
-				selection.selectRanges( selection.getRanges() );
-			}
-
 		}
 
 		return !!selectedCellsCount;
@@ -120,6 +114,14 @@
 		}
 	}
 
+	// reselect ranges to create ranges of selected cells
+	function reselectRanges() {
+		var selection = this.getSelection();
+		if ( selection ) {
+			selection.selectRanges( selection.getRanges() );
+		}
+	}
+
 	// cancel mousemove event on table resizer element
 	function cancelTableResizer( ev ) {
 		if ( mouseStartCell ) {
@@ -128,7 +130,7 @@
 				ev.data.preventDefault();
 			}
 		}
-	};
+	}
 
 	function release( removeSelection, selectFirst ) {
 		var editor = this,
@@ -139,14 +141,20 @@
 		removeSelection && removeCellsSelection.call( editor, selectFirst );		
 		editable.removeListener( 'mousemove', cancelTableResizer );
 		editable.$.style.webkitUserSelect = '';
-	};
+	}
 
 	CKEDITOR.plugins.add( 'mindtouch/tableselection', {
 		init: function( editor ) {
 			editor.on( 'contentDom', function() {
-				var editable = editor.editable();
+				var target = editor.editable(),
+					forceReselectRange = false;
 
-				editable.on( 'mousedown', function( ev ) {
+				if ( !target.isInline() ) {
+					target = target.getDocument().getDocumentElement();
+				}
+
+
+				target.on( 'mousedown', function( ev ) {
 					if ( ev.data.$.button === 2 ) {
 						return;
 					}
@@ -155,7 +163,6 @@
 
 					var target = ev.data.getTarget();
 					mouseStartCell = target.getAscendant( { td:1, th:1 }, true );
-					cancelClickEvent = false;
 
 					if ( mouseStartCell ) {
 						var editable = editor.editable();
@@ -164,11 +171,15 @@
 					}
 				});
 
-				editable.on( 'mouseup', function( ev ) {
+				target.on( 'mouseup', function( ev ) {
 					release.call( editor );
+					if ( forceReselectRange ) {
+						reselectRanges.call( editor );
+						forceReselectRange = false;
+					}
 				});
 
-				editable.on( 'mouseover', function( ev ) {
+				target.on( 'mouseover', function( ev ) {
 					if ( mouseStartCell ) {
 						var target = ev.data.getTarget(),
 							endCell = target && target.getAscendant( { td:1, th:1 }, true );
@@ -176,166 +187,170 @@
 						CKEDITOR.env.webkit && editor.setReadOnly( true );
 
 						if ( selectCells.call( editor, mouseStartCell, endCell ) ) {
-							cancelClickEvent = true;
+							forceReselectRange = true;
 						}
+					}
+				});
+
+				target.on( 'keydown', function( ev ) {
+					var keyCode = ev.data.getKeystroke();
+					switch ( keyCode ) {
+						case CKEDITOR.SHIFT + 37: /* LEFT */
+						case CKEDITOR.SHIFT + 38: /* UP */
+						case CKEDITOR.SHIFT + 39: /* RIGHT */
+						case CKEDITOR.SHIFT + 40: /* DOWN */
+							if ( !keyStartCell ) {
+								var selection = editor.getSelection(),
+									range = selection && selection.getRanges()[ 0 ],
+									cell = range && range.startContainer.getAscendant( { td:1, th:1 }, true );
+
+								if ( cell && cell.equals( range.endContainer.getAscendant( { td:1, th:1 }, true ) ) ) {
+									var isFirstLine = false,
+										isLastLine = false;
+
+									var bookmark = range.createBookmark( true ),
+										node = cell.clone( true );
+
+									range.moveToBookmark( bookmark );
+
+									var lines = [],
+										index = 0,
+										bookmarks = [],
+										block
+										prevBlock = null;
+
+									while ( node = node.getNextSourceNode() ) {
+										// make sure the current line is string
+										lines[ index ] = lines[ index ] || '';
+
+										if ( !node.getName || !( node.getName() in CKEDITOR.dtd.$block ) ) {
+											block = node.getAscendant( CKEDITOR.dtd.$block );
+											if ( block && prevBlock && !block.equals( prevBlock ) ) {
+												index++;
+												lines[ index ] = '';
+											}
+
+											prevBlock = block;
+										}
+
+										if ( node.type == CKEDITOR.NODE_TEXT ) {
+											lines[ index ] += node.getText();
+										} else if ( node.is && node.is( 'br' ) ) {
+											index++;
+										} else if ( node.data && node.data( 'cke-bookmark' ) ) {
+											bookmarks.push( index );
+										}
+									}
+
+									if ( typeof bookmarks[ 0 ] !== 'undefined' ) {
+										isFirstLine = ( bookmarks[ 0 ] === 0 );
+										isLastLine = ( bookmarks[ 0 ] === lines.length - 1 );
+									}
+
+									if ( typeof bookmarks[ 1 ] !== 'undefined' ) {
+										isLastLine = ( bookmarks[ 1 ] === lines.length - 1 );
+									}
+
+									if ( isFirstLine || isLastLine ) {
+										var canSelect = false;
+
+										switch ( keyCode ) {
+											case CKEDITOR.SHIFT + 37:
+												if ( isFirstLine && range.checkStartOfBlock() ) {
+													canSelect = true;
+												}
+												break;
+											case CKEDITOR.SHIFT + 38:
+												if ( isFirstLine ) {
+													canSelect = true;
+												}
+												break;
+											case CKEDITOR.SHIFT + 39:
+												if ( isLastLine && range.checkEndOfBlock() ) {
+													canSelect = true;
+												}
+												break;
+											case CKEDITOR.SHIFT + 40:
+												if ( isLastLine ) {
+													canSelect = true;
+												}
+												break;
+										}
+
+										if ( canSelect ) {
+											keyStartCell = keyEndCell = cell;
+										}
+									}
+								}
+							} else {
+								var table = keyStartCell.getAscendant( 'table', true ),
+									endRow = keyEndCell.getParent(),
+									rowIndex = endRow.$.rowIndex,
+									cellIndex = keyEndCell.$.cellIndex;
+
+								switch ( ev.data.keyCode ) {
+									case CKEDITOR.SHIFT + 37: cellIndex--; break;
+									case CKEDITOR.SHIFT + 38: rowIndex--; break;
+									case CKEDITOR.SHIFT + 39: cellIndex++; break;
+									case CKEDITOR.SHIFT + 40: rowIndex++; break;
+								}
+
+								rowIndex = Math.max( rowIndex, 0 );
+								rowIndex = Math.min( rowIndex, table.$.rows.length - 1 );
+								cellIndex = Math.max( cellIndex, 0 );
+								cellIndex = Math.min( cellIndex, endRow.$.cells.length - 1 );
+
+								keyEndCell = new CKEDITOR.dom.element( table.$.rows[ rowIndex ].cells[ cellIndex ] );
+							}
+
+							if ( selectCells.call( editor, keyStartCell, keyEndCell ) ) {
+								ev.cancel();
+							}
+							break;
+						default:
+							var key = ev.data.getKey(),
+								domEvent = ev.data.$;
+
+							// don't release the selection on pressing some keys and shortcuts:
+							// - if only shift is pressed
+							// - SHIFT + DEL
+							// - any shortcut with CTRL/COMMAND or ALT keys
+							if ( !( key === 16 || keyCode === CKEDITOR.SHIFT + 46 || domEvent.ctrlKey || domEvent.metaKey || domEvent.altKey ) ) {
+								release.call( editor, true, true );
+							}
+
+							// delete and backspace should remove cells' content
+							if ( keyCode in { 8: 1, 46: 1 } ) {
+								var selection = editor.getSelection(),
+									cells = ( selection && CKEDITOR.plugins.tabletools.getSelectedCells( selection ) ) || [],
+									cell;
+
+								if ( cells.length > 1 ) {
+									editor.fire( 'saveSnapshot' );
+
+									for ( var i = 0 ; i < cells.length ; i++ ) {
+										cell = cells[ i ];
+										while ( cell.getChildCount() ) {
+											cell.getLast().remove();
+										}
+
+										if ( !CKEDITOR.env.ie ) {
+											cell.append( cell.getDocument().createElement( 'br' ) );
+										}
+									}
+
+									editor.fire( 'saveSnapshot' );
+								}
+							}
+
+							break;
 					}
 				});
 			});
 
-			editor.on( 'key', function( ev ) {
-				var keyCode = ev.data.keyCode;
-				switch ( keyCode ) {
-					case CKEDITOR.SHIFT + 37: /* LEFT */
-					case CKEDITOR.SHIFT + 38: /* UP */
-					case CKEDITOR.SHIFT + 39: /* RIGHT */
-					case CKEDITOR.SHIFT + 40: /* DOWN */
-						if ( !keyStartCell ) {
-							var selection = editor.getSelection(),
-								range = selection && selection.getRanges()[ 0 ],
-								cell = range && range.startContainer.getAscendant( { td:1, th:1 }, true );
-
-							if ( cell ) {
-								var isFirstLine = false,
-									isLastLine = false;
-
-								var bookmark = range.createBookmark( true ),
-									node = cell.clone( true );
-
-								range.moveToBookmark( bookmark );
-
-								var lines = [],
-									index = 0,
-									bookmarks = [],
-									block
-									prevBlock = null;
-
-								while ( node = node.getNextSourceNode() ) {
-									// make sure the current line is string
-									lines[ index ] = lines[ index ] || '';
-
-									if ( !node.getName || !( node.getName() in CKEDITOR.dtd.$block ) ) {
-										block = node.getAscendant( CKEDITOR.dtd.$block );
-										if ( block && prevBlock && !block.equals( prevBlock ) ) {
-											index++;
-											lines[ index ] = '';
-										}
-
-										prevBlock = block;
-									}
-
-									if ( node.type == CKEDITOR.NODE_TEXT ) {
-										lines[ index ] += node.getText();
-									} else if ( node.is && node.is( 'br' ) ) {
-										index++;
-									} else if ( node.data && node.data( 'cke-bookmark' ) ) {
-										bookmarks.push( index );
-									}
-								}
-
-								if ( typeof bookmarks[ 0 ] !== 'undefined' ) {
-									isFirstLine = ( bookmarks[ 0 ] === 0 );
-									isLastLine = ( bookmarks[ 0 ] === lines.length - 1 );
-								}
-
-								if ( typeof bookmarks[ 1 ] !== 'undefined' ) {
-									isLastLine = ( bookmarks[ 1 ] === lines.length - 1 );
-								}
-
-								if ( isFirstLine || isLastLine ) {
-									var canSelect = false;
-
-									switch ( keyCode ) {
-										case CKEDITOR.SHIFT + 37:
-											if ( isFirstLine && range.checkStartOfBlock() ) {
-												canSelect = true;
-											}
-											break;
-										case CKEDITOR.SHIFT + 38:
-											if ( isFirstLine ) {
-												canSelect = true;
-											}
-											break;
-										case CKEDITOR.SHIFT + 39:
-											if ( isLastLine && range.checkEndOfBlock() ) {
-												canSelect = true;
-											}
-											break;
-										case CKEDITOR.SHIFT + 40:
-											if ( isLastLine ) {
-												canSelect = true;
-											}
-											break;
-									}
-
-									if ( canSelect ) {
-										keyStartCell = keyEndCell = cell;
-									}
-								}
-							}
-						} else {
-							var table = keyStartCell.getAscendant( 'table', true ),
-								endRow = keyEndCell.getParent(),
-								rowIndex = endRow.$.rowIndex,
-								cellIndex = keyEndCell.$.cellIndex;
-
-							switch ( ev.data.keyCode ) {
-								case CKEDITOR.SHIFT + 37: cellIndex--; break;
-								case CKEDITOR.SHIFT + 38: rowIndex--; break;
-								case CKEDITOR.SHIFT + 39: cellIndex++; break;
-								case CKEDITOR.SHIFT + 40: rowIndex++; break;
-							}
-
-							rowIndex = Math.max( rowIndex, 0 );
-							rowIndex = Math.min( table.$.rows.length - 1 );
-							cellIndex = Math.max( cellIndex, 0 );
-							cellIndex = Math.min( cellIndex, endRow.$.cells.length - 1 );
-
-							keyEndCell = new CKEDITOR.dom.element( table.$.rows[ rowIndex ].cells[ cellIndex ] );
-						}
-
-						if ( selectCells.call( editor, keyStartCell, keyEndCell ) ) {
-							ev.cancel();
-						}
-						break;
-					default:
-						var controlKeys = {};
-						controlKeys[ CKEDITOR.CTRL + 17 ] = 1;
-						controlKeys[ CKEDITOR.ALT + 18 ] = 1;
-						controlKeys[ CKEDITOR.SHIFT + 16 ] = 1;
-
-						editor.fire( 'saveSnapshot' );
-
-						if ( !( keyCode in controlKeys ) ) {
-							release.call( editor, true, true );
-						}
-
-						if ( keyCode in { 8: 1, 46: 1 } ) {
-							var selection = editor.getSelection(),
-								cells = ( selection && CKEDITOR.plugins.tabletools.getSelectedCells( selection ) ) || [],
-								cell;
-
-							if ( cells.length > 1 ) {
-								for ( var i = 0 ; i < cells.length ; i++ ) {
-									cell = cells[ i ];
-									while ( cell.getChildCount() ) {
-										cell.getLast().remove();
-									}
-
-									if ( !CKEDITOR.env.ie ) {
-										cell.append( cell.getDocument().createElement( 'br' ) );
-									}
-								}
-							}
-						}
-
-						editor.fire( 'saveSnapshot' );
-				}
-			});
-
-
-			editor.on( 'insertElement', removeCellsSelection, editor );
-			editor.on( 'afterPaste', removeCellsSelection, editor );
-			editor.on( 'afterTablePaste', removeCellsSelection, editor );
+			editor.on( 'insertElement', removeCellsSelection, editor, null, 50 );
+			editor.on( 'afterPaste', removeCellsSelection, editor, null, 50 );
+			editor.on( 'afterTablePaste', removeCellsSelection, editor, null, 50 );
 
 			// cell selected class should be removed from the snapshot
 			// to prevent saving selection in undo snapshots

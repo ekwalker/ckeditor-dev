@@ -187,8 +187,6 @@
 
 						// we can save the id in clipboard if the original row has been removed
 						cloneId = true;
-					} else if (!ignoreCells) {
-						moveCursorToNode = originalRow.getFirst();
 					}
 				}
 
@@ -237,10 +235,8 @@
 				return false;
 			}
 
-			var editor = this.editor;
-			editor.fire('saveSnapshot');
-
-			var cells = CKEDITOR.plugins.tabletools.getSelectedCells(selection),
+			var editor = this.editor,
+				cells = CKEDITOR.plugins.tabletools.getSelectedCells(selection),
 				table = this.clipboard.table;
 
 			// if we are not into table, paste the saved table
@@ -314,6 +310,8 @@
 			// reverse rows
 			// to insert the last copied row before the current
 			(mode == PASTE_ROW_BEFORE) && rowsToInsert.reverse();
+
+			editor.fire('saveSnapshot');
 
 			for (i = 0; i < rowsToInsert.length; i++) {
 				rowToInsert = rowsToInsert[i].clone(true, true);
@@ -393,6 +391,14 @@
 				}
 			});
 
+			var cancelEvent = function(evt) {
+				if (evt.data && evt.data.preventDefault) {
+					evt.data.preventDefault(true);
+				} else {
+					evt.cancel();
+				}
+			};
+
 			var onCopyCut = function(evt) {
 				clipboard.reset();
 
@@ -414,34 +420,30 @@
 				var command = (evt.name in {'copy': 1, 'zcBeforeCopy': 1}) ? 'cellsCopy' : 'cellsCut';
 				editor.execCommand(command);
 
-				if (!clipboard.isEmpty()) {
-					if (evt.data && evt.data.preventDefault) {
-						evt.data.preventDefault(true);
-					} else {
-						evt.cancel();
-					}
-				}
+				!clipboard.isEmpty() && cancelEvent(evt);
 			};
 
-			editor.on('contentDom', function() {
-				var body = editor.document.getBody();
-				for (var eventName in {'copy': 1, 'cut': 1}) {
-					body.on(eventName, onCopyCut);
-				}
-
-				// IE does not fire cut event for selected table cells
-				if (CKEDITOR.env.ie) {
-					body.on('beforecut', onCopyCut);
-				}
-			}, null, null, 1);
-
-			editor.on('beforePaste', function(evt) {
+			var onPasteEvent = function(evt) {
 				// if clipboard is not empty,
 				// paste stored rows and cancel paste event
 				if (!clipboard.isEmpty()) {
 					editor.execCommand('rowPasteAfter');
-					evt.cancel();
+					cancelEvent(evt);
 				}
+			};
+
+			editor.on('contentDom', function() {
+				var editable = editor.editable();
+				for (var eventName in {'copy': 1, 'cut': 1}) {
+					editable.on(eventName, onCopyCut, null, null, 1);
+				}
+
+				// IE does not fire cut event for selected table cells
+				if (CKEDITOR.env.ie) {
+					editable.on('beforecut', onCopyCut, null, null, 1);
+				}
+
+				editable.on(CKEDITOR.env.ie ? 'beforepaste' : 'paste', onPasteEvent, null, null, 1);
 			});
 
 			// override ZeroClipboard behavior
