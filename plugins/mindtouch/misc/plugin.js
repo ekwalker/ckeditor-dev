@@ -112,106 +112,165 @@ CKEDITOR.editor.prototype.unlock = function() {
 };
 
 (function() {
-	CKEDITOR.plugins.add('mindtouch/misc', {
-		init: function(editor) {
-			editor.setKeystroke(CKEDITOR.ALT + 13 /*ENTER*/ , 'source');
+	CKEDITOR.plugins.add( 'mindtouch/misc', {
+		init: function( editor ) {
+			editor.setKeystroke( CKEDITOR.ALT + 13 /*ENTER*/ , 'source' );
 
 			/**
 			 * Webkit specific fixes
 			 */
-			if (CKEDITOR.env.webkit) {
-				var evaluator = function() {
-					var nodeType = CKEDITOR.dom.walker.nodeType(CKEDITOR.NODE_ELEMENT),
-						isBookmark = CKEDITOR.dom.walker.bookmark();
-					return function(node) {
-						return nodeType(node) && !isBookmark(node) && !node.is('br');
+			if ( CKEDITOR.env.webkit ) {
+				var bookmark = CKEDITOR.dom.walker.bookmark(),
+					isElementNode = function( node ) {
+						return node.type === CKEDITOR.NODE_ELEMENT && !bookmark( node ) && !node.data( 'scaytid' );
 					};
-				};
 
-				editor.on('contentDom', function() {
-					var body = editor.document.getBody();
-
+				editor.on( 'contentDom', function() {
 					/**
 					 * Webkit adds custom styles and span elements on drag and drop operations
-					 * 1. Save current elements style on dragstart
-					 * 2. Restore saved styles on dragend and remove added spans
 					 *
 					 * @see MT-8868
 					 * @see MT-9985
+					 * @see EDT-612
 					 */
-					body.on('dragstart', function() {
-						var selection = editor.getSelection(),
-							range = selection && selection.getRanges(true)[0],
-							startContainer = range.startContainer,
-							walker = new CKEDITOR.dom.walker(range.clone()),
-							node;
 
-						editor.fire('saveSnapshot');
+					var editable = editor.editable();
 
-						walker.evaluator = evaluator();
-
-						node = (startContainer.type === CKEDITOR.NODE_ELEMENT) ? startContainer : startContainer.getParent();
-
-						while (node) {
-							var style = node.getAttribute('style') || '';
-							node.data('cke-dnd-style', style);
-							node = walker.next();
-						}
+					// this flag is true if content is dragging inside of the editor
+					var dragInternal = false;
+					editable.on( 'dragstart', function( evt ) {
+						dragInternal = true;
+					});
+					editable.on( 'dragend', function( evt ) {
+						dragInternal = false;
 					});
 
-					body.on('dragend', function(evt) {
-						if (evt.data.$.dataTransfer.dropEffect === 'none') {
+					editable.on( 'drop', function( evt ) {
+						if ( evt.data.$.dataTransfer.files.length ) {
 							return;
 						}
 
-						var selection = editor.getSelection(),
-							range = selection && selection.getRanges(true)[0],
-							startContainer = range.startContainer,
-							walker = new CKEDITOR.dom.walker(range.clone()),
-							bookmarks = range.createBookmark(),
-							toRemove = [],
-							node;
+						editor.fire( 'saveSnapshot' );
 
-						walker.evaluator = evaluator();
+						// the list of the selected nodes when drag is started
+						var dragNodes = [];
 
-						node = (startContainer.type === CKEDITOR.NODE_ELEMENT) ? startContainer : startContainer.getParent();
+						if ( dragInternal ) {
+							var range = editor.getSelection().getRanges()[ 0 ];
+							if ( !range.collapsed ) {
+								// save the selected nodes
+								var cloneRange = range.clone();
+								cloneRange.enlarge( CKEDITOR.ENLARGE_ELEMENT );
+								
+								var walker = new CKEDITOR.dom.walker( cloneRange );
+								walker.evaluator = isElementNode;
 
-						while (node) {
-							// Webkit adds the child pre block on dragging a few lines of pre
-							if (node.is('pre') && node.hasAscendant('pre')) {
-								var br = editor.document.createElement('br');
-								br.appendTo(node, true);
-								toRemove.push(node);
-							} else {
-								var style = node.data('cke-dnd-style');
-
-								if (style === null) {
-									// remove span nodes which were added on drag and drop operation
-									node.is('span') && toRemove.push(node);
-								} else {
-									// restore saved style
-									if (style.length) {
-										node.setAttribute('style', style);
-									} else {
-										node.removeAttribute('style');
-									}
-
-									node.data('cke-dnd-style', false);
+								var node;
+								while ( node = walker.next() ) {
+									dragNodes.push( node.clone( true ) );
 								}
 							}
-
-							node = walker.next();
 						}
 
-						for (var i = 0; i < toRemove.length; i++) {
-							toRemove[i].remove(true);
-						}
+						window.setTimeout( function() {
+							// DOM is modified at this point
+							// so we can process the inline styles
 
-						range.moveToBookmark(bookmarks);
-						range.select();
+							var range = editor.getSelection().getRanges()[ 0 ];
+							if ( !range.collapsed ) {
+								var cloneRange = range.clone();
+								cloneRange.enlarge( CKEDITOR.ENLARGE_ELEMENT );
 
-						editor.fire('saveSnapshot');
+								var walker = new CKEDITOR.dom.walker( cloneRange );
+								walker.evaluator = isElementNode;
+
+								var counter = 0,
+									nodesToRemove = [];
+
+								var node;
+								while ( node = walker.next() ) {
+									var nodeProcessed = false;
+									if ( !dragInternal ) {
+										// the content was dragged out of the editor
+										// remove all inline styles in this case
+
+										var width = node.getStyle( 'width' ) || node.getAttribute( 'width' ),
+											height = node.getStyle( 'height' ) || node.getAttribute( 'height' );
+
+										// special case for nodes with width/height styles (like images)
+										if ( width || height ) {
+											width = CKEDITOR.tools.cssLength( width );
+											height = CKEDITOR.tools.cssLength( height );
+
+											node.removeAttribute( 'style' );
+
+											width && node.setStyle( 'width', width );
+											height && node.setStyle( 'height', height );
+											
+											node.removeAttribute( 'width' );
+											node.removeAttribute( 'height' );
+										}
+
+										node.removeAttribute( 'style' );
+									} else {
+										var dragNode = dragNodes[ counter ],
+											clone = node.clone( true );
+
+										if ( !dragNode || !clone.isIdentical( dragNode ) ) {
+											if ( node.is( 'span' ) ) {
+												if ( dragNode && dragNode.is( 'span' ) ) {
+													// check if only styles are different for spans
+													// and restore the previous styles
+													var style = dragNode.getAttribute( 'style' );
+													dragNode.removeAttribute( 'style' );
+													clone.removeAttribute( 'style' );
+
+													if ( clone.isIdentical( dragNode ) ) {
+														if ( style ) {
+															node.setAttribute( 'style', style );
+														} else {
+															node.removeAttribute( 'style' );
+														}
+
+														nodeProcessed = true;
+													}
+												}
+
+												if ( !nodeProcessed ) {
+													// looks like this span node was added by Webkit
+													// so we don't need to increase the counter
+													counter--;
+
+													node.removeAttribute( 'style' );
+													if ( !node.hasAttributes() ) {
+														nodesToRemove.push( node );
+													}
+												}
+											} else {
+												// something went wrong;
+												// break the process to prevent corrupting of the styles
+												break;
+											}
+										}
+									}
+
+									counter++;
+								}
+
+								if ( nodesToRemove.length ) {
+									var bookmark = range.createBookmark();
+									for ( var i in nodesToRemove ) {
+										nodesToRemove[ i ].remove( true );
+									}
+									range.moveToBookmark( bookmark );
+									range.select();
+								}
+
+								editor.fire( 'saveSnapshot' );
+							}
+						}, 0 );
 					});
+
 				});
 			}
 
