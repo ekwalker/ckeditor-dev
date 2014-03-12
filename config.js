@@ -104,6 +104,12 @@ CKEDITOR.editorConfig = function( config ) {
 
 	config.skin = 'mindtouch';
 
+	config.menu_groups = 'clipboard,' +
+		'form,' +
+		'anchor,link,image,flash,' +
+		'checkbox,radio,textfield,hiddenfield,imagebutton,button,select,textarea,div,' +
+		'tablecell,tablecellalignment,tablecellproperties,tablerow,tablecolumn,tableinsert,tabledelete,table';
+
 	config.allowedContent = true;
 
 	// SCAYT config
@@ -111,7 +117,7 @@ CKEDITOR.editorConfig = function( config ) {
 	protocol = protocol.search( /https?:/) != -1 ? protocol : 'http:';
 	config.scayt_srcUrl = protocol + '//spellcheck.mindtouch.us/spellcheck/lf/scayt/scayt.js';
 	config.scayt_contextCommands = 'ignore|ignoreall';
-	config.scayt_maxSuggestions = 8;
+	config.scayt_maxSuggestions = 4;
 	config.scayt_moreSuggestions = 'off';
 	config.scayt_customerid = '1:wiN6M-YQYOz2-PTPoa2-3yaA92-PmWom-3CEx53-jHqwR3-NYK6b-XR5Uh1-M7YAp4';
 

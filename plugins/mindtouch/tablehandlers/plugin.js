@@ -65,7 +65,13 @@
 				return;
 			}
 
+			var table = cell.getAscendant('table');
+			if (!table) {
+				return;
+			}
+
 			var cellPos = cell.getDocumentPosition(doc),
+				tablePos = table.getDocumentPosition(doc),
 				width = cell.$.offsetWidth,
 				height = cell.$.offsetHeight,
 				left, top;
@@ -77,7 +83,7 @@
 			}
 
 			handlers.row.setStyles({
-				left: cellPos.x - 16 + 'px',
+				left: tablePos.x - 16 - 3 + 'px',
 				top: top + 'px'
 			});
 
@@ -89,7 +95,7 @@
 
 			handlers.col.setStyles({
 				left: left + 'px',
-				top: cellPos.y - 16 + 'px'
+				top: tablePos.y - 16 - 3 + 'px'
 			});
 
 			handlers.row.show();
@@ -194,6 +200,10 @@
 					position: absolute; \
 					z-index: 2; \
 					overflow: hidden; \
+					opacity: 0.6; \
+				} \
+				.cke_table_handlers:hover { \
+					opacity: 1; \
 				} \
 				.cke_table_handlers a { \
 					display: block; \
@@ -204,6 +214,12 @@
 				} \
 				.cke_table_handlers_col a { \
 					float: left; \
+				} \
+				.cke_table_handlers_col { \
+					margin-bottom: 3px; \
+				} \
+				.cke_table_handlers_row a { \
+					margin-right: 3px; \
 				} \
 				.cke_table_handlers a.rowInsertBefore { \
 					background-image: url(' + path + 'images/arrow_up.png); \
@@ -228,6 +244,12 @@
 				} \
 				.cke_table_handlers a.columnInsertAfter:hover { \
 					background-image: url(' + path + 'images/arrow_right_active.png); \
+				} \
+				.cke_table_handlers a.rowDelete { \
+					margin: 3px 0; \
+				} \
+				.cke_table_handlers a.columnDelete { \
+					margin: 0 3px; \
 				} \
 				.cke_table_handlers a.rowDelete, \
 				.cke_table_handlers a.columnDelete { \

@@ -415,6 +415,22 @@
 										captionElement.getItem( i ).remove();
 								}
 							}
+						},
+						{
+							type: 'text',
+							id: 'txtSummary',
+							requiredContent: 'table[summary]',
+							label: editor.lang.table.summary,
+							setup: function( selectedTable ) {
+								this.setValue( selectedTable.getAttribute( 'summary' ) || '' );
+							},
+							commit: function( data, selectedTable ) {
+								if ( this.getValue() ) {
+									selectedTable.setAttribute( 'summary', this.getValue() );
+								} else {
+									selectedTable.removeAttribute( 'summary' );
+								}
+							}
 						}
 					]
 				}
