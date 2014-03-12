@@ -283,6 +283,7 @@
 		init: function(editor) {
 			var plugin = this,
 				lang = editor.lang,
+				tableLang = lang['mindtouch/table'],
 				picker;
 
 			// update allowedContent for table
@@ -305,50 +306,84 @@
 			addVerticalAlignCommands( editor );
 
 			if ( editor.addMenuItems ) {
-				editor.addMenuGroup( 'cellAlignment', 5 );
-				editor.addMenuGroup( 'tableDelete', 6 );
 				editor.addMenuItems({
 					cellalign: {
-						label: editor.lang['mindtouch/table'].cellAlignment,
-						group: 'cellAlignment',
+						label: tableLang.cellAlignment,
+						group: 'tablecellalignment',
 						order: 1,
 						getItems: function() {
 							var cells = CKEDITOR.plugins.tabletools.getSelectedCells( editor.getSelection() ),
 								vAlign = getVerticalAlign( cells );
 
 							return {
-								cellalign_top: vAlign === 'top' ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF,
-								cellalign_middle: vAlign === 'middle' ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF,
-								cellalign_bottom: vAlign === 'bottom' ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF
+								tablecell_alignTop: vAlign === 'top' ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF,
+								tablecell_alignMiddle: vAlign === 'middle' ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF,
+								tablecell_alignBottom: vAlign === 'bottom' ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF
 							};
 						}
 					},
-					cellalign_top: {
+					tablecell_alignTop: {
 						label: lang.common.alignTop,
-						group: 'cellAlignment',
 						command: 'cellAlignmentTop',
+						group: 'tablecellalignment',
 						order: 5
 					},
-					cellalign_middle: {
+					tablecell_alignMiddle: {
 						label: lang.common.alignMiddle,
-						group: 'cellAlignment',
 						command: 'cellAlignmentMiddle',
+						group: 'tablecellalignment',
 						order: 10
 					},
-					cellalign_bottom: {
+					tablecell_alignBottom: {
 						label: lang.common.alignBottom,
-						group: 'cellAlignment',
 						command: 'cellAlignmentBottom',
+						group: 'tablecellalignment',
 						order: 15
 					},
+					tablerow_insertBefore: {
+						label: tableLang.insertRowAbove,
+						command: 'rowInsertBefore',
+						group: 'tableinsert',
+						order: 5
+					},
+					tablerow_insertAfter: {
+						label: tableLang.insertRowBelow,
+						command: 'rowInsertAfter',
+						group: 'tableinsert',
+						order: 10
+					},
+					tablecolumn_insertBefore: {
+						label: tableLang.insertColumnLeft,
+						command: 'columnInsertBefore',
+						group: 'tableinsert',
+						order: 15
+					},
+					tablecolumn_insertAfter: {
+						label: tableLang.insertColumnRight,
+						command: 'columnInsertAfter',
+						group: 'tableinsert',
+						order: 20
+					},
+					tablerow_delete: {
+						label: tableLang.deleteRow,
+						command: 'rowDelete',
+						group: 'tabledelete',
+						order: 5
+					},
+					tablecolumn_delete: {
+						label: tableLang.deleteColumn,
+						command: 'columnDelete',
+						group: 'tabledelete',
+						order: 10
+					},
 					tabledelete: {
-						label: lang.table.deleteTable,
+						label: CKEDITOR.tools.capitalize( lang.table.deleteTable ),
 						command: 'tableDelete',
-						group: 'tableDelete',
-						order: 1
+						group: 'tabledelete',
+						order: 15
 					},
 					table: {
-						label: lang.table.menu,
+						label: CKEDITOR.tools.capitalize( lang.table.menu ),
 						command: 'mindtouchTableProperties',
 						group: 'table',
 						order: 5
@@ -368,7 +403,13 @@
 					var cell = path.contains( { 'td':1,'th':1 }, 1 );
 					if ( cell && !cell.isReadOnly() ) {
 						return {
-							cellalign: CKEDITOR.TRISTATE_OFF
+							// cellalign: CKEDITOR.TRISTATE_OFF
+							tablerow_insertBefore: CKEDITOR.TRISTATE_OFF,
+							tablerow_insertAfter: CKEDITOR.TRISTATE_OFF,
+							tablecolumn_insertBefore: CKEDITOR.TRISTATE_OFF,
+							tablecolumn_insertAfter: CKEDITOR.TRISTATE_OFF,
+							tablerow_delete: CKEDITOR.TRISTATE_OFF,
+							tablecolumn_delete: CKEDITOR.TRISTATE_OFF
 						};
 					}
 
