@@ -130,11 +130,11 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 }
 
 .cke_menubutton__preltpregtpre_format pre {
-	float: left;
 	cursor: default;
-	margin-right: 0.2em;
+	float: left;
 	font-family: monospace;
 	line-height: 16px;
+	margin-right: 0.2em;
 }
 
 .cke_browser_ie6 .cke_menubutton__preltpregtpre_format pre,

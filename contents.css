@@ -3,88 +3,53 @@ Copyright (c) 2003-2013, CKSource - Frederico Knabben. All rights reserved.
 For licensing, see LICENSE.html or http://ckeditor.com/license
 */
 
-body
-{
-	/* Font */
-	font: 12px/1.5 Arial, Helvetica, sans-serif;
-
-	/* Text color */
-	color: #333;
-
-	/* Remove the background color to make it transparent */
-	background-color: #fff;
-
-	margin: 20px;
+html {
+    overflow-y: auto;
 }
 
-.cke_editable
-{
-	font-size: 13px;
-	line-height: 1.6em;
+html,
+body {
+    background: #fff;
+    font-size: 12px;
+    line-height: 1.5;
 }
 
-a
-{
-	color: #0782C1;
+body.cke_editable {
+    cursor: text;
+    height: auto; 
 }
 
-ol,ul,dl
-{
-	/* IE7: reset rtl list margin. (#7334) */
-	*margin-right: 0px;
+body.page-mode-editor {
+    height: auto;
+    min-height: 100%;
 }
 
-h1,h2,h3,h4,h5,h6
-{
-	line-height: 1.2em;
+hr {
+    border: 0;
+    border-top: 1px solid #ccc;
 }
 
-hr
-{
-	border: 0px;
-	border-top: 1px solid #ccc;
-}
-
-img.right {
-    border: 1px solid #ccc;
+img.rwrap {
     float: right;
-    margin-left: 15px;
-    padding: 5px;
 }
 
-img.left {
-    border: 1px solid #ccc;
+img.lwrap {
     float: left;
-    margin-right: 15px;
-    padding: 5px;
 }
 
 img:hover {
-	opacity: .9;
-	filter: alpha(opacity = 90);
+    opacity: .8;
+    filter: alpha(opacity = 80);
 }
 
-pre
-{
-	white-space: pre-wrap; /* CSS 2.1 */
-	word-wrap: break-word; /* IE7 */
+/* @see MT-10386 */
+pre {
+    white-space: pre-wrap;
+    word-wrap: normal;
 }
 
-.marker {
-    background-color: Yellow;
-}
-
-/*
-MindTouch styles
-*/
-
-html {
-	overflow-y: auto;
-}
-
-/* Fixed editor background css */
-body {
-	background: #fff;
+blockquote p {
+    margin: .25em 0;
 }
 
 /* from skin's resetcss */
@@ -93,18 +58,19 @@ table {
 	border-spacing: 0;
 }
 
-/* @see MT-10386 */
-pre {
-	word-wrap: normal;
+.mt-style-conditional {
+    background: #e8fffb;
+    border: 1px dashed #666;
+    padding: .3em;
 }
 
-blockquote p {
-	margin: 1em 0;
+.scayt-enabled pre .scayt-ignore {
+    background-image: none !important;
 }
 
 /* @see EDT-490 */
 p.comment {
-	line-height: 2em;
+    line-height: 2em;
 }
 
 /* @see EDT-444 */
@@ -112,22 +78,12 @@ p.comment {
 .cke_browser_ie pre.script-jem,
 .cke_browser_ie pre.script-js,
 .cke_browser_ie pre.script-css {
-	width: auto;
+    width: auto;
 }
 
 /* @see EDT-323 */
 .cke_browser_ie td {
-	box-sizing: border-box;
-}
-
-.mt-style-conditional {
-	background: #e8fffb;
-	border: 1px dashed #666;
-	padding: .3em;
-}
-
-.scayt-enabled pre .scayt-ignore {
-	background-image: none !important;
+    box-sizing: border-box;
 }
 
 ::-moz-selection {

@@ -32,9 +32,9 @@
 
 (function() {
 	function sendRequest(formatter, options) {
-		var pageId = Deki.PageId;
+		var pageId = this.config.mindtouch.pageId;
 
-		if (pageId == 0) {
+		if (!pageId) {
 			return;
 		}
 
@@ -101,7 +101,7 @@
 	}
 
 	function cancelEditing(async) {
-		sendRequest('page_editor_whoisediting_cancel', {
+		sendRequest.call(this, 'page_editor_whoisediting_cancel', {
 			async: async
 		});
 	}
@@ -109,7 +109,7 @@
 	function update() {
 		var editor = this;
 
-		sendRequest('page_editor_whoisediting_update', {
+		sendRequest.call(editor, 'page_editor_whoisediting_update', {
 			async: true,
 			success: function(data, status) {
 				if (data && data.success) {
@@ -139,7 +139,7 @@
 
 			editor.addCommand('whoisediting', {
 				exec: function() {
-					sendRequest('page_editor_whoisediting_getlist', {
+					sendRequest.call(editor, 'page_editor_whoisediting_getlist', {
 						async: false,
 						success: function(data, status) {
 							if (data && data.success) {
@@ -176,10 +176,10 @@
 			editor.on('cancel', function() {
 				if (!Deki.CancelUrl) {
 					window.setTimeout(function() {
-						cancelEditing(true);
+						cancelEditing.call(editor, true);
 					}, 0);
 				} else {
-					cancelEditing(false);
+					cancelEditing.call(editor, false);
 				}
 			}, null, null, 1);
 
@@ -193,7 +193,7 @@
 			});
 
 			$(CKEDITOR.document.getWindow().$).bind('unload.whoisediting', function() {
-				cancelEditing(false);
+				cancelEditing.call(editor, false);
 			});
 
 			var reset = function() {
@@ -254,7 +254,7 @@
 							onClick: function(evt) {
 								var dialog = evt.data.dialog;
 								editor.setReadOnly(true);
-								cancelEditing(true);
+								cancelEditing.call(editor, true);
 								dialog.hide();
 							}
 						}

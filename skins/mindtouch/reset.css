@@ -85,9 +85,9 @@ http://docs.cksource.com/CKEditor_4.x/Skin_SDK/Reset
 	cursor: text;
 }
 
-.cke_reset_all textarea[disabled],
-.cke_reset_all input[type="text"][disabled],
-.cke_reset_all input[type="password"][disabled]
+.cke_reset_all textarea:disabled,
+.cke_reset_all input[type="text"]:disabled,
+.cke_reset_all input[type="password"]:disabled
 {
 	cursor: default;
 }

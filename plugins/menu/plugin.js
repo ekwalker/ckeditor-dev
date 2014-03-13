@@ -448,8 +448,14 @@ CKEDITOR.plugins.add( 'menu', {
 					state: stateName,
 					hasPopup: hasSubMenu ? 'true' : 'false',
 					disabled: state == CKEDITOR.TRISTATE_DISABLED,
-					title: this.label,
-					href: 'javascript:void(\'' + ( this.label || '' ).replace( "'" + '' ) + '\')',
+					// allow to use different title/label strings
+					// @see EDT-636
+					// @author MindTouch
+					title: this.title || this.label,
+					// title: this.label,
+					href: 'javascript:void(\'' + ( this.title || this.label || '' ).replace( "'" + '' ) + '\')',
+					// href: 'javascript:void(\'' + ( this.label || '' ).replace( "'" + '' ) + '\')',
+					// END
 					hoverFn: menu._.itemOverFn,
 					moveOutFn: menu._.itemOutFn,
 					clickFn: menu._.itemClickFn,

@@ -125,12 +125,10 @@
 				top : pos.y + 2 + 'px'
 			});
 
-			editor.fire('updateSnapshot');
-
 			comment.data('cke-comment-hover', 1);
 			// IE8: force to redraw
 			comment.$.className = comment.$.className;
-
+			
 			button.setCustomData('comment', comment);
 			button.show();
 		};
@@ -147,10 +145,7 @@
 				comment.data('cke-comment-hover', false);
 				// IE8: force to redraw
 				comment.$.className = comment.$.className;
-
 				button.removeCustomData('comment');
-
-				editor.fire('updateSnapshot');
 				editor.selectionChange(1);
 			}
 		};
@@ -192,6 +187,13 @@
 					}, 30);
 				});
 			});
+
+			// remove data-cke-comment-hover attribute from the snapshot
+			editor.on( 'getSnapshot', function( ev ) {
+				if ( typeof ev.data == 'string' ) {
+					ev.data = ev.data.replace( /\s+data-cke-comment-hover=".*?"/g, '' );
+				}
+			}, null, null, 1000 );
 
 			editor.on('saveSnapshot', function() {
 				commentDeleteButton.detach();

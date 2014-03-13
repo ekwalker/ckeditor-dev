@@ -36,7 +36,7 @@ CKEDITOR.editorConfig = function( config ) {
 		'link,' +
 		'list,' +
 		'liststyle,' +
-		'magicline,' +
+		// 'magicline,' +
 		'newpage,' +
 		'pagebreak,' +
 		'pastefromword,' +
@@ -145,7 +145,7 @@ CKEDITOR.editorConfig = function( config ) {
 
 	config.stylesSet = [
 		{ name : 'None', element : 'p', attributes : { 'class' : '' }, group : 'default', priority : 10 },
-		{ name : '<pre>&lt;pre&gt;</pre> Format', element : 'pre', attributes : { 'class' : '' }, group : 'default', label : 'Formatted', priority : 30 },
+		{ name : '<pre>&lt;pre&gt;</pre> Format', element : 'pre', attributes : { 'class' : '' }, group : 'default', label : 'Formatted', title : '<pre> Format', priority : 30 },
 		{ name : 'Blockquote', element : 'blockquote', group : 'default', priority : 30, command : 'blockquote' },
 		{ name : 'Comment', element : 'p', attributes : { 'class' : 'comment' }, group : 'default', priority : 30, keystroke : CKEDITOR.CTRL + CKEDITOR.ALT + 77 /*M*/ },
 
