@@ -342,8 +342,11 @@
 						var data = editor.getData(),
 							blob = new Blob([data], { type: "text/html;charset=utf-8" }),
 							pageName = Deki.PageName || editor.config.mindtouch.pageTitle,
-							fileName = pageName.replace(/[^A-Za-z0-9]/ig, '_') + '.html';
+							dummy = editor.document.createElement('div');
 
+						dummy.setHtml(pageName);
+
+						var fileName = dummy.getText().replace(/[^A-Za-z0-9]/ig, '_') + '.html';
 						window.saveAs(blob, fileName);
 						return false;
 					});

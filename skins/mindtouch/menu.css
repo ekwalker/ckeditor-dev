@@ -154,19 +154,22 @@ Special outer level classes used in this file:
 
 .cke_menubutton_on
 {
-	background-color: #D3D3D3;
+	background-color: #ddd;
+	border-top: 1px solid #bbb;
+	border-bottom: 1px solid #bbb;
 	display: block;
 }
 
 .cke_hc .cke_menubutton_on
 {
-	border: 2px solid;
+	border: 2px solid #666;
 	padding: 0;
 }
 
 .cke_menubutton_on .cke_menubutton_icon
 {
-	background-color: #D0D2D0;
+	background-color: #d0d2d0;
+	background-color: #bbb;
 }
 
 /* @see EDT-617 */

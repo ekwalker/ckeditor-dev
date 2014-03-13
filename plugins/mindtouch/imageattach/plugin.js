@@ -93,10 +93,10 @@
 						} else {
 							element = editor.document.createElement('a');
 
-							element.setAttribute('href', uri);
-							element.data('cke-saved-href', uri);
-							element.setAttribute('title', uri);
-							element.setHtml(uri);
+							element.setAttribute('href', url);
+							element.data('cke-saved-href', url);
+							element.setAttribute('title', url);
+							element.setHtml(url);
 						}
 
 						element.addClass('internal');

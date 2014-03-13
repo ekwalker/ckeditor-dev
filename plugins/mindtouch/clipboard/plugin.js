@@ -54,7 +54,12 @@
 					evt.data.dataValue = evt.data.dataValue.replace( /<p><br><\/p>/g, '<p></p>' )
 						.replace( /<\/p><p>/g, '<br>' )
 						.replace( /<\/?p>/g, '' )
-						.replace( /\n/g, '<br>' );
+						.replace( /\n/g, '<br>' )
+						.replace( /\s+/g, function( spaces ) {
+							// replace two and more spaces with nbsp to prevent of losing them
+							// @see EDT-635
+							return ' ' + CKEDITOR.tools.repeat( '\u00a0', spaces.length - 1 );
+						});
 				}
 			});
 

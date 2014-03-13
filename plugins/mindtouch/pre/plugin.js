@@ -173,15 +173,15 @@
 
 	var styles = {};
 	function updateWidth(pre) {
-		var editor = this,
-			updateSnapshot = false;
-
 		if (!pre || !pre.is || !pre.is( 'pre' )) {
 			return;
 		}
 
 		// the fake pre element to calculate the width
-		var dummyPre = pre.clone(true);
+		var editor = this,
+			editable = editor.editable(),
+			dummyPre = pre.clone(true);
+
 		dummyPre.data('cke-temp', 1);
 		dummyPre.setStyles({
 			'position': 'absolute',
@@ -190,14 +190,13 @@
 			'width': 'auto'
 		});
 		dummyPre.data('cke-prewidth', false);
-		editor.document.getBody().append(dummyPre);
+		editable.append(dummyPre);
 
 		var id = pre.data('cke-prewidth');
 
 		if (!id) {
 			id = CKEDITOR.tools.getNextNumber();
 			pre.data('cke-prewidth', id);
-			updateSnapshot = true;
 		}
 
 		var doc = editor.document,
@@ -205,7 +204,7 @@
 			newWidth = dummyPre.$.scrollWidth,
 			cssStyleText = '';
 
-		if (doc.getBody().$.offsetWidth < newWidth) {
+		if (editable.$.offsetWidth < newWidth) {
 			cssStyleText = 'pre[data-cke-prewidth="' + id + '"] { width : ' + newWidth + 'px; }';
 		}
 
@@ -222,8 +221,6 @@
 		}
 
 		dummyPre.remove();
-
-		updateSnapshot && editor.fire('updateSnapshot');
 	}
 
 	CKEDITOR.plugins.add('mindtouch/pre', {
@@ -231,9 +228,9 @@
 		lang: 'en', // %REMOVE_LINE_CORE%
 		init: function(editor) {
 			editor.on('contentDom', function() {
-				var body = editor.document.getBody();
-				body.on('mouseup', calculateCursorPositionTimeout, this, editor);
-				body.on('keyup', calculateCursorPositionTimeout, this, editor);
+				var editable = editor.editable();
+				editable.on('mouseup', calculateCursorPositionTimeout, this, editor);
+				editable.on('keyup', calculateCursorPositionTimeout, this, editor);
 			});
 
 			editor.on('mode', calculateCursorPositionTimeout);
@@ -266,7 +263,9 @@
 					var sel = editor.getSelection(),
 						startElement = sel && sel.getStartElement();
 
-					if ( startElement && startElement.getAscendant( 'pre', true ) ) {
+					startElement = startElement && startElement.getAscendant( 'pre', true );
+
+					if ( startElement ) {
 						updateWidth.call( editor, startElement );
 						editor.execCommand( 'autogrow' );
 					}
@@ -274,17 +273,30 @@
 
 				editor.on( 'afterPaste', update );
 
+				var undoCommand = editor.getCommand( 'undo' );
+				if ( undoCommand ) {
+					undoCommand.on( 'afterUndo', update );
+					editor.getCommand( 'redo' ).on( 'afterRedo', update );
+				}
+
 				editor.on( 'contentDom', function() {
 					updateAll();
 
 					var callback = function() {
-						timer = CKEDITOR.tools.setTimeout( update, 0, editor );
+						CKEDITOR.tools.setTimeout( update, 0, editor );
 					};
 
-					var body = editor.document.getBody();
-					body.on( 'keydown', callback );
-					body.on( 'mouseup', callback );
+					var editable = editor.editable();
+					editable.on( 'keydown', callback );
+					editable.on( 'mouseup', callback );
 				});
+
+				// remove data-cke-prewidth attribute from the snapshot
+				editor.on( 'getSnapshot', function( ev ) {
+					if ( typeof ev.data == 'string' ) {
+						ev.data = ev.data.replace( /\s+data-cke-prewidth=".*?"/g, '' );
+					}
+				}, null, null, 1000 );
 			}
 		},
 
@@ -321,38 +333,45 @@
 				});
 			}
 
-			if (htmlFilter && editor.config.allowedContent === true) {
-				htmlFilter && htmlFilter.addRules({
-					elements: {
-						/**
-						 * remove all node elements inside of special pre elements
-						 * @see EDT-523
-						 */
-						pre: function(element) {
-							// get an array of text nodes + br nodes of element
-							var getText = function(element) {
-								var text = [];
+			if ( htmlFilter ) {
+				if ( editor.config.allowedContent === true ) {
+					htmlFilter.addRules({
+						elements: {
+							/**
+							 * remove all node elements inside of special pre elements
+							 * @see EDT-523
+							 */
+							pre: function(element) {
+								if ( element.attributes[ 'class' ] && /(^|\s+)script(-|\s+|$)/.test( element.attributes[ 'class' ] ) ) {
+									var text = [];
+									element.forEach( function( child ) {
+										if ( child.type == CKEDITOR.NODE_TEXT || child.name == 'br' ) {
+											text.push( child );
+										}
+									}, null, true );
 
-								for (var i = 0; i < element.children.length; i++) {
-									var child = element.children[i];
-
-									if (child.type == CKEDITOR.NODE_ELEMENT && child.name != 'br') {
-										text = text.concat(getText(child));
-									} else {
-										text.push(child);
+									element.children.splice( 0, element.children.length );
+									for ( var i = 0; i < text.length; i++ ) {
+										element.add( text[ i ] );
 									}
 								}
-
-								return text;
-							};
-
-							if (element.attributes['class'] && /(^|\s+)script(-|\s+|$)/.test(element.attributes['class'])) {
-								var text = getText(element);
-								element.children.splice(0, element.children.length);
-								for (var i = 0; i < text.length; i++) {
-									element.add(text[i]);
-								}
 							}
+						}
+					});
+				}
+
+				htmlFilter.addRules({
+					elements: {
+						/**
+						 * replace &nbsp; with space inside pre element
+						 * @see EDT-523
+						 */
+						pre: function( element ) {
+							element.forEach( function( child ) {
+								if ( child.type == CKEDITOR.NODE_TEXT ) {
+									child.value = child.value.replace( /&nbsp;/ig, ' ' );
+								}
+							}, null, true );
 						}
 					}
 				});

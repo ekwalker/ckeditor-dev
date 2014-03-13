@@ -104,7 +104,7 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 				window.scayt.time = 500;
 
 				// @see EDT-544
-				window.scayt.prototype.nextBlockInterval = 0;
+				window.scayt.prototype.nextBlockInterval = 50;
 			}
 		}, editor, null, 1);
 
