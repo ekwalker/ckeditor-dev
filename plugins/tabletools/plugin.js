@@ -38,6 +38,22 @@
 				var node;
 				walker.guard = moveOutOfCellGuard;
 
+				/**
+				 * In some cases result of the function includes the next cell to the selection
+				 * @author MindTouch
+				 * @link http://youtrack.developer.mindtouch.com/issue/EDT-628#comment=46-41206
+				 * @link http://screencast.com/t/j2qGylvk5
+				 * @link https://dev.ckeditor.com/ticket/11686
+				 */
+				if ( CKEDITOR.env.webkit ) {
+					walker.evaluator = function( node ) {
+						var ec = this.range.endContainer;
+						if ( ec.type === CKEDITOR.NODE_ELEMENT && ec.is( 'th', 'td' ) && this.range.endOffset === 0 && ec.equals( node ) ) {
+							return false;
+						}
+					};
+				}
+
 				while ( ( node = walker.next() ) ) {
 					// If may be possible for us to have a range like this:
 					// <td>^1</td><td>^2</td>
