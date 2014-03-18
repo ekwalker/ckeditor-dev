@@ -74,8 +74,6 @@
 
 		if ( selectedCellsCount > 0 ) {
 			reselectRanges.call( editor );
-			editor.forceNextSelectionCheck();
-			editor.selectionChange( true );
 		}
 
 		return !!selectedCellsCount;
@@ -102,12 +100,14 @@
 			if ( firstCell ) {
 				var selection = editor.getSelection();
 				if ( selection ) {
-					selection.reset();
+					selection.removeAllRanges();
 
 					if ( selectFirst ) {
-						var range = selection.getRanges()[ 0 ];
-						range.selectNodeContents( firstCell );
-						range.select();
+						var range = new CKEDITOR.dom.range( editor.document );
+						range.setStartAt( firstCell, CKEDITOR.POSITION_AFTER_START );
+						range.collapse( true );
+
+						selection.selectRanges( [ range  ] );
 					}
 				}
 			}
@@ -118,7 +118,8 @@
 	function reselectRanges() {
 		var selection = this.getSelection();
 		if ( selection ) {
-			selection.selectRanges( selection.getRanges() );
+			selection.removeAllRanges();
+			!CKEDITOR.env.gecko && selection.selectRanges( selection.getRanges() );
 		}
 	}
 
@@ -179,6 +180,10 @@
 					}
 				});
 
+				target.on( 'dragstart', function() {
+					release.call( editor );
+				});
+
 				target.on( 'mouseover', function( ev ) {
 					if ( mouseStartCell ) {
 						var target = ev.data.getTarget(),
@@ -188,6 +193,7 @@
 
 						if ( selectCells.call( editor, mouseStartCell, endCell ) ) {
 							forceReselectRange = true;
+							ev.data.preventDefault( 1 );
 						}
 					}
 				});
@@ -288,7 +294,7 @@
 									rowIndex = endRow.$.rowIndex,
 									cellIndex = keyEndCell.$.cellIndex;
 
-								switch ( ev.data.keyCode ) {
+								switch ( keyCode ) {
 									case CKEDITOR.SHIFT + 37: cellIndex--; break;
 									case CKEDITOR.SHIFT + 38: rowIndex--; break;
 									case CKEDITOR.SHIFT + 39: cellIndex++; break;
@@ -303,7 +309,14 @@
 								keyEndCell = new CKEDITOR.dom.element( table.$.rows[ rowIndex ].cells[ cellIndex ] );
 							}
 
+							if ( CKEDITOR.env.webkit && keyStartCell ) {
+								editor.editable().$.style.webkitUserSelect = 'none';
+								editor.setReadOnly( true );
+							}
+
 							if ( selectCells.call( editor, keyStartCell, keyEndCell ) ) {
+								forceReselectRange = true;
+								ev.data.preventDefault( 1 );
 								ev.cancel();
 							}
 							break;
@@ -344,6 +357,18 @@
 							}
 
 							break;
+					}
+				});
+
+				target.on( 'keyup', function( evt ) {
+					if ( evt.data.getKeystroke() === 16 ) {
+						editor.editable().$.style.webkitUserSelect = '';
+						CKEDITOR.env.webkit && editor.setReadOnly( false );
+
+						if ( forceReselectRange ) {
+							reselectRanges.call( editor );
+							forceReselectRange = false;
+						}
 					}
 				});
 			});
@@ -389,8 +414,8 @@
 					}
 
 					var range = new CKEDITOR.dom.range( this.document );
-					range.setStartAt( cell, CKEDITOR.POSITION_AFTER_START );
-					range.setEndAt( cell, CKEDITOR.POSITION_BEFORE_END );
+					range.setStartBefore( cell );
+					range.setEndAfter( cell );
 
 					ranges.push( range );
 				}
