@@ -63,32 +63,15 @@
 				return false;
 			}
 
-			var ranges = selection.getRanges(),
-				range = ranges && ranges[0],
-				doc = this.editor.document,
+			var doc = this.editor.document,
 				remove = (mode & 2) >> 1,
 				ignoreCells = mode & 1,
 				rows = [],
 				table, i, j, row;
 
-			if (!ignoreCells) {
-				// use the regular copy/cut operations in case
-				// if only content of the cell (or partially content of the cells)
-				// is selected (not whole the cell)
-
-				var boundaryNodes = range && range.getBoundaryNodes(),
-					dtdCells = {
-						td: 1,
-						th: 1
-					};
-
-				if (!(boundaryNodes && boundaryNodes.startNode.is && boundaryNodes.startNode.is('td')) && !(boundaryNodes && boundaryNodes.endNode.is && boundaryNodes.endNode.is('td'))) {
-					return false;
-				}
-			}
-
-			if (range && range.checkReadOnly()) {
-				remove = false;
+			// don't process the single cell
+			if (!ignoreCells && cells.length == 1) {
+				return false;
 			}
 
 			// save the table structure in case if rows will be pasted outside of the table
@@ -200,19 +183,17 @@
 							moveCursorToNode = CKEDITOR.dom.element.get(table.$.rows[index]).getFirst();
 						}
 
-						originalRow.remove();
+						!originalRow.isReadOnly() && originalRow.remove();
 
 						// we can save the id in clipboard if the original row has been removed
 						cloneId = true;
-					} else if (!ignoreCells) {
-						moveCursorToNode = originalRow.getFirst();
 					}
 				}
 
 				rows[i] = row.clone(true, cloneId);
 			}
 
-			if (remove && rows.length && !table.$.rows.length) {
+			if (remove && rows.length && !table.$.rows.length && !table.isReadOnly()) {
 				// remove the table if it's empty
 				moveCursorToNode = table.getNext() || table.getPrevious() || doc.getBody();
 				table.remove();
@@ -254,10 +235,8 @@
 				return false;
 			}
 
-			var editor = this.editor;
-			editor.fire('saveSnapshot');
-
-			var cells = CKEDITOR.plugins.tabletools.getSelectedCells(selection),
+			var editor = this.editor,
+				cells = CKEDITOR.plugins.tabletools.getSelectedCells(selection),
 				table = this.clipboard.table;
 
 			// if we are not into table, paste the saved table
@@ -332,6 +311,8 @@
 			// to insert the last copied row before the current
 			(mode == PASTE_ROW_BEFORE) && rowsToInsert.reverse();
 
+			editor.fire('saveSnapshot');
+
 			for (i = 0; i < rowsToInsert.length; i++) {
 				rowToInsert = rowsToInsert[i].clone(true, true);
 				j = (mode == PASTE_ROW_BEFORE) ? this.clipboard.rows.length - 1 - i : i;
@@ -349,6 +330,7 @@
 				currentRow = rowToInsert;
 			}
 
+			editor.fire('afterTablePaste');
 			editor.fire('saveSnapshot');
 
 			return true;
@@ -364,12 +346,8 @@
 	};
 
 	CKEDITOR.plugins.add('mindtouch/tableclipboard', {
-		lang: 'en', // %REMOVE_LINE_CORE%
-		icons: 'tablerow_copy,tablerow_cut,tablerow_pasteAfter,tablerow_pasteBefore', // %REMOVE_LINE_CORE%
-		requires: 'mindtouch/table',
 		init: function(editor) {
-			var lang = editor.lang['mindtouch/tableclipboard'],
-				clipboard = new tableClipboard(editor);
+			var clipboard = new tableClipboard(editor);
 
 			editor.addCommand('rowCut', {
 				exec: function(editor) {
@@ -413,120 +391,69 @@
 				}
 			});
 
+			var cancelEvent = function(evt) {
+				if (evt.data && evt.data.preventDefault) {
+					evt.data.preventDefault(true);
+				} else {
+					evt.cancel();
+				}
+			};
+
 			var onCopyCut = function(evt) {
 				clipboard.reset();
 
 				// check if only table content
 				// and content of only single table is selected
 				var sel = editor.getSelection(),
-					ranges = sel && sel.getRanges(),
-					range = ranges && ranges[0];
+					cells = ( sel && CKEDITOR.plugins.tabletools.getSelectedCells( sel ) ) || [],
+					table = prevTable = null;
 
-				if (range) {
-					var startAscendant = range.startContainer.getAscendant('table', true),
-						endAscendant = range.endContainer.getAscendant('table', true);
-
-					if (!startAscendant || !endAscendant || !startAscendant.equals(endAscendant)) {
+				for ( var i = 0 ; i < cells.length ; i++ ) {
+					table = cells[ i ].getAscendant( 'table' );
+					if ( i > 0 && !table.equals( prevTable ) ) {
 						return;
 					}
+					prevTable = table;
 				}
 
+				// try to copy/cut selected cells
 				var command = (evt.name in {'copy': 1, 'zcBeforeCopy': 1}) ? 'cellsCopy' : 'cellsCut';
-
 				editor.execCommand(command);
 
-				// if we've saved selected rows/cells, cancel the default event
-				if (!clipboard.isEmpty()) {
-					if (evt.data && evt.data.preventDefault) {
-						evt.data.preventDefault(true);
-					} else {
-						evt.cancel();
-					}
-				}
+				!clipboard.isEmpty() && cancelEvent(evt);
 			};
 
-			editor.on('contentDom', function() {
-				var body = editor.document.getBody();
-				for (var eventName in {'copy': 1, 'cut': 1}) {
-					body.on(eventName, onCopyCut);
-				}
-
-				// IE does not fire cut event for selected table cells
-				if (CKEDITOR.env.ie) {
-					body.on('beforecut', onCopyCut);
-				}
-			}, null, null, 1);
-
-			editor.on('beforePaste', function(evt) {
+			var onPasteEvent = function(evt) {
 				// if clipboard is not empty,
 				// paste stored rows and cancel paste event
 				if (!clipboard.isEmpty()) {
 					editor.execCommand('rowPasteAfter');
-					evt.cancel();
+					cancelEvent(evt);
 				}
+			};
+
+			editor.on('contentDom', function() {
+				var editable = editor.editable();
+				for (var eventName in {'copy': 1, 'cut': 1}) {
+					editable.on(eventName, onCopyCut, null, null, 1);
+				}
+
+				// IE does not fire cut event for selected table cells
+				if (CKEDITOR.env.ie) {
+					editable.on('beforecut', onCopyCut, null, null, 1);
+				}
+
+				editable.on(CKEDITOR.env.ie ? 'beforepaste' : 'paste', onPasteEvent, null, null, 1);
 			});
 
 			// override ZeroClipboard behavior
-			editor.on('zcBeforeCopy', onCopyCut);
-			editor.on('zcBeforeCut', onCopyCut);
+			editor.on( 'zcBeforeCopy', onCopyCut );
+			editor.on( 'zcBeforeCut', onCopyCut );
 
 			// @see EDT-637
-			editor.on('blur', function() {
+			editor.on( 'blur', function() {
 				clipboard.reset();
 			});
-
-			if (editor.addMenuItems) {
-				editor.addMenuGroup('tablerowcopypaste', 101);
-				editor.addMenuGroup('tablerowproperties', 102);
-
-				editor.addMenuItems({
-					tablerow: {
-						label: editor.lang.table.row.menu,
-						group: 'tablerow',
-						order: 1,
-						getItems: function() {
-							return {
-								tablerow_insertBefore: CKEDITOR.TRISTATE_OFF,
-								tablerow_insertAfter: CKEDITOR.TRISTATE_OFF,
-								tablerow_delete: CKEDITOR.TRISTATE_OFF,
-								tablerow_cut: CKEDITOR.TRISTATE_OFF,
-								tablerow_copy: CKEDITOR.TRISTATE_OFF,
-								tablerow_pasteBefore: clipboard.isEmpty() ? CKEDITOR.TRISTATE_DISABLED : CKEDITOR.TRISTATE_OFF,
-								tablerow_pasteAfter: clipboard.isEmpty() ? CKEDITOR.TRISTATE_DISABLED : CKEDITOR.TRISTATE_OFF,
-								tablerow_properties: CKEDITOR.TRISTATE_OFF
-							};
-						}
-					},
-
-					tablerow_cut: {
-						label: lang.cutRows,
-						group: 'tablerowcopypaste',
-						command: 'rowCut',
-						order: 20
-					},
-
-					tablerow_copy: {
-						label: lang.copyRows,
-						group: 'tablerowcopypaste',
-						command: 'rowCopy',
-						order: 25
-					},
-
-					tablerow_pasteBefore: {
-						label: lang.pasteRowsBefore,
-						group: 'tablerowcopypaste',
-						command: 'rowPasteBefore',
-						order: 30
-					},
-
-					tablerow_pasteAfter: {
-						label: lang.pasteRowsAfter,
-						group: 'tablerowcopypaste',
-						command: 'rowPasteAfter',
-						order: 35
-					}
-				});
-			}
 		}
 	});
 })();

@@ -301,11 +301,6 @@ a.cke_button_disabled:active
 	color: #222 !important;
 }
 
-.cke .cke_button__viewmenu .cke_button_label
-{
-	padding: 0;
-}
-
 .cke_button_on .cke_button_label
 {
 	color: #fff;
@@ -322,15 +317,6 @@ a.cke_button_disabled:active
 	padding: 0;
 	display: inline-block;
 	font-size: 12px;
-}
-
-.cke_button .cke .cke_button__normal .cke_button_label
-{
-	padding: 0 2px;
-}
-.cke_button .cke_button__tableoneclick .cke_button_label
-{
-	padding: 0 4px;
 }
 
 /* The small arrow available on buttons that can be expanded

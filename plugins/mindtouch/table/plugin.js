@@ -57,7 +57,7 @@
 	}
 
 	var dimensionPicker = CKEDITOR.tools.createClass({
-		$: function(container, panel, tableButton, onPick) {
+		$: function(container, panel, onPick) {
 			this._.minCols = 5;
 			this._.minRows = 5;
 			this._.lastCols = 0;
@@ -65,8 +65,6 @@
 
 			this._.container = container;
 			this._.panel = panel;
-
-			this._.tableButtonUi = tableButton;
 
 			this.onPick = onPick;
 
@@ -97,19 +95,6 @@
 
 				this._.picker = new CKEDITOR.dom.element('div', doc);
 				this._.picker.setAttribute('id', 'dimension-picker');
-
-				this._.tableButton = new CKEDITOR.dom.element('div', doc);
-				this._.tableButton.addClass('cke_' + editor.lang.dir);
-				this._.tableButton.addClass('dimension-picker-tableButton');
-
-				if (this._.tableButtonUi) {
-					var output = [];
-
-					this._.tableButtonUi.render(editor, output);
-					this._.tableButton.setHtml(output.join(''));
-
-					this._.container.append(this._.tableButton);
-				}
 
 				this._.container.append(this._.picker);
 				this._.container.append(this._.statusDiv);
@@ -146,18 +131,18 @@
 
 				this._.statusDiv.setHtml(rows + 'x' + cols);
 
-				if (CKEDITOR.env.ie6Compat || CKEDITOR.env.ie7Compat) {
+				if (CKEDITOR.env.ie && CKEDITOR.env.version < 8) {
 					this._.mouseDiv.setStyle('width', (this._.picker.$.offsetWidth + 18) + 'px');
 					this._.mouseDiv.setStyle('height', this._.picker.$.offsetHeight + 'px');
 				}
 
 				var pickerWidth = this._.uhDiv.$.offsetWidth,
-					pickerHeight = this._.tableButton.$.offsetHeight + this._.uhDiv.$.offsetHeight + this._.statusDiv.$.offsetHeight;
+					pickerHeight = this._.uhDiv.$.offsetHeight + this._.statusDiv.$.offsetHeight;
 
 				pickerWidth += 8;
 				pickerHeight += 14;
 
-				if (CKEDITOR.env.ie6Compat || CKEDITOR.env.ie7Compat) {
+				if (CKEDITOR.env.ie && CKEDITOR.env.version < 8) {
 					this._.panel._.iframe.setStyle('width', pickerWidth + 'px');
 					this._.panel._.iframe.setStyle('height', (pickerHeight + 18) + 'px');
 				}
@@ -178,15 +163,11 @@
 			},
 
 			getDimensions: function(ev) {
-				var mousePos = getMousePosition(ev);
-				var x = mousePos.x;
-				var y = mousePos.y;
-
-				y -= this._.tableButton.$.offsetHeight;
-				y = Math.max(y, 0);
-
-				var cols = Math.ceil(x / 18.0);
-				var rows = Math.ceil(y / 18.0);
+				var mousePos = getMousePosition(ev),
+					x = mousePos.x,
+					y = mousePos.y,
+					cols = Math.ceil(x / 18.0),
+					rows = Math.ceil(y / 18.0);
 
 				if (cols == 0 || rows == 0) {
 					cols = rows = 0;
@@ -222,65 +203,219 @@
 		}
 	});
 
+	function getVerticalAlign( cells ) {
+		var vAlign = '',
+			vAlignValues = { top:1, middle:1, bottom:1 };
+		for ( var i = 0 ; i < cells.length ; i++ ) {
+			var cell = cells[ i ],
+				vAlignAttr = cell.getAttribute( 'vAlign' ),
+				vAlignStyle = cell.getStyle( 'vertical-align' ),
+				align;
+
+			if ( !(vAlignAttr in vAlignValues) ) {
+				vAlignAttr = '';
+			}
+			if ( !(vAlignStyle in vAlignValues) ) {
+				vAlignStyle = '';
+			}
+
+			align = vAlignStyle || vAlignAttr || '';
+
+			if ( i > 0 && vAlign !== align ) {
+				vAlign = '';
+				break;
+			}
+
+			vAlign = align;
+		}
+
+		return vAlign;
+	}
+
+	function addVerticalAlignCommands( editor ) {
+		function createDef( vAlign ) {
+			return {
+				contextSensitive: 1,
+				allowedContent: 'td th{vertical-align}',
+				requiredContent: 'td th{vertical-align}',
+				refresh: function( editor, path ) {
+					this.setState( path.contains( { td:1,th:1 }, 1 ) ? CKEDITOR.TRISTATE_OFF : CKEDITOR.TRISTATE_DISABLED );
+				},
+				exec: function() {
+					var cells = CKEDITOR.plugins.tabletools.getSelectedCells( editor.getSelection() ),
+						currentVAlign = getVerticalAlign( cells );
+
+					editor.fire( 'saveSnapshot' );
+
+					for ( var i = 0 ; i < cells.length ; i++ ) {
+						var cell = cells[ i ];
+						if ( currentVAlign !== vAlign ) {
+							cell.setStyle( 'vertical-align', vAlign );
+						} else {
+							cell.removeStyle( 'vertical-align' );
+						}
+
+						cell.removeAttribute( 'vAlign' );
+					}
+
+					editor.fire( 'saveSnapshot' );
+				}
+			};
+		}
+
+		function addCmd( name, def ) {
+			var cmd = editor.addCommand( name, def );
+			editor.addFeature( cmd );
+		}
+
+		addCmd( 'cellAlignmentTop', createDef( 'top' ) );
+		addCmd( 'cellAlignmentMiddle', createDef( 'middle' ) );
+		addCmd( 'cellAlignmentBottom', createDef( 'bottom' ) );
+	}
+
+	/**
+	 * @see EDT-628
+	 */
 	CKEDITOR.plugins.add('mindtouch/table', {
 		lang: 'en', // %REMOVE_LINE_CORE%
 		icons: 'tableoneclick', // %REMOVE_LINE_CORE%
-		requires: 'mindtouch/tools,table,tabletools',
+		requires: 'table,tabletools',
 		init: function(editor) {
 			var plugin = this,
+				lang = editor.lang,
+				tableLang = lang['mindtouch/table'],
 				picker;
 
-			var lang = editor.lang['mindtouch/table'];
-			CKEDITOR.tools.extend(editor.lang.table, lang);
-			CKEDITOR.tools.extend(editor.lang.table.cell, lang.cell);
-			CKEDITOR.tools.extend(editor.lang.table.row, lang.row);
+			// update allowedContent for table
+			editor.getCommand( 'table' ).allowedContent += ';table(*)';
 
-			lang = editor.lang.table;
-
-			// update allowedContent for table and cell properties dialogs
-			editor.getCommand('table').allowedContent += ';table[frame,rules,id]{border,border-width,border-style,border-color,background,background-image,background-color}(*)';
-
-			var cellPropertiesCommand = editor.getCommand('cellProperties');
-			cellPropertiesCommand.allowedContent += ';td th[id]{border,border-width,border-style,border-color,background,background-image}(*)';
-			editor.addFeature(cellPropertiesCommand);
-
-			// allow to override dialog definition
-			var addDialog = CKEDITOR.tools.override(CKEDITOR.dialog.add, function(add) {
-				return function(name, dialogDefinition) {
-					add.apply(this, [name, dialogDefinition]);
-					if (this._.dialogDefinitions[ name ] !== dialogDefinition) {
-						this._.dialogDefinitions[ name ] = dialogDefinition;
-					}
-				}
-			});
-
-			addDialog.call(CKEDITOR.dialog, 'table', this.path + 'dialogs/table.js');
-			addDialog.call(CKEDITOR.dialog, 'tableProperties', this.path + 'dialogs/table.js');
-			addDialog.call(CKEDITOR.dialog, 'cellProperties', this.path + 'dialogs/tableCell.js');
-
-			var cmd = editor.addCommand('rowProperties', new CKEDITOR.dialogCommand('rowProperties', {
-				allowedContent: 'tr{height,vertical-align,text-align,background,background-color,background-image}[id](*)',
-				requiredContent: 'table',
+			editor.addCommand( 'mindtouchTableProperties', new CKEDITOR.dialogCommand( 'mindtouchTableProperties', {
 				contextSensitive: 1,
 				refresh: function( editor, path ) {
-					this.setState( path.contains( { tr:1 }, 1 ) ? CKEDITOR.TRISTATE_OFF : CKEDITOR.TRISTATE_DISABLED );
+					this.setState( path.contains( 'table', 1 ) ? CKEDITOR.TRISTATE_OFF : CKEDITOR.TRISTATE_DISABLED );
 				}
 			}));
-			editor.addFeature( cmd );
 
-			addDialog.call(CKEDITOR.dialog, 'rowProperties', this.path + 'dialogs/tableRow.js');
+			CKEDITOR.dialog.add( 'mindtouchTableProperties', this.path + 'dialogs/table.js' );
 
-			var tableButton;
-			editor.on( 'uiSpace', function( event ) {
-				if ( event.data.space != editor.config.toolbarLocation ) {
-					return;
-				}
+			editor.removeMenuItem( 'tablecell' );
+			editor.removeMenuItem( 'tablerow' );
+			editor.removeMenuItem( 'tablecolumn' );
+			editor.removeMenuItem( 'table' );
 
-				tableButton = editor.ui.create('Table');
-				if (tableButton && editor.addFeature(tableButton)) {
-					tableButton.label = tableButton.title = lang.title;
-				}
+			addVerticalAlignCommands( editor );
+
+			if ( editor.addMenuItems ) {
+				editor.addMenuItems({
+					cellalign: {
+						label: tableLang.cellAlignment,
+						group: 'tablecellalignment',
+						order: 1,
+						getItems: function() {
+							var cells = CKEDITOR.plugins.tabletools.getSelectedCells( editor.getSelection() ),
+								vAlign = getVerticalAlign( cells );
+
+							return {
+								tablecell_alignTop: vAlign === 'top' ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF,
+								tablecell_alignMiddle: vAlign === 'middle' ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF,
+								tablecell_alignBottom: vAlign === 'bottom' ? CKEDITOR.TRISTATE_ON : CKEDITOR.TRISTATE_OFF
+							};
+						}
+					},
+					tablecell_alignTop: {
+						label: lang.common.alignTop,
+						command: 'cellAlignmentTop',
+						group: 'tablecellalignment',
+						order: 5
+					},
+					tablecell_alignMiddle: {
+						label: lang.common.alignMiddle,
+						command: 'cellAlignmentMiddle',
+						group: 'tablecellalignment',
+						order: 10
+					},
+					tablecell_alignBottom: {
+						label: lang.common.alignBottom,
+						command: 'cellAlignmentBottom',
+						group: 'tablecellalignment',
+						order: 15
+					},
+					tablerow_insertBefore: {
+						label: tableLang.insertRowAbove,
+						command: 'rowInsertBefore',
+						group: 'tableinsert',
+						order: 5
+					},
+					tablerow_insertAfter: {
+						label: tableLang.insertRowBelow,
+						command: 'rowInsertAfter',
+						group: 'tableinsert',
+						order: 10
+					},
+					tablecolumn_insertBefore: {
+						label: tableLang.insertColumnLeft,
+						command: 'columnInsertBefore',
+						group: 'tableinsert',
+						order: 15
+					},
+					tablecolumn_insertAfter: {
+						label: tableLang.insertColumnRight,
+						command: 'columnInsertAfter',
+						group: 'tableinsert',
+						order: 20
+					},
+					tablerow_delete: {
+						label: tableLang.deleteRow,
+						command: 'rowDelete',
+						group: 'tabledelete',
+						order: 5
+					},
+					tablecolumn_delete: {
+						label: tableLang.deleteColumn,
+						command: 'columnDelete',
+						group: 'tabledelete',
+						order: 10
+					},
+					tabledelete: {
+						label: CKEDITOR.tools.capitalize( lang.table.deleteTable ),
+						command: 'tableDelete',
+						group: 'tabledelete',
+						order: 15
+					},
+					table: {
+						label: CKEDITOR.tools.capitalize( lang.table.menu ),
+						command: 'mindtouchTableProperties',
+						group: 'table',
+						order: 5
+					}
+				});
+			}
+
+			editor.on( 'doubleclick', function( evt ) {
+				var element = evt.data.element;
+
+				if ( element.is( 'table' ) )
+					evt.data.dialog = 'mindtouchTableProperties';
 			});
+
+			if ( editor.contextMenu ) {
+				editor.contextMenu.addListener( function( element, selection, path ) {
+					var cell = path.contains( { 'td':1,'th':1 }, 1 );
+					if ( cell && !cell.isReadOnly() ) {
+						return {
+							// cellalign: CKEDITOR.TRISTATE_OFF
+							tablerow_insertBefore: CKEDITOR.TRISTATE_OFF,
+							tablerow_insertAfter: CKEDITOR.TRISTATE_OFF,
+							tablecolumn_insertBefore: CKEDITOR.TRISTATE_OFF,
+							tablecolumn_insertAfter: CKEDITOR.TRISTATE_OFF,
+							tablerow_delete: CKEDITOR.TRISTATE_OFF,
+							tablecolumn_delete: CKEDITOR.TRISTATE_OFF
+						};
+					}
+
+					return null;
+				});
+			}
 
 			// @see EDT-554
 			editor.addRemoveFormatFilter && editor.addRemoveFormatFilter( function( element ) {
@@ -289,22 +424,20 @@
 					element.setAttribute( 'style', 'width: 100%; table-layout: fixed;' );
 					return false;
 				}
-
 				return true;
 			});
 
 			editor.ui.add('TableOneClick', CKEDITOR.UI_PANELBUTTON, {
-				label: lang.toolbar,
-				title: lang.toolbar,
+				label: lang.table.toolbar,
+				title: lang.table.toolbar,
 				toolbar: 'insert,40',
-				className: 'cke_button_tableoneclick',
 				modes: {wysiwyg: 1},
 
 				panel: {
 					css: [ CKEDITOR.skin.getPath( 'editor' ) ].concat([editor.config.contentsCss, plugin.path + 'css/style.css']),
 					attributes: {
 						role: 'listbox',
-						'aria-label': lang.toolbar
+						'aria-label': lang.table.toolbar
 					}
 				},
 
@@ -322,7 +455,7 @@
 
 					CKEDITOR.ui.fire('ready', this);
 
-					picker = new dimensionPicker(pickerContainer, panel, tableButton, function(dimensions) {
+					picker = new dimensionPicker(pickerContainer, panel, function(dimensions) {
 						editor.focus();
 						panel.hide();
 
@@ -384,21 +517,6 @@
 					picker.hide();
 				}
 			});
-
-			if (editor.addMenuItems) {
-				editor.addMenuGroup('tablerowproperties', 102);
-				editor.addMenuItems({
-					tablerow_properties: {
-						label: lang.row.title,
-						group: 'tablerowproperties',
-						command: 'rowProperties',
-						order: 40
-					}
-				});
-			}
-		},
-		onLoad: function() {
-			CKEDITOR.document.appendStyleText('.cke_button__tableoneclick .cke_button_label { display: inline; margin: 0; padding-right: 2px;}');
 		}
 	});
 })();

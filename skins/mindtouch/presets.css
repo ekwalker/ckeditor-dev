@@ -36,6 +36,12 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	background-color: #fff;
 }
 
+.cke_button__tableoneclick .cke_button_label {
+	display: inline;
+	margin: 0;
+	padding-right: 2px;
+}
+
 .cke_inner .cke_infobar
 {
 	background: transparent;
@@ -121,6 +127,20 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 {
 	width: auto;
 	padding-right: 2px;
+}
+
+.cke_menubutton__preltpregtpre_format pre {
+	cursor: default;
+	float: left;
+	font-family: monospace;
+	line-height: 16px;
+	margin-right: 0.2em;
+}
+
+.cke_browser_ie6 .cke_menubutton__preltpregtpre_format pre,
+.cke_browser_ie7 .cke_menubutton__preltpregtpre_format pre,
+.cke_browser_ie8 .cke_menubutton__preltpregtpre_format pre {
+	line-height: 13px;
 }
 
 /* ie specific styles */
