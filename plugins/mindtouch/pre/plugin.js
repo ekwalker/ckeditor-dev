@@ -275,8 +275,8 @@
 
 				var undoCommand = editor.getCommand( 'undo' );
 				if ( undoCommand ) {
-					undoCommand.on( 'afterUndo', update );
-					editor.getCommand( 'redo' ).on( 'afterRedo', update );
+					undoCommand.on( 'afterUndo', updateAll );
+					editor.getCommand( 'redo' ).on( 'afterRedo', updateAll );
 				}
 
 				editor.on( 'contentDom', function() {
