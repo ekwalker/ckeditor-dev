@@ -112,6 +112,8 @@
 				}
 			}
 		}
+
+		editor.selectionChange( 1 );
 	}
 
 	// reselect ranges to create ranges of selected cells
@@ -120,6 +122,8 @@
 		if ( selection ) {
 			selection.removeAllRanges();
 			!CKEDITOR.env.gecko && selection.selectRanges( selection.getRanges() );
+			this.forceNextSelectionCheck();
+			this.selectionChange( 1 );
 		}
 	}
 
@@ -142,6 +146,7 @@
 		removeSelection && removeCellsSelection.call( editor, selectFirst );		
 		editable.removeListener( 'mousemove', cancelTableResizer );
 		editable.$.style.webkitUserSelect = '';
+		editor.focusManager.unlock();
 	}
 
 	CKEDITOR.plugins.add( 'mindtouch/tableselection', {
@@ -169,6 +174,7 @@
 						var editable = editor.editable();
 						editable.$.style.webkitUserSelect = 'none';
 						editable.on( 'mousemove', cancelTableResizer );
+						editor.focusManager.lock();
 					}
 				});
 
@@ -316,6 +322,7 @@
 
 							if ( selectCells.call( editor, keyStartCell, keyEndCell ) ) {
 								forceReselectRange = true;
+								editor.focusManager.lock();
 								ev.data.preventDefault( 1 );
 								ev.cancel();
 							}
@@ -375,7 +382,6 @@
 
 			editor.on( 'insertElement', removeCellsSelection, editor, null, 50 );
 			editor.on( 'afterPaste', removeCellsSelection, editor, null, 50 );
-			editor.on( 'afterTablePaste', removeCellsSelection, editor, null, 50 );
 
 			// cell selected class should be removed from the snapshot
 			// to prevent saving selection in undo snapshots
