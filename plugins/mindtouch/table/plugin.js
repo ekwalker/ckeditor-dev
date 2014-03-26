@@ -298,6 +298,20 @@
 
 			CKEDITOR.dialog.add( 'mindtouchTableProperties', this.path + 'dialogs/table.js' );
 
+			// keep reference to tablecell menu item before we remove it:
+			// we need tablecell_merge item from it to get its state in context menu listener
+			// @see EDT-668
+			var tablecellMenuItem = editor.getMenuItem( 'tablecell' );
+			if ( tablecellMenuItem ) {
+				var def = {};
+				for ( var name in tablecellMenuItem ) {
+					if ( Object.prototype.hasOwnProperty.call( tablecellMenuItem, name ) ) {
+						def[ name ] = tablecellMenuItem[ name ];
+					}
+				}
+				tablecellMenuItem = new CKEDITOR.menuItem( editor, 'tablecell', def );
+			}
+
 			editor.removeMenuItem( 'tablecell' );
 			editor.removeMenuItem( 'tablerow' );
 			editor.removeMenuItem( 'tablecolumn' );
@@ -339,6 +353,12 @@
 						command: 'cellAlignmentBottom',
 						group: 'tablecellalignment',
 						order: 15
+					},
+					tablecell_mergeSelected: {
+						label: tableLang.mergeSelected,
+						group: 'tablecell',
+						command: 'cellMerge',
+						order: 5
 					},
 					tablerow_insertBefore: {
 						label: tableLang.insertRowAbove,
@@ -404,6 +424,7 @@
 					if ( cell && !cell.isReadOnly() ) {
 						return {
 							// cellalign: CKEDITOR.TRISTATE_OFF
+							tablecell_mergeSelected: tablecellMenuItem ? tablecellMenuItem.getItems().tablecell_merge : CKEDITOR.TRISTATE_DISABLED,
 							tablerow_insertBefore: CKEDITOR.TRISTATE_OFF,
 							tablerow_insertAfter: CKEDITOR.TRISTATE_OFF,
 							tablecolumn_insertBefore: CKEDITOR.TRISTATE_OFF,
