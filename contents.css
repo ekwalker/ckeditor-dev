@@ -54,8 +54,8 @@ blockquote p {
 
 /* from skin's resetcss */
 table {
-	border-collapse: collapse;
-	border-spacing: 0;
+    border-collapse: collapse;
+    border-spacing: 0;
 }
 
 .mt-style-conditional {
@@ -87,14 +87,28 @@ p.comment {
 }
 
 ::-moz-selection {
-	background-color: #42aae7;
+    background-color: #42aae7;
 }
 
 ::selection {
-	background-color: #42aae7;
+    background-color: #42aae7;
 }
 
 td[data-cke-cell-selected],
 th[data-cke-cell-selected] {
-	background-color: #42aae7;
+    background-color: #42aae7;
+}
+
+td[data-cke-cell-selected]::-moz-selection,
+th[data-cke-cell-selected]::-moz-selection,
+td[data-cke-cell-selected] *::-moz-selection,
+th[data-cke-cell-selected] *::-moz-selection {
+    background:rgba(255, 255, 255, 0.0);
+}
+
+td[data-cke-cell-selected]::selection,
+th[data-cke-cell-selected]::selection,
+td[data-cke-cell-selected] *::selection,
+th[data-cke-cell-selected] *::selection {
+    background:rgba(255, 255, 255, 0.0);
 }
