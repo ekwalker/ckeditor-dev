@@ -184,7 +184,24 @@
 				} else {
 					handlers.detach();
 				}
-			}, null, null, 1);
+			}, null, null, 1 );
+
+			// ckeditor fires "selectionChange" with a delay when cursor is moved to the prev/next cell
+			// we need to fire it immediately to move the handlers without the delay
+			// @see EDT-666
+			editor.on( 'key', function( evt ) {
+				if ( evt.data.keyCode in { 37:1, 39:1 } ) {
+					var selection = editor.getSelection(),
+						range = selection && selection.getRanges()[ 0 ];
+
+					if ( range && range.collapsed && range.startContainer.getAscendant( { th: 1, td: 1 }, true ) ) {
+						window.setTimeout( function() {
+							editor.forceNextSelectionCheck();
+							editor.selectionChange( 1 );
+						}, 0 );
+					}
+				}
+			}, null, null, 1 );
 
 			editor.on( 'contentDomUnload', function() {
 				handlers && handlers.detach();
