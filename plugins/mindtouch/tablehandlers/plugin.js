@@ -37,47 +37,47 @@
 		'<a title="{titleInsertAfter}" class="{scope}InsertAfter" onclick="return CKEDITOR.tools.callFunction({fn}, \'{scope}InsertAfter\')"></a>' +
 		'</div>' );
 
-	function cancel(evt) {
-		(evt.data || evt).preventDefault();
+	function cancel( evt ) {
+		( evt.data || evt ).preventDefault();
 	}
 
-	function tableHandlers(editor) {
+	function tableHandlers( editor ) {
 		this.editor = editor;
 
-		var handlers = {row: null, col: null},
+		var handlers = { row: null, col: null },
 			cell = null,
 			doc = CKEDITOR.document,
 			win = doc.getWindow();
 
-		var handlerFn = CKEDITOR.tools.addFunction(function(command) {
-			cell && this.execCommand(command);
-			this.execCommand('autogrow');
+		var handlerFn = CKEDITOR.tools.addFunction( function( command ) {
+			cell && this.execCommand( command );
+			this.execCommand( 'autogrow' );
 			return false;
-		}, editor);
+		}, editor );
 
-		function update(ev) {
-			if (!cell) {
+		function update( ev ) {
+			if ( !cell ) {
 				return;
 			}
 
-			if (ev && ev.listenerData && ev.listenerData.async) {
-				setTimeout(update, 0);
+			if ( ev && ev.listenerData && ev.listenerData.async ) {
+				setTimeout( update, 0 );
 				return;
 			}
 
-			var table = cell.getAscendant('table');
-			if (!table) {
+			var table = cell.getAscendant( 'table' );
+			if ( !table ) {
 				return;
 			}
 
-			var cellPos = cell.getDocumentPosition(doc),
-				tablePos = table.getDocumentPosition(doc),
+			var cellPos = cell.getDocumentPosition( doc ),
+				tablePos = table.getDocumentPosition( doc ),
 				width = cell.$.offsetWidth,
 				height = cell.$.offsetHeight,
 				left, top;
 
-			if (height < 48) {
-				top = cellPos.y - (24 - height / 2);
+			if ( height < 48 ) {
+				top = cellPos.y - ( 24 - height / 2 );
 			} else {
 				top = cellPos.y + height / 2 - 24;
 			}
@@ -87,8 +87,8 @@
 				top: top + 'px'
 			});
 
-			if (width < 30) {
-				left = cellPos.x - (24 - width / 2);
+			if ( width < 30 ) {
+				left = cellPos.x - ( 24 - width / 2 );
 			} else {
 				left = cellPos.x + width / 2 - 24;
 			}
@@ -102,32 +102,32 @@
 			handlers.col.show();
 		}
 
-		this.attachTo = function(element) {
-			if (cell && cell.equals(element)) {
+		this.attachTo = function( element ) {
+			if ( cell && cell.equals( element ) ) {
 				return;
-			} else if (cell) {
+			} else if ( cell ) {
 				this.detach();
 			}
 
 			cell = element;
 
-			win.on('resize', update);
-			editor.on('afterCommandExec', update, null, {async: true});
-			editor.on('key', update, null, {async: true});
-			editor.on('change', update, null, {async: true});
+			win.on( 'resize', update );
+			editor.on( 'afterCommandExec', update, null, { async: true } );
+			editor.on( 'key', update, null, { async: true } );
+			editor.on( 'change', update, null, { async: true } );
 
 			update();
 		};
 
 		this.detach = function() {
-			if (!cell) {
+			if ( !cell ) {
 				return;
 			}
 
-			win.removeListener('resize', update);
-			editor.removeListener('afterCommandExec', update);
-			editor.removeListener('key', update);
-			editor.removeListener('change', update);
+			win.removeListener( 'resize', update );
+			editor.removeListener( 'afterCommandExec', update );
+			editor.removeListener( 'key', update );
+			editor.removeListener( 'change', update );
 
 			cell = null;
 
@@ -135,31 +135,31 @@
 			handlers.col.hide();
 		};
 
-		var addHandler = function(name) {
+		var addHandler = function( name ) {
 			var scope = name == 'row' ? 'row' : 'column',
-				lang = this.editor.lang.table[scope];
+				lang = this.editor.lang.table[ scope ];
 
-			handlers[name] = CKEDITOR.dom.element.createFromHtml( handlersTpl.output({
+			handlers[ name ] = CKEDITOR.dom.element.createFromHtml( handlersTpl.output({
 				name: name,
 				scope: scope,
 				fn: handlerFn,
 				titleInsertBefore: lang.insertBefore,
 				titleInsertAfter: lang.insertAfter,
-				titleDelete: lang['delete' + CKEDITOR.tools.capitalize(scope)]
+				titleDelete: lang[ 'delete' + CKEDITOR.tools.capitalize( scope ) ]
 			}));
 
-			doc.getBody().append(handlers[name]);
+			doc.getBody().append( handlers[ name ] );
 
-			handlers[name].on('mousedown', function(evt) {
-				cancel(evt);
+			handlers[ name ].on( 'mousedown', function( evt ) {
+				cancel( evt );
 			});
 		};
 
-		addHandler.call(this, 'row');
-		addHandler.call(this, 'col')
+		addHandler.call( this, 'row' );
+		addHandler.call( this, 'col' )
 
-		editor.on('destroy', function() {
-			CKEDITOR.tools.removeFunction(handlerFn);
+		editor.on( 'destroy', function() {
+			CKEDITOR.tools.removeFunction( handlerFn );
 			handlers.row.remove();
 			handlers.col.remove();
 		});
@@ -184,7 +184,24 @@
 				} else {
 					handlers.detach();
 				}
-			}, null, null, 1);
+			}, null, null, 1 );
+
+			// ckeditor fires "selectionChange" with a delay when cursor is moved to the prev/next cell
+			// we need to fire it immediately to move the handlers without the delay
+			// @see EDT-666
+			editor.on( 'key', function( evt ) {
+				if ( evt.data.keyCode in { 37:1, 39:1 } ) {
+					var selection = editor.getSelection(),
+						range = selection && selection.getRanges()[ 0 ];
+
+					if ( range && range.collapsed && range.startContainer.getAscendant( { th: 1, td: 1 }, true ) ) {
+						window.setTimeout( function() {
+							editor.forceNextSelectionCheck();
+							editor.selectionChange( 1 );
+						}, 0 );
+					}
+				}
+			}, null, null, 1 );
 
 			editor.on( 'contentDomUnload', function() {
 				handlers && handlers.detach();
