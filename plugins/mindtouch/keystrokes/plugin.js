@@ -320,6 +320,10 @@
 		}, 0 );
 	};
 
+	var isBlockNode = function( node ) {
+		return node && node.type === CKEDITOR.NODE_ELEMENT && !( node.getName() in CKEDITOR.dtd.$inline );
+	};
+
 	CKEDITOR.plugins.add( 'mindtouch/keystrokes', {
 		requires: 'tab',
 		init: function( editor ) {
@@ -429,94 +433,128 @@
 			}, null, null, 1 );
 
 			/**
-			 * Webkit applies css styles as inline styles on merging blocks with backspace/delete
-			 * 1. Save the current ( backspace ) or next ( delete ) block
-			 * 2. When DOM is modified get the node next to the cursor
-			 * 		( usually Webkit inserts span node but it may use inline node at start of block if it is already exist )
-			 * 3. Insert cloned block ( see #1 )
-			 * 4. Compare inline styles of span node ( see #2 ) and computed styles of block node
-			 * 5. If styles are equal, remove inline style of span node - this style was added by Webkit
-			 *
-			 * Known issue: incorrect behavior in case if the first child of the block is inline node ( not span, i.e. code, sub etc. )
+			 * Webkit applies css styles as inline styles on merging blocks with backspace/delete.
+			 * As workaround, wrap all contents after the end of the range with <i> element.
+			 * In this case Webkit will add inline styles to the <i> element
+			 * and we could safely remove it after the merging of the blocks
 			 *
 			 * @see EDT-459
+			 * @see EDT-663
 			 * @link { https://dev.ckeditor.com/ticket/9998 }
 			 */
 			if ( CKEDITOR.env.webkit ) {
+				// add data filter to make sure all wrapper elements are removed
+				var dataFilter = editor.dataProcessor && editor.dataProcessor.dataFilter;
+				dataFilter && dataFilter.addRules({
+					elements: {
+						i: function( element ) {
+							var attrs = element.attributes;
+							if ( attrs && attrs[ 'data-style-wrapper' ] )
+								delete element.name;
+						}
+					}
+				});
+
 				editor.on( 'contentDom', function() {
-					editor.document.getBody().on( 'keydown', function( evt ) {
+					editor.document.appendStyleText( 'i[data-style-wrapper] { font-style: inherit; }' );
+					editor.editable().on( 'keydown', function( evt ) {
 						var keyCode = evt.data.getKeystroke();
 
 						if ( keyCode === 8 || keyCode === 46 ) {
 							var selection = editor.getSelection(),
 								range = selection && selection.getRanges( true )[ 0 ];
 
-							if ( !range || !range.collapsed ) {
+							if ( !range ) {
 								return false;
 							}
 
-							var isStartOfBlock = range.checkStartOfBlock(),
-								isEndOfBlock = range.checkEndOfBlock(),
-								node;
+							// make sure that two different blocks are selected
+							if ( !range.collapsed ) {
+								var startBlock = range.startContainer,
+									endBlock = range.endContainer;
 
-							if ( (keyCode === 8 && isStartOfBlock ) || ( keyCode === 46 && isEndOfBlock ) ) {
-								var path = new CKEDITOR.dom.elementPath( range.startContainer );
+								while ( !isBlockNode( startBlock ) ) {
+									startBlock = startBlock.getParent();
+								}
 
-								node = path.block || path.blockLimit;
+								while ( !isBlockNode( endBlock ) ) {
+									endBlock = endBlock.getParent();
+								}
 
-								if ( keyCode === 46 ) {
-									// use the next block for delete
-									node = node && node.getNext();
+								if ( startBlock && startBlock.equals( endBlock ) ) {
+									return false;
 								}
 							}
 
-							if ( !node || node.type !== CKEDITOR.NODE_ELEMENT ) {
-								return;
-							}
+							if ( !range.collapsed || ( keyCode === 8 && range.checkStartOfBlock() ) || ( keyCode === 46 && range.checkEndOfBlock() ) ) {
+								var bookmark = range.createBookmark(),
+									nextNode = bookmark[ bookmark.collapsed ? 'startNode' : 'endNode' ].getNextSourceNode( true ),
+									wrapper;
 
-							window.setTimeout( function() {
-								var range = editor.getSelection().getRanges( true )[ 0 ],
-									styledNode = range.getNextNode(),
-									reselect = false;
-
-								if ( !styledNode ) {
-									return;
+								if ( nextNode && nextNode.is && nextNode.is( 'br' ) ) {
+									nextNode = nextNode.getNextSourceNode();
 								}
 
-								if ( styledNode.type === CKEDITOR.NODE_TEXT ) {
-									styledNode = styledNode.getParent();
-									range.setStartBefore( styledNode );
-									range.collapse( true );
-									reselect = true;
+								if ( isBlockNode( nextNode ) ) {
+									do {
+										nextNode = nextNode.getFirst();
+									} while ( isBlockNode( nextNode ) );
 								}
 
-								if ( styledNode && styledNode.type === CKEDITOR.NODE_ELEMENT && styledNode.getName() in CKEDITOR.dtd.$inline ) {
-									var dummy = node.clone();
-									dummy.setStyle( 'visibility', 'hidden' );
-									dummy.data( 'cke-temp' );
+								if ( nextNode ) {
+									var getNext = ( function( firstNode ) {
+										var guard = firstNode;
+										while ( !isBlockNode( guard ) ) {
+											guard = guard.getParent();
+										}
 
-									// actually we need to keep the previous context for dummy node
-									// but let's make things simple
-									// this should work for most cases
-									range.root.append( dummy );
+										return function( node ) {
+											do {
+												node = node && node.getNextSourceNode( !isBlockNode( node ), null, guard );
+											} while ( node && isBlockNode( node ) );
 
-									for ( var i = styledNode.$.style.length; i--; ) {
-										var style = styledNode.$.style[ i ];
+											return node;
+										};
+									})( nextNode );
 
-										if ( styledNode.getComputedStyle( style ) === dummy.getComputedStyle( style ) ) {
-											styledNode.removeStyle( style );
+									wrapper = editor.document.createElement( 'i' );
+									wrapper.data( 'style-wrapper', 1 );
+									wrapper.setStyle( 'display', 'none' );
+									wrapper.insertBefore( nextNode );
+
+									do {
+										var node = getNext( nextNode );
+										nextNode.move( wrapper );
+										nextNode = node;
+									} while ( nextNode );
+
+									wrapper.removeStyle( 'display' );
+								}
+
+								range.moveToBookmark( bookmark );
+								range.select();
+
+								wrapper && window.setTimeout( function() {
+									var selection = editor.getSelection(),
+										range = selection && selection.getRanges( true )[ 0 ],
+										bookmark = range && range.createBookmark(),
+										wrappers = editor.document.getElementsByTag( 'i' ),
+										count = wrappers.count(),
+										i;
+
+									for ( i = 0 ; i < count ; i++ ) {
+										var item = wrappers.getItem( i );
+										if ( item.data( 'style-wrapper' ) ) {
+											item.remove( true );
 										}
 									}
 
-									if ( styledNode.is( 'span' ) && !styledNode.$.style.length ) {
-										styledNode.remove( true );
+									if ( bookmark ) {
+										range.moveToBookmark( bookmark );
+										range.select();
 									}
-
-									dummy.remove();
-
-									reselect && range.select();
-								}
-							}, 0 );
+								}, 0 );
+							}
 						}
 					}, null, null, 100 );
 				});
