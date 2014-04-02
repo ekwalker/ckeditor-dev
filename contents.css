@@ -52,6 +52,12 @@ blockquote p {
     margin: .25em 0;
 }
 
+/* from skin's resetcss */
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
 .mt-style-conditional {
     background: #e8fffb;
     border: 1px dashed #666;
@@ -80,34 +86,29 @@ p.comment {
     box-sizing: border-box;
 }
 
-/* toolbar dropdown styles */
-.cke_menubutton__preltpregtpre_format pre {
-    cursor: default;
-    float: left;
-    font-family: monospace;
-    line-height: 16px;
-    margin-right: 0.2em;
+::-moz-selection {
+    background-color: #42aae7;
 }
 
-.cke_browser_ie6 .cke_menubutton__preltpregtpre_format pre,
-.cke_browser_ie7 .cke_menubutton__preltpregtpre_format pre,
-.cke_browser_ie8 .cke_menubutton__preltpregtpre_format pre {
-    line-height: 13px;
+::selection {
+    background-color: #42aae7;
 }
 
-.cke_menubutton_on {
-    background-color: #ddd;
-    border-top: 1px solid #bbb;
-    border-bottom: 1px solid #bbb;
-    display: block;
+td[data-cke-cell-selected],
+th[data-cke-cell-selected] {
+    background-color: #42aae7;
 }
 
-.cke_hc .cke_menubutton_on {
-    border: 2px solid #666;
-    padding: 0;
+td[data-cke-cell-selected]::-moz-selection,
+th[data-cke-cell-selected]::-moz-selection,
+td[data-cke-cell-selected] *::-moz-selection,
+th[data-cke-cell-selected] *::-moz-selection {
+    background:rgba(255, 255, 255, 0.0);
 }
 
-.cke_menubutton_on .cke_menubutton_icon {
-    background-color: #D0D2D0;
-    background-color: #bbb;
+td[data-cke-cell-selected]::selection,
+th[data-cke-cell-selected]::selection,
+td[data-cke-cell-selected] *::selection,
+th[data-cke-cell-selected] *::selection {
+    background:rgba(255, 255, 255, 0.0);
 }
