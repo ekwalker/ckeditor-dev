@@ -215,7 +215,7 @@
 			var path = this.path,
 				css = '.cke_table_handlers { \
 					position: absolute; \
-					z-index: 2; \
+					z-index: 1; \
 					overflow: hidden; \
 					opacity: 0.6; \
 				} \
