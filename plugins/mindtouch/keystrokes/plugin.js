@@ -55,16 +55,16 @@
 		91: "LEFT WINDOW KEY",
 		92: "RIGHT WINDOW KEY",
 		93: "SELECT KEY",
-		96: "NUMPAD  0",
-		97: "NUMPAD  1",
-		98: "NUMPAD  2",
-		99: "NUMPAD  3",
-		100: "NUMPAD  4",
-		101: "NUMPAD  5",
-		102: "NUMPAD  6",
-		103: "NUMPAD  7",
-		104: "NUMPAD  8",
-		105: "NUMPAD  9",
+		96: "NUMPAD 0",
+		97: "NUMPAD 1",
+		98: "NUMPAD 2",
+		99: "NUMPAD 3",
+		100: "NUMPAD 4",
+		101: "NUMPAD 5",
+		102: "NUMPAD 6",
+		103: "NUMPAD 7",
+		104: "NUMPAD 8",
+		105: "NUMPAD 9",
 		106: "MULTIPLY",
 		107: "ADD",
 		109: "SUBTRACT",
@@ -129,26 +129,26 @@
 		return presentation.join( '+' );
 	}
 
-	var tab = function(keyCode) {
+	var tab = function( keyCode ) {
 		var editor = this,
-			hasShift = (keyCode == CKEDITOR.SHIFT + 9);
+			hasShift = ( keyCode == CKEDITOR.SHIFT + 9 );
 
 		var selection = editor.getSelection(),
-			ranges = selection && selection.getRanges(1),
-			range = ranges && ranges[0];
+			ranges = selection && selection.getRanges( 1 ),
+			range = ranges && ranges[ 0 ];
 
-		if (!range) {
+		if ( !range ) {
 			return false;
 		}
 
-		var path = new CKEDITOR.dom.elementPath(range.startContainer);
+		var path = new CKEDITOR.dom.elementPath( range.startContainer );
 
-		if (!path.contains({td: 1, th: 1, pre: 1}) && range.checkStartOfBlock()) {
-			editor.execCommand(hasShift ? 'outdent' : 'indent');
+		if ( !path.contains( { td: 1, th: 1, pre: 1 } ) && range.checkStartOfBlock() ) {
+			editor.execCommand( hasShift ? 'outdent' : 'indent' );
 			return true;
 		}
 
-		if (!hasShift && editor.execCommand('selectNextCell') || hasShift && editor.execCommand('selectPreviousCell')) {
+		if ( !hasShift && editor.execCommand( 'selectNextCell' ) || hasShift && editor.execCommand( 'selectPreviousCell' ) ) {
 			return true;
 		}
 
@@ -156,14 +156,14 @@
 	};
 
 	var toggleListCmd = {
-		exec: function(editor) {
+		exec: function( editor ) {
 			var commandName;
 
-			if (editor.getCommand('bulletedlist').state == CKEDITOR.TRISTATE_ON) {
+			if ( editor.getCommand( 'bulletedlist' ).state == CKEDITOR.TRISTATE_ON ) {
 				commandName = 'numberedlist';
 			} else {
-				if (editor.getCommand('numberedlist').state == CKEDITOR.TRISTATE_ON) {
-					var path = new CKEDITOR.dom.elementPath(editor.getSelection().getStartElement());
+				if ( editor.getCommand( 'numberedlist' ).state == CKEDITOR.TRISTATE_ON ) {
+					var path = new CKEDITOR.dom.elementPath( editor.getSelection().getStartElement() );
 
 					commandName = 'numberedlist';
 
@@ -171,14 +171,14 @@
 						element,
 						name;
 
-					for (var i = 0; i < path.elements.length; i++) {
-						element = path.elements[i];
+					for ( var i = 0; i < path.elements.length; i++ ) {
+						element = path.elements[ i ];
 
-						if (element.is('ul', 'ol')) {
+						if ( element.is( 'ul', 'ol' ) ) {
 							listsCount++;
 						}
 
-						if (listsCount > 1) {
+						if ( listsCount > 1 ) {
 							commandName = 'bulletedlist';
 						}
 					}
@@ -187,8 +187,8 @@
 				}
 			}
 
-			if (editor.getCommand(commandName).state != CKEDITOR.TRISTATE_DISABLED) {
-				editor.execCommand(commandName);
+			if ( editor.getCommand( commandName ).state != CKEDITOR.TRISTATE_DISABLED ) {
+				editor.execCommand( commandName );
 				return true;
 			}
 
@@ -196,18 +196,18 @@
 		}
 	};
 
-	var removePagebreakOrHr = function(keyCode) {
+	var removePagebreakOrHr = function( keyCode ) {
 		var editor = this,
 			selection = editor.getSelection(),
-			ranges = selection && selection.getRanges(true),
-			range = ranges && ranges[0],
+			ranges = selection && selection.getRanges( true ),
+			range = ranges && ranges[ 0 ],
 			node = null;
 
-		if (range && range.collapsed && range[keyCode == 8 ? 'checkStartOfBlock' : 'checkEndOfBlock']()) {
-			node = range.startContainer[keyCode == 8 ? 'getPreviousSourceNode' : 'getNextSourceNode'](1, CKEDITOR.NODE_ELEMENT);
+		if ( range && range.collapsed && range[ keyCode == 8 ? 'checkStartOfBlock' : 'checkEndOfBlock' ]() ) {
+			node = range.startContainer[ keyCode == 8 ? 'getPreviousSourceNode' : 'getNextSourceNode' ]( 1, CKEDITOR.NODE_ELEMENT );
 		}
 
-		if (node && (node.data('cke-display-name') == 'pagebreak' || node.is('hr'))) {
+		if ( node && ( node.data( 'cke-display-name' ) == 'pagebreak' || node.is( 'hr' ) ) ) {
 			node.remove();
 			return true;
 		}
@@ -215,64 +215,64 @@
 		return false;
 	};
 
-	var moveCursor = function(arrowKeyCode) {
+	var moveCursor = function( arrowKeyCode ) {
 		var editor = this,
 			selection = editor.getSelection(),
-			ranges = selection && selection.getRanges(1),
-			range = ranges && ranges[0];
+			ranges = selection && selection.getRanges( 1 ),
+			range = ranges && ranges[ 0 ];
 
-		if (!range) {
+		if ( !range ) {
 			return false;
 		}
 
 		// override up/down cursor behavior only for table cells
-		var cell = range.startContainer.getAscendant({td: 1, th: 1}, 1);
-		if (!cell) {
+		var cell = range.startContainer.getAscendant( { td: 1, th: 1 }, 1 );
+		if ( !cell ) {
 			return false;
 		}
 
 		// we need to keep offset to emulate behavior of other browsers
 		var offset;
-		if (range.startContainer.type == CKEDITOR.NODE_TEXT) {
+		if ( range.startContainer.type == CKEDITOR.NODE_TEXT ) {
 			offset = range.startOffset;
 		}
 
-		window.setTimeout(function() {
+		window.setTimeout( function() {
 			var selection = editor.getSelection(),
-				ranges = selection && selection.getRanges(1),
-				range = ranges && ranges[0];
+				ranges = selection && selection.getRanges( 1 ),
+				range = ranges && ranges[ 0 ];
 
-			if (!range) {
+			if ( !range ) {
 				return false;
 			}
 
-			var rows = function(isReject) {
-				return function(node) {
+			var rows = function( isReject ) {
+				return function( node ) {
 					var isRow = node && node.getName() == 'tr';
 					return isReject ^ isRow;
 				};
 			};
 
-			var newCell = range.startContainer.getAscendant({td: 1, th: 1}, 1);
+			var newCell = range.startContainer.getAscendant( { td: 1, th: 1 }, 1 );
 
 			// if cursor was not moved out of the cell
-			if (!newCell || newCell.equals(cell)) {
+			if ( !newCell || newCell.equals( cell ) ) {
 				return false;
 			}
 
 			var row = cell.getParent(),
 				siblingRow;
 
-			siblingRow = row && row[arrowKeyCode == 38 ? 'getPrevious' : 'getNext'](rows);
+			siblingRow = row && row[ arrowKeyCode == 38 ? 'getPrevious' : 'getNext' ]( rows );
 
 			// if we are in the last row
-			if (!siblingRow) {
-				var table = row.getAscendant('table'),
-					next = table && table[arrowKeyCode == 38 ? 'getPrevious' : 'getNext']();
+			if ( !siblingRow ) {
+				var table = row.getAscendant( 'table' ),
+					next = table && table[ arrowKeyCode == 38 ? 'getPrevious' : 'getNext' ]();
 
-				if (next) {
-					range.moveToElementEditStart(next);
-					range.collapse(true);
+				if ( next ) {
+					range.moveToElementEditStart( next );
+					range.collapse( true );
 					range.select();
 				}
 
@@ -280,97 +280,101 @@
 			}
 
 			var index = cell.$.cellIndex;
-			if (index > siblingRow.$.cells.length - 1) {
+			if ( index > siblingRow.$.cells.length - 1 ) {
 				index = siblingRow.$.cells.length - 1;
 			}
 
-			var targetCell = new CKEDITOR.dom.element(siblingRow.$.cells[index]);
+			var targetCell = new CKEDITOR.dom.element( siblingRow.$.cells[ index ] );
 
 			// we don't need do anything for tables with one column
-			if (newCell.equals(targetCell)) {
+			if ( newCell.equals( targetCell ) ) {
 				return false;
 			}
 
 			// restoring cursor offset
-			if (!isNaN(offset)) {
-				var textNode = targetCell[arrowKeyCode == 38 ? 'getLast' : 'getFirst']();
+			if ( !isNaN( offset ) ) {
+				var textNode = targetCell[ arrowKeyCode == 38 ? 'getLast' : 'getFirst' ]();
 
-				if (textNode && textNode.type !== CKEDITOR.NODE_TEXT) {
+				if ( textNode && textNode.type !== CKEDITOR.NODE_TEXT ) {
 					var children = textNode.getChildren();
-					for (var i = 0; i < children.count(); i++) {
-						var child = children.getItem(i);
-						if (child.type === CKEDITOR.NODE_TEXT) {
+					for ( var i = 0; i < children.count(); i++ ) {
+						var child = children.getItem( i );
+						if ( child.type === CKEDITOR.NODE_TEXT ) {
 							textNode = child;
 							break;
 						}
 					}
 				}
 
-				if (textNode && textNode.type === CKEDITOR.NODE_TEXT && textNode.getLength() >= offset) {
-					range.setStart(textNode, offset);
-					range.collapse(true);
+				if ( textNode && textNode.type === CKEDITOR.NODE_TEXT && textNode.getLength() >= offset ) {
+					range.setStart( textNode, offset );
+					range.collapse( true );
 					range.select();
 					return true;
 				}
 			}
 
-			range.moveToElementEditStart(targetCell);
+			range.moveToElementEditStart( targetCell );
 			range.select();
 			return true;
-		}, 0);
+		}, 0 );
 	};
 
-	CKEDITOR.plugins.add('mindtouch/keystrokes', {
+	var isBlockNode = function( node ) {
+		return node && node.type === CKEDITOR.NODE_ELEMENT && !( node.getName() in CKEDITOR.dtd.$inline );
+	};
+
+	CKEDITOR.plugins.add( 'mindtouch/keystrokes', {
 		requires: 'tab',
-		init: function(editor) {
-			editor.addCommand('toggleList', toggleListCmd);
+		init: function( editor ) {
+			editor.addCommand( 'toggleList', toggleListCmd );
 
-			editor.setKeystroke(CKEDITOR.CTRL + 76 /*L*/, 'toggleList');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 55 /*7*/, 'numberedlist');
-			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 56 /*8*/, 'bulletedlist');
+			editor.setKeystroke( CKEDITOR.CTRL + 76 /*L*/, 'toggleList' );
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 55 /*7*/, 'numberedlist' );
+			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 56 /*8*/, 'bulletedlist' );
 
-			editor.on('key', function(evt) {
-				if (evt.editor.readOnly || evt.editor.mode != 'wysiwyg') {
+			editor.on( 'key', function( evt ) {
+				if ( evt.editor.readOnly || evt.editor.mode != 'wysiwyg' ) {
 					return;
 				}
 
 				var editor = evt.editor,
 					keyCode = evt.data.keyCode;
 
-				switch (keyCode) {
+				switch ( keyCode ) {
 					case 9: /* TAB */
 					case CKEDITOR.SHIFT + 9:
 					case CKEDITOR.CTRL + 9:
-						if (tab.call(editor, keyCode)) {
+						if ( tab.call( editor, keyCode ) ) {
 							evt.cancel();
 						}
 						break;
 					case 38: /* UP */
 					case 40: /* DOWN */
 						// @see #0007860
-						CKEDITOR.env.webkit && moveCursor.call(editor, keyCode);
+						CKEDITOR.env.webkit && moveCursor.call( editor, keyCode );
 						break;
 					case 8: /* BACKSPACE */
 					case 46: /* DEL */
-						if (removePagebreakOrHr.call(editor, keyCode)) {
+						if ( removePagebreakOrHr.call( editor, keyCode ) ) {
 							evt.cancel();
 						}
 						
 						// @see EDT-582
 						// change the default firefox behavior on backspace/delete at the start/end of pre block
-						if (CKEDITOR.env.gecko) {
+						if ( CKEDITOR.env.gecko ) {
 							var selection = editor.getSelection(),
-								range = selection && selection.getRanges()[0];
+								range = selection && selection.getRanges()[ 0 ];
 
-							if (range.collapsed) {
+							if ( range.collapsed ) {
 								var startElement = selection.getStartElement();
-								if (startElement && startElement.is('pre') && range[keyCode == 8 ? 'checkStartOfBlock' : 'checkEndOfBlock']()) {
-									var sibling = startElement[keyCode == 8 ? 'getPrevious' : 'getNext']();
-									if (sibling && sibling.is && sibling.is('pre')) {
-										// if current block and its sibling (prev for backspace and next for del keys)
-										// are pre blocks, merge the first line of current (backspace) or the sibling (delete) block
+								if ( startElement && startElement.is( 'pre' ) && range[ keyCode == 8 ? 'checkStartOfBlock' : 'checkEndOfBlock' ]() ) {
+									var sibling = startElement[ keyCode == 8 ? 'getPrevious' : 'getNext' ]();
+									if ( sibling && sibling.is && sibling.is( 'pre' ) ) {
+										// if current block and its sibling ( prev for backspace and next for del keys )
+										// are pre blocks, merge the first line of current ( backspace ) or the sibling ( delete ) block
 										var from, to;
-										if (keyCode == 8) {
+										if ( keyCode == 8 ) {
 											from = startElement;
 											to = sibling;
 										} else {
@@ -378,22 +382,22 @@
 											to = startElement;
 										}
 
-										editor.fire('saveSnapshot');
+										editor.fire( 'saveSnapshot' );
 
 										// looking for the first br node
 										var br = from;
-										while (br && !br.is('br')) {
-											br = br.getNextSourceNode(false, CKEDITOR.NODE_ELEMENT, from);
+										while ( br && !br.is( 'br' ) ) {
+											br = br.getNextSourceNode( false, CKEDITOR.NODE_ELEMENT, from );
 										}
 
-										range.setStartAt(from, CKEDITOR.POSITION_AFTER_START);
+										range.setStartAt( from, CKEDITOR.POSITION_AFTER_START );
 										
 										// if there are few lines we'll extract only the first one
 										// or we'll use the whole block otherwise
-										if (br) {
-											range.setEndAt(br, CKEDITOR.POSITION_BEFORE_START);
+										if ( br ) {
+											range.setEndAt( br, CKEDITOR.POSITION_BEFORE_START );
 										} else {
-											range.setEndAt(from, CKEDITOR.POSITION_BEFORE_END);
+											range.setEndAt( from, CKEDITOR.POSITION_BEFORE_END );
 										}
 
 										range.select();
@@ -402,21 +406,21 @@
 
 										br && br.remove();
 
-										range.moveToElementEditEnd(to);
+										range.moveToElementEditEnd( to );
 										range.select();
 
 										// if there is br element at the end of the block
 										// where we'll merge the line, remove it
 										br = to.getLast();
-										br && br.is && br.is('br') && br.remove();
+										br && br.is && br.is( 'br' ) && br.remove();
 
-										contentToMerge.appendTo(to);
+										contentToMerge.appendTo( to );
 
-										if (!from.getChildCount()) {
+										if ( !from.getChildCount() ) {
 											from.remove();
 										}
 
-										editor.fire('saveSnapshot');
+										editor.fire( 'saveSnapshot' );
 
 										evt.cancel();
 									}
@@ -426,99 +430,133 @@
 						break;
 				}
 
-			}, null, null, 1);
+			}, null, null, 1 );
 
 			/**
-			 * Webkit applies css styles as inline styles on merging blocks with backspace/delete
-			 * 1. Save the current (backspace) or next (delete) block
-			 * 2. When DOM is modified get the node next to the cursor
-			 * 		(usually Webkit inserts span node but it may use inline node at start of block if it is already exist)
-			 * 3. Insert cloned block (see #1)
-			 * 4. Compare inline styles of span node (see #2) and computed styles of block node
-			 * 5. If styles are equal, remove inline style of span node - this style was added by Webkit
-			 *
-			 * Known issue: incorrect behavior in case if the first child of the block is inline node (not span, i.e. code, sub etc.)
+			 * Webkit applies css styles as inline styles on merging blocks with backspace/delete.
+			 * As workaround, wrap all contents after the end of the range with <i> element.
+			 * In this case Webkit will add inline styles to the <i> element
+			 * and we could safely remove it after the merging of the blocks
 			 *
 			 * @see EDT-459
+			 * @see EDT-663
 			 * @link {https://dev.ckeditor.com/ticket/9998}
 			 */
-			if (CKEDITOR.env.webkit) {
+			if ( CKEDITOR.env.webkit ) {
+				// add data filter to make sure all wrapper elements are removed
+				var dataFilter = editor.dataProcessor && editor.dataProcessor.dataFilter;
+				dataFilter && dataFilter.addRules({
+					elements: {
+						i: function( element ) {
+							var attrs = element.attributes;
+							if ( attrs && attrs[ 'data-style-wrapper' ] )
+								delete element.name;
+						}
+					}
+				});
+
 				editor.on( 'contentDom', function() {
-					editor.document.getBody().on( 'keydown', function( evt ) {
+					editor.document.appendStyleText( 'i[data-style-wrapper] { font-style: inherit; }' );
+					editor.editable().on( 'keydown', function( evt ) {
 						var keyCode = evt.data.getKeystroke();
 
-						if (keyCode === 8 || keyCode === 46) {
+						if ( keyCode === 8 || keyCode === 46 ) {
 							var selection = editor.getSelection(),
-								range = selection && selection.getRanges(true)[0];
+								range = selection && selection.getRanges( true )[ 0 ];
 
-							if (!range || !range.collapsed) {
+							if ( !range ) {
 								return false;
 							}
 
-							var isStartOfBlock = range.checkStartOfBlock(),
-								isEndOfBlock = range.checkEndOfBlock(),
-								node;
+							// make sure that two different blocks are selected
+							if ( !range.collapsed ) {
+								var startBlock = range.startContainer,
+									endBlock = range.endContainer;
 
-							if ((keyCode === 8 && isStartOfBlock) || (keyCode === 46 && isEndOfBlock)) {
-								var path = new CKEDITOR.dom.elementPath(range.startContainer);
+								while ( !isBlockNode( startBlock ) ) {
+									startBlock = startBlock.getParent();
+								}
 
-								node = path.block || path.blockLimit;
+								while ( !isBlockNode( endBlock ) ) {
+									endBlock = endBlock.getParent();
+								}
 
-								if (keyCode === 46) {
-									// use the next block for delete
-									node = node && node.getNext();
+								if ( startBlock && startBlock.equals( endBlock ) ) {
+									return false;
 								}
 							}
 
-							if (!node || node.type !== CKEDITOR.NODE_ELEMENT) {
-								return;
-							}
+							if ( !range.collapsed || ( keyCode === 8 && range.checkStartOfBlock() ) || ( keyCode === 46 && range.checkEndOfBlock() ) ) {
+								var bookmark = range.createBookmark(),
+									nextNode = bookmark[ bookmark.collapsed ? 'startNode' : 'endNode' ].getNextSourceNode( true ),
+									wrapper;
 
-							window.setTimeout(function() {
-								var range = editor.getSelection().getRanges(true)[0],
-									styledNode = range.getNextNode(),
-									reselect = false;
-
-								if (!styledNode) {
-									return;
+								if ( nextNode && nextNode.is && nextNode.is( 'br' ) ) {
+									nextNode = nextNode.getNextSourceNode();
 								}
 
-								if (styledNode.type === CKEDITOR.NODE_TEXT) {
-									styledNode = styledNode.getParent();
-									range.setStartBefore(styledNode);
-									range.collapse(true);
-									reselect = true;
+								if ( isBlockNode( nextNode ) ) {
+									do {
+										nextNode = nextNode.getFirst();
+									} while ( isBlockNode( nextNode ) );
 								}
 
-								if (styledNode && styledNode.type === CKEDITOR.NODE_ELEMENT && styledNode.getName() in CKEDITOR.dtd.$inline) {
-									var dummy = node.clone();
-									dummy.setStyle('visibility', 'hidden');
-									dummy.data('cke-temp');
+								if ( nextNode ) {
+									var getNext = ( function( firstNode ) {
+										var guard = firstNode;
+										while ( !isBlockNode( guard ) ) {
+											guard = guard.getParent();
+										}
 
-									// actually we need to keep the previous context for dummy node
-									// but let's make things simple
-									// this should work for most cases
-									range.root.append(dummy);
+										return function( node ) {
+											do {
+												node = node && node.getNextSourceNode( !isBlockNode( node ), null, guard );
+											} while ( node && isBlockNode( node ) );
 
-									for (var i = styledNode.$.style.length; i--; ) {
-										var style = styledNode.$.style[i];
+											return node;
+										};
+									})( nextNode );
 
-										if (styledNode.getComputedStyle(style) === dummy.getComputedStyle(style)) {
-											styledNode.removeStyle(style);
+									wrapper = editor.document.createElement( 'i' );
+									wrapper.data( 'style-wrapper', 1 );
+									wrapper.setStyle( 'display', 'none' );
+									wrapper.insertBefore( nextNode );
+
+									do {
+										var node = getNext( nextNode );
+										nextNode.move( wrapper );
+										nextNode = node;
+									} while ( nextNode );
+
+									wrapper.removeStyle( 'display' );
+								}
+
+								range.moveToBookmark( bookmark );
+								range.select();
+
+								wrapper && window.setTimeout( function() {
+									var selection = editor.getSelection(),
+										range = selection && selection.getRanges( true )[ 0 ],
+										bookmark = range && range.createBookmark(),
+										wrappers = editor.document.getElementsByTag( 'i' ),
+										count = wrappers.count(),
+										i;
+
+									for ( i = 0 ; i < count ; i++ ) {
+										var item = wrappers.getItem( i );
+										if ( item.data( 'style-wrapper' ) ) {
+											item.remove( true );
 										}
 									}
 
-									if (styledNode.is('span') && !styledNode.$.style.length) {
-										styledNode.remove(true);
+									if ( bookmark ) {
+										range.moveToBookmark( bookmark );
+										range.select();
 									}
-
-									dummy.remove();
-
-									reselect && range.select();
-								}
-							}, 0);
+								}, 0 );
+							}
 						}
-					}, null, null, 100);
+					}, null, null, 100 );
 				});
 			}
 
@@ -535,66 +573,66 @@
 				var i, name, item, command, keystroke,
 					items = editor.ui.items;
 
-				for (keystroke in editor.keystrokeHandler.keystrokes) {
-					keystrokes[editor.keystrokeHandler.keystrokes[keystroke]] = keystroke;
+				for ( keystroke in editor.keystrokeHandler.keystrokes ) {
+					keystrokes[ editor.keystrokeHandler.keystrokes[ keystroke ] ] = keystroke;
 				}
 
-				keystrokes['indent'] = 9;
-				keystrokes['outdent'] = CKEDITOR.SHIFT + 9;
-				keystrokes['copy'] = CKEDITOR.CTRL + 67;
-				keystrokes['cut'] = CKEDITOR.CTRL + 88;
-				keystrokes['paste'] = CKEDITOR.CTRL + 86;
+				keystrokes[ 'indent' ] = 9;
+				keystrokes[ 'outdent' ] = CKEDITOR.SHIFT + 9;
+				keystrokes[ 'copy' ] = CKEDITOR.CTRL + 67;
+				keystrokes[ 'cut' ] = CKEDITOR.CTRL + 88;
+				keystrokes[ 'paste' ] = CKEDITOR.CTRL + 86;
 
 				// go through ui items
-				for (name in items) {
-					if (!items.hasOwnProperty(name)) {
+				for ( name in items ) {
+					if ( !items.hasOwnProperty( name ) ) {
 						continue;
 					}
 
-					item = items[name];
+					item = items[ name ];
 					command = item.command;
 
-					if (command && item.type == CKEDITOR.UI_BUTTON && command in keystrokes) {
-						keystroke = representKeyStroke(keystrokes[command]);
+					if ( command && item.type == CKEDITOR.UI_BUTTON && command in keystrokes ) {
+						keystroke = representKeyStroke( keystrokes[ command ] );
 
-						var def = item.args[0],
+						var def = item.args[ 0 ],
 							title = def.title || def.label || '';
 
 						title += ' (' + keystroke + ')';
-						item.args[0].title = title;
+						item.args[ 0 ].title = title;
 					}
 				}
-			}, null, null, 1);
+			}, null, null, 1 );
 
-			CKEDITOR.ui.on('ready', function(evt) {
+			CKEDITOR.ui.on( 'ready', function( evt ) {
 				var ui = evt.data;
 
-				if (ui.items) {
+				if ( ui.items ) {
 					var element = ui._.element,
 						item, command, keystroke,
-						nodeList = element.getElementsByTag('a'),
+						nodeList = element.getElementsByTag( 'a' ),
 						itemNode, title,
 						i, j;
 
-					for (i = 0; i < ui.items.length; i++) {
-						item = ui.items[i];
+					for ( i = 0; i < ui.items.length; i++ ) {
+						item = ui.items[ i ];
 						command = item.command;
 
-						if (command && command in keystrokes) {
-							keystroke = representKeyStroke(keystrokes[command]);
+						if ( command && command in keystrokes ) {
+							keystroke = representKeyStroke( keystrokes[ command ] );
 
-							for (j = 0; j < nodeList.count(); j++) {
-								itemNode = nodeList.getItem(j);
+							for ( j = 0; j < nodeList.count(); j++ ) {
+								itemNode = nodeList.getItem( j );
 
-								if (itemNode.hasClass(item.className)) {
+								if ( itemNode.hasClass( item.className ) ) {
 									// decode html entity
-									var dummy = itemNode.getDocument().createElement('div');
-									dummy.setHtml(keystroke);
+									var dummy = itemNode.getDocument().createElement( 'div' );
+									dummy.setHtml( keystroke );
 
-									title = itemNode.getAttribute('title') || item.label || '';
+									title = itemNode.getAttribute( 'title' ) || item.label || '';
 									title += ' (' + dummy.getText() + ')';
 
-									itemNode.setAttribute('title', title);
+									itemNode.setAttribute( 'title', title );
 									break; // for j
 								}
 							}
