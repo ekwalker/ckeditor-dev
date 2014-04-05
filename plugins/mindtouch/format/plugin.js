@@ -63,6 +63,10 @@
 		icons: 'h1,h2,h3,h4,h5,hx,code,plaintext', // %REMOVE_LINE_CORE%
 		requires: 'format',
 		init: function( editor ) {
+			CKEDITOR.on( 'style.copyAttributes', function( evt ) {
+				evt.data.skipAttributes[ 'class' ] = 1;
+			});
+
 			var format = editor.lang.format,
 				lang = editor.lang[ 'mindtouch/format' ],
 				config = editor.config;

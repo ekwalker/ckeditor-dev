@@ -153,6 +153,7 @@
 				editor.on( 'uiReady', function ( ev ) {
 					win.on( 'scroll', fixToolbar, editor );
 					win.on( 'resize', fixToolbar, editor );
+					fixToolbar.call( editor );
 				});
 
 				editor.on( 'destroy', function ( ev ) {

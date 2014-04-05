@@ -227,6 +227,10 @@
 		requires: 'mindtouch/infobar',
 		lang: 'en', // %REMOVE_LINE_CORE%
 		init: function(editor) {
+			CKEDITOR.on( 'style.copyAttributes', function( evt ) {
+				evt.data.skipAttributes[ 'data-cke-prewidth' ] = 1;
+			});
+
 			editor.on('contentDom', function() {
 				var editable = editor.editable();
 				editable.on('mouseup', calculateCursorPositionTimeout, this, editor);
