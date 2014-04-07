@@ -432,6 +432,48 @@
 
 			}, null, null, 1 );
 
+			// 1. command + delete: delete everything from the cursor to the end of the current line
+			// 2. command + backspace: delete everything from the cursor to the beginning of the current line
+			// 3. ctrl + delete: delete everything from the cursor to the next word boundary
+			// 4. ctrl + backspace: delete everything from the cursor to the previous word boundary
+			// @see EDT-631
+			if ( CKEDITOR.env.mac ) {
+				editor.on( 'contentDom', function() {
+					editor.editable().on( 'keydown', function( evt ) {
+						var e = evt.data.$,
+							key = evt.data.getKey();
+						if ( key in { 46: 1, 8: 1 } && ( e.metaKey || e.ctrlKey ) && !e.altKey && !e.shiftKey ) {
+							var selection = editor.getSelection(),
+								ranges = selection && selection.getRanges( true ),
+								range = ranges && ranges[ 0 ];
+
+							if ( !range ) {
+								return;
+							}
+
+							editor.fire( 'saveSnapshot' );
+
+							if ( range.collapsed ) {
+								var direction = key == 46 ? 'forward' : 'backward',
+									granularity = e.metaKey ? 'lineboundary' : 'word';
+
+								var nativeSel = selection.getNative();
+								nativeSel.modify( 'extend', direction, granularity );
+
+								// get the updated range
+								selection = editor.getSelection();
+								range = selection.getRanges( true )[ 0 ];
+							}
+
+							range.deleteContents();
+							range.select();
+							editor.fire( 'saveSnapshot' );
+							evt.data.preventDefault( true );
+						}
+					});
+				});
+			}
+
 			/**
 			 * Webkit applies css styles as inline styles on merging blocks with backspace/delete.
 			 * As workaround, wrap all contents after the end of the range with <i> element.
