@@ -262,15 +262,6 @@
 				!clipboard.isEmpty() && cancelEvent( evt );
 			};
 
-			var onPasteEvent = function( evt ) {
-				// if clipboard is not empty,
-				// paste stored rows and cancel paste event
-				if ( !clipboard.isEmpty() ) {
-					editor.execCommand( 'cellsPaste' );
-					cancelEvent( evt );
-				}
-			};
-
 			editor.on( 'contentDom', function() {
 				var editable = editor.editable();
 				for ( var eventName in { 'copy': 1, 'cut': 1 } ) {
@@ -281,8 +272,15 @@
 				if ( CKEDITOR.env.ie ) {
 					editable.on( 'beforecut', onCopyCut, null, null, 1 );
 				}
+			});
 
-				editable.on( CKEDITOR.env.ie ? 'beforepaste' : 'paste', onPasteEvent, null, null, 1 );
+			editor.on( 'beforePaste', function( evt ) {
+				// if clipboard is not empty,
+				// paste stored cells and cancel event
+				if ( !clipboard.isEmpty() ) {
+					editor.execCommand( 'cellsPaste' );
+					evt.cancel();
+				}
 			});
 
 			// override ZeroClipboard behavior
