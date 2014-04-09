@@ -381,8 +381,12 @@
 				});
 			});
 
-			editor.on( 'insertElement', removeCellsSelection, editor, null, 50 );
-			editor.on( 'afterPaste', removeCellsSelection, editor, null, 50 );
+			var removeSelection = function() {
+				removeCellsSelection.call( this, true );
+			};
+
+			editor.on( 'insertElement', removeSelection, editor, null, 50 );
+			editor.on( 'afterPaste', removeSelection, editor, null, 50 );
 
 			editor.on( 'afterCommandExec', function( evt ) {
 				if ( evt.data.name == 'cellMerge' ) {
