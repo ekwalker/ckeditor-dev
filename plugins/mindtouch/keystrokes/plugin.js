@@ -141,18 +141,16 @@
 			return false;
 		}
 
-		var path = new CKEDITOR.dom.elementPath( range.startContainer );
+		var path = new CKEDITOR.dom.elementPath( range.startContainer ),
+			command;
 
-		if ( !path.contains( { td: 1, th: 1, pre: 1 } ) && range.checkStartOfBlock() ) {
-			editor.execCommand( hasShift ? 'outdent' : 'indent' );
-			return true;
+		if ( range.checkStartOfBlock() && ( !path.contains( { td: 1, th: 1, pre: 1 } ) || path.contains( { ul: 1, ol: 1 } ) ) ) {
+			command = hasShift ? 'outdent' : 'indent';
+		} else {
+			command = hasShift ? 'selectPreviousCell' : 'selectNextCell';
 		}
 
-		if ( !hasShift && editor.execCommand( 'selectNextCell' ) || hasShift && editor.execCommand( 'selectPreviousCell' ) ) {
-			return true;
-		}
-
-		return false;
+		return !!editor.execCommand( command );
 	};
 
 	var toggleListCmd = {
