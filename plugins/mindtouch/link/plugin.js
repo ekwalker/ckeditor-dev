@@ -284,6 +284,26 @@
 				}
 			}, this, null, 1);
 
+			// removing style on unlink command works like general inline style
+			// at the end of the link
+			// so we need to process this case separately
+			// @see EDT-647
+			var unlinkCmd = editor.getCommand('unlink');
+			unlinkCmd && unlinkCmd.on('exec', function(evt) {
+				var selection = editor.getSelection(),
+					range = selection && selection.getRanges()[0];
+				if (range && range.collapsed) {
+					var element = selection.getStartElement().getAscendant('a', true);
+					if (element && element.getAttribute('href') && element.getChildCount() && range.checkBoundaryOfElement(element, CKEDITOR.END)) {
+						var bookmark = range.createBookmark();
+						element.remove(true);
+						range.moveToBookmark(bookmark);
+						range.select();
+						evt.cancel();
+					}
+				}
+			});
+
 			if (editor.addMenuItems) {
 				editor.addMenuItems({
 					link: {
