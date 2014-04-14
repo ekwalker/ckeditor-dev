@@ -86,80 +86,90 @@
 			html += div.getHtml();
 
 			// remove contents on cut operations
-			if (removeContents && !range.checkReadOnly()) {
+			if ( removeContents && !range.checkReadOnly() ) {
 				var boundaryNodes = range.getBoundaryNodes(),
-					startNode = boundaryNodes.startNode,
-					endNode = boundaryNodes.endNode;
+					startPath = new CKEDITOR.dom.elementPath( boundaryNodes.startNode ),
+					endPath = new CKEDITOR.dom.elementPath( boundaryNodes.endNode ),
+					startBlock = startPath.block || startPath.blockLimit,
+					endBlock = endPath.block || endPath.blockLimit,
+					previousNode = startBlock && startBlock.getPrevious(),
+					nextNode = endBlock && endBlock.getNext(),
+					dtdTableContents = CKEDITOR.dtd.$tableContent;
 
-				while (startNode.type != CKEDITOR.NODE_ELEMENT || startNode.getName() in CKEDITOR.dtd.$inline) {
-					startNode = startNode.getParent();
-				}
-
-				while (endNode.type != CKEDITOR.NODE_ELEMENT || endNode.getName() in CKEDITOR.dtd.$inline) {
-					endNode = endNode.getParent();
+				// @see EDT-684
+				if ( startPath.contains( dtdTableContents ) ) {
+					range.enlarge( CKEDITOR.ENLARGE_ELEMENT );
 				}
 
 				range.deleteContents();
 
+				var editable = editor.editable(),
+					startBlockExists = startBlock && editable.contains( startBlock ),
+					endBlockExists = endBlock && editable.contains( endBlock );
+
 				// if selected two and more different block nodes
-				// we need to merge the last node into the first node
+				// we need to merge the end node into the start node
 				// note: we can't use mergeThen param of deleteContents
 				// since it doesn't work with different block nodes
 				// (i.e. header and paragraph)
-				if (!startNode.equals(endNode)) {
-					// if the last selected node is into the table
-					// we don't need to merge its content
-					if (!(endNode.getName() in CKEDITOR.dtd.$tableContent)) {
-						var span = CKEDITOR.dom.element.createFromHtml('<span ' +
-							'data-cke-bookmark="1" style="display:none">&nbsp;</span>', range.document);
+				if ( startBlock && !startBlock.equals( endBlock ) ) {
+					// merge end block content into the start block
+					// except the case when end block is in the table
+					if ( startBlockExists && endBlockExists && !endPath.contains( dtdTableContents ) ) {
+						var span = CKEDITOR.dom.element.createFromHtml( '<span ' +
+							'data-cke-bookmark="1" style="display:none">&nbsp;</span>', range.document );
 
-						range.moveToElementEditEnd(startNode);
-						range.insertNode(span);
+						range.moveToElementEditEnd( startBlock );
+						range.insertNode( span );
 
-						// the end node should be removed after merging
-						var removeEndNode = true;
+						// the end block should be removed after merging
+						var removeEndBlock = true;
 
 						// special case for pre block:
 						// if it still has content after deleting
-						// we need to merge just the first line of pre block into the start node
-						if (endNode.is('pre')) {
-							var node = endNode;
-							while (node && !node.is('br')) {
-								node = node.getNextSourceNode(false, CKEDITOR.NODE_ELEMENT, endNode);
+						// we need to merge just the first line of pre block
+						if ( endBlock.is( 'pre' ) ) {
+							var node = endBlock;
+							while ( node && !node.is( 'br' ) ) {
+								node = node.getNextSourceNode( false, CKEDITOR.NODE_ELEMENT, endBlock );
 							}
 
-							if (node) {
-								range.setStartAt(endNode, CKEDITOR.POSITION_AFTER_START);
-								range.setEndAt(node, CKEDITOR.POSITION_BEFORE_START);
+							if ( node ) {
+								range.setStartAt( endBlock, CKEDITOR.POSITION_AFTER_START );
+								range.setEndAt( node, CKEDITOR.POSITION_BEFORE_START );
 								range.select();
 
-								range.extractContents().appendTo(startNode);
+								range.extractContents().appendTo( startBlock );
 
 								node.remove();
 
-								if (endNode.getChildCount() > 0) {
+								if ( endBlock.getChildCount() > 0 ) {
 									// don't remove pre block
-									removeEndNode = false;
+									removeEndBlock = false;
 								}
 							}
 						}
 
-						if (removeEndNode) {
-							endNode.moveChildren(startNode);
-							endNode.remove();
+						if ( removeEndBlock ) {
+							endBlock.moveChildren( startBlock );
+							endBlock.remove();
 						}
 
-						range.moveToBookmark({startNode: span});
+						range.moveToBookmark( { startNode: span } );
+					} else if ( startBlockExists ) {
+						range.moveToElementEditEnd( startBlock );
+					} else if ( endBlockExists ) {
+						range.moveToElementEditStart( endBlock );
+					} else if ( previousNode && editable.contains( previousNode ) ) {
+						range.moveToElementEditEnd( previousNode );
+					} else if ( nextNode && editable.contains( nextNode ) ) {
+						range.moveToElementEditStart( nextNode );
+					} else {
+						range.moveToElementEditStart( editable );
 					}
-				}
 
-				// append the bogus node if we have an empty block
-				if (!startNode.getText().length) {
-					!CKEDITOR.env.ie && startNode.appendBogus();
-					range.moveToElementEditStart(startNode);
+					range.collapse( 1 );
 				}
-
-				range.collapse(1);
 			}
 
 			range.select();
