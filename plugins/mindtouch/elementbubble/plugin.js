@@ -165,6 +165,7 @@ CKEDITOR.ui.elementBubble = CKEDITOR.tools.createClass({
 
 			this.doc.getWindow().on('resize', this._.update, this);
 			this.editor.on('change', this._.asyncUpdate, this);
+			this.editor.on('infobar', this._.update, this);
 
 			this.onAttach && this.onAttach.call(this);
 
@@ -174,6 +175,7 @@ CKEDITOR.ui.elementBubble = CKEDITOR.tools.createClass({
 		detach: function() {
 			this.doc.getWindow().removeListener('resize', this._.update);
 			this.editor.removeListener('change', this._.asyncUpdate);
+			this.editor.removeListener('infobar', this._.update);
 
 			this.onDetach && this.onDetach.call(this);
 

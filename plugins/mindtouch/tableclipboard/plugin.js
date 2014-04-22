@@ -217,6 +217,7 @@
 			});
 
 			editor.addCommand( 'cellsCopy', {
+				canUndo: false,
 				exec: function( editor ) {
 					var selection = editor.getSelection();
 					selection && clipboard.copyCells( selection );
@@ -224,6 +225,7 @@
 			});
 
 			editor.addCommand( 'cellsPaste', {
+				canUndo: false,
 				exec: function( editor ) {
 					var selection = editor.getSelection();
 					selection && clipboard.paste( selection );
@@ -241,13 +243,27 @@
 			var onCopyCut = function( evt ) {
 				clipboard.reset();
 
-				// check if only table content
-				// and content of only single table is selected
 				var sel = editor.getSelection(),
-					cells = ( sel && CKEDITOR.plugins.tabletools.getSelectedCells( sel ) ) || [],
-					table = prevTable = null;
+					cells = ( sel && CKEDITOR.plugins.tabletools.getSelectedCells( sel ) ) || [];
 
-				for ( var i = 0 ; i < cells.length ; i++ ) {
+				if ( !cells.length ) {
+					return;
+				}
+
+				// check if only table content is selected
+				var range = sel.getRanges()[ 0 ];
+				if ( !range.startContainer.hasAscendant( 'table' ) ) {
+					return;
+				}
+
+				if ( !range.collapsed && !range.endContainer.hasAscendant( 'table' ) ) {
+					return;
+				}
+
+				// check if content of single table is selected
+				var table = prevTable = null,
+					i;
+				for ( i = 0 ; i < cells.length ; i++ ) {
 					table = cells[ i ].getAscendant( 'table' );
 					if ( i > 0 && !table.equals( prevTable ) ) {
 						return;
@@ -262,15 +278,6 @@
 				!clipboard.isEmpty() && cancelEvent( evt );
 			};
 
-			var onPasteEvent = function( evt ) {
-				// if clipboard is not empty,
-				// paste stored rows and cancel paste event
-				if ( !clipboard.isEmpty() ) {
-					editor.execCommand( 'cellsPaste' );
-					cancelEvent( evt );
-				}
-			};
-
 			editor.on( 'contentDom', function() {
 				var editable = editor.editable();
 				for ( var eventName in { 'copy': 1, 'cut': 1 } ) {
@@ -281,9 +288,25 @@
 				if ( CKEDITOR.env.ie ) {
 					editable.on( 'beforecut', onCopyCut, null, null, 1 );
 				}
-
-				editable.on( CKEDITOR.env.ie ? 'beforepaste' : 'paste', onPasteEvent, null, null, 1 );
 			});
+
+			editor.on( 'beforePaste', function( evt ) {
+				// if clipboard is not empty,
+				// paste stored cells and cancel event
+				if ( !clipboard.isEmpty() ) {
+					editor.execCommand( 'cellsPaste' );
+					evt.cancel();
+				}
+			});
+
+			// when we cancel beforePaste event
+			// ckeditor still calls getClipboardDataByPastebin()
+			// it causes saving of pastebin in snapshot (because of insertElement in pasteCells)
+			editor.on( 'getSnapshot', function( ev ) {
+				if ( typeof ev.data == 'string' ) {
+					ev.data = ev.data.replace( /<(?:body|div)\s+.*?id="cke_pastebin"[^>]*>.*?<\/(?:body|div)>/g, '' );
+				}
+			}, null, null, 1000 );
 
 			// override ZeroClipboard behavior
 			editor.on( 'zcBeforeCopy', onCopyCut );

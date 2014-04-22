@@ -103,11 +103,12 @@
 					selection.removeAllRanges();
 
 					if ( selectFirst ) {
-						var range = new CKEDITOR.dom.range( editor.document );
-						range.setStartAt( firstCell, CKEDITOR.POSITION_AFTER_START );
-						range.collapse( true );
-
-						selection.selectRanges( [ range  ] );
+						var range = new CKEDITOR.dom.range( firstCell.getDocument() );
+						if ( !range.moveToElementEditEnd( firstCell ) ) {
+							range.selectNodeContents( firstCell );
+							range.collapse();
+						}
+						range.select( true );
 					}
 				}
 			}
@@ -380,8 +381,18 @@
 				});
 			});
 
-			editor.on( 'insertElement', removeCellsSelection, editor, null, 50 );
-			editor.on( 'afterPaste', removeCellsSelection, editor, null, 50 );
+			var removeSelection = function() {
+				removeCellsSelection.call( this, true );
+			};
+
+			editor.on( 'insertElement', removeSelection, editor, null, 50 );
+			editor.on( 'afterPaste', removeSelection, editor, null, 50 );
+
+			editor.on( 'afterCommandExec', function( evt ) {
+				if ( evt.data.name == 'cellMerge' ) {
+					release.call( editor, true, true );
+				}
+			});
 
 			// cell selected class should be removed from the snapshot
 			// to prevent saving selection in undo snapshots

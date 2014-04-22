@@ -438,6 +438,11 @@
 			CKEDITOR.addCss('pre[function] { padding: 16px 12px 0 12px; background-repeat: no-repeat; background-position: 5px 0; border: 1px solid #aaa; border-left-width: 5px; }');
 		},
 		init: function(editor) {
+			CKEDITOR.on( 'style.copyAttributes', function( evt ) {
+				evt.data.skipAttributes[ 'function' ] = 1;
+				evt.data.skipAttributes[ 'data-cke-transform' ] = 1;
+			});
+
 			var onSelectionChange = function(evt) {
 				if (evt.editor.readOnly) {
 					return null;

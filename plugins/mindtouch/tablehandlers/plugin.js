@@ -143,9 +143,9 @@
 				name: name,
 				scope: scope,
 				fn: handlerFn,
-				titleInsertBefore: lang.insertBefore,
-				titleInsertAfter: lang.insertAfter,
-				titleDelete: lang[ 'delete' + CKEDITOR.tools.capitalize( scope ) ]
+				titleInsertBefore: CKEDITOR.tools.capitalize( lang.insertBefore ),
+				titleInsertAfter: CKEDITOR.tools.capitalize( lang.insertAfter ),
+				titleDelete: this.editor.lang[ 'mindtouch/table' ][ 'delete' + CKEDITOR.tools.capitalize( scope ) ]
 			}));
 
 			doc.getBody().append( handlers[ name ] );
@@ -166,6 +166,7 @@
 	}
 
 	CKEDITOR.plugins.add( 'mindtouch/tablehandlers', {
+		requires: 'mindtouch/table',
 		init: function( editor ) {
 			if ( CKEDITOR.env.gecko && !editor.config.disableNativeTableHandles ) {
 				return;
@@ -215,7 +216,7 @@
 			var path = this.path,
 				css = '.cke_table_handlers { \
 					position: absolute; \
-					z-index: 2; \
+					z-index: 1; \
 					overflow: hidden; \
 					opacity: 0.6; \
 				} \

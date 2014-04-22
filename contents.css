@@ -58,6 +58,11 @@ table {
     border-spacing: 0;
 }
 
+/* @see EDT-678 */
+th {
+    text-alignment: left;
+}
+
 .mt-style-conditional {
     background: #e8fffb;
     border: 1px dashed #666;

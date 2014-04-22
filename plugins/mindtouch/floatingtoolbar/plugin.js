@@ -77,6 +77,7 @@
 		}
 
 		$toolbar.css( { position: toolbarPosition, top: cssLength( top ) } );
+		$toolbar.css( 'z-index', toolbarPosition == 'fixed' ? editor.config.floating_toolbar_zIndex || 10 : '' );
 
 		// @see EDT-293
 		if ( CKEDITOR.env.webkit ) {
@@ -152,6 +153,7 @@
 				editor.on( 'uiReady', function ( ev ) {
 					win.on( 'scroll', fixToolbar, editor );
 					win.on( 'resize', fixToolbar, editor );
+					fixToolbar.call( editor );
 				});
 
 				editor.on( 'destroy', function ( ev ) {
@@ -191,5 +193,14 @@
  *		config.floating_toolbar_top = 30;
  *
  * @cfg {Number} [floating_toolbar_top=0]
+ * @member CKEDITOR.config
+ */
+
+/**
+ * Toolbar z-index
+ *
+ *		config.floating_toolbar_zIndex = 99;
+ *
+ * @cfg {Number} [floating_toolbar_zIndex=10]
  * @member CKEDITOR.config
  */
