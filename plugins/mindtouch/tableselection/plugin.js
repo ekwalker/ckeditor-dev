@@ -172,6 +172,7 @@
 	}
 
 	CKEDITOR.plugins.add( 'mindtouch/tableselection', {
+		requires: 'tabletools',
 		init: function( editor ) {
 			editor.on( 'contentDom', function() {
 				var target = editor.editable(),
@@ -443,7 +444,7 @@
 				return cells;
 			};
 
-			var selectedCells = getSelectedCells( td ).concat( getSelectedCells( th ) );
+			var selectedCells = getSelectedCells( th ).concat( getSelectedCells( td ) );
 
 			if ( selectedCells.length ) {
 				var ranges = [];
