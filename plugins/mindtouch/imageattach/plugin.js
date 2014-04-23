@@ -90,7 +90,7 @@
         lang: 'en', // %REMOVE_LINE_CORE%
         requires: 'dialog,mindtouch/dialog,mindtouch/save',
         init: function(editor) {
-            /*editor.on('contentDom', function() {
+            editor.on('contentDom', function() {
                 editor.document.getBody().on('paste', function(ev) {
                     var e = ev.data.$;
 
@@ -113,16 +113,18 @@
                                     editor.lock();
 
                                     // We need to represent the image as a file
-                                    //var extension = _(image.type).strRightBack('/');
+                                    var extension = _(image.type).strRightBack('/');
                                     var blob = image.getAsFile();
                                     var reader = new FileReader();
                                     reader.onload = function(e) {
-                                        //blob.type = image.type;
-                                        //blob.name = 'clipboard_' + new Date().getTime() + '.' + extension;
-                                        Deki.Log(e);
-                                        window.console.warn('Uploading from paste is not yet supported!!');
+                                        var fileInfo = {
+                                            base64: true,
+                                            size: e.total,
+                                            name: 'clipboard_' + new Date().getTime() + '.' + extension,
+                                            encoded: this.result
+                                        };
                                         try {
-                                            attachImages(editor, binary);
+                                            attachImages(editor, fileInfo);
                                         } catch (ex) {
                                             window.alert(ex);
                                         }
@@ -133,7 +135,7 @@
                         });
                     }}
                 });
-            });*/
+            });
 
             // enable attaching files on drag and drop
             var doAttach = function(e) {
