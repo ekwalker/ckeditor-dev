@@ -35,6 +35,32 @@
 		keyStartCell = null,
 		keyEndCell = null;
 
+	function getCellIndex( cell, row, map ) {
+		var cells = map[ row.$.rowIndex ];
+		for ( var i = 0 ; i < cells.length ; i++ ) {
+			if ( cell.equals( CKEDITOR.dom.element.get( cells[ i ] ) ) ) {
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
+	function clearTableSelection( table ) {
+		var cells = [];
+		for ( var i = 0 ; i < table.$.rows.length ; i ++ ) {
+			for ( var j = 0 ; j < table.$.rows[ i ].cells.length ; j++ ) {
+				var cell = new CKEDITOR.dom.element( table.$.rows[ i ].cells[ j ] );
+				if ( cell.data( 'cke-cell-selected' ) ) {
+					cell.data( 'cke-cell-selected', false );
+					cells.push(  cell );
+				}
+			}
+		}
+
+		return cells;
+	}
+
 	function selectCells( startCell, endCell ) {
 		if ( !startCell || !startCell.is || !startCell.is( 'td', 'th' ) ||
 			 !endCell || !endCell.is || !endCell.is( 'td', 'th' ) ) {
@@ -50,24 +76,28 @@
 
 		var startRow = startCell.getParent(),
 			endRow = endCell.getParent(),
-			fromCellIndex, fromRowIndex, toCellIndex, toRowIndex;
+			map = CKEDITOR.tools.buildTableMap( table ),
+			fromRowIndex = Math.min( startRow.$.rowIndex, endRow.$.rowIndex ),
+			toRowIndex = Math.max( startRow.$.rowIndex, endRow.$.rowIndex ),
+			fromCellIndex = getCellIndex( startCell, startRow, map );
+			toCellIndex = getCellIndex( endCell, endRow, map );
 
-		fromCellIndex = Math.min( startCell.$.cellIndex, endCell.$.cellIndex );
-		toCellIndex = Math.max( startCell.$.cellIndex, endCell.$.cellIndex );
+		// swap values
+		if ( fromCellIndex > toCellIndex ) {
+			fromCellIndex = fromCellIndex + toCellIndex;
+			toCellIndex = fromCellIndex - toCellIndex;
+			fromCellIndex = fromCellIndex - toCellIndex;
+		}
 
-		fromRowIndex = Math.min( startRow.$.rowIndex, endRow.$.rowIndex );
-		toRowIndex = Math.max( startRow.$.rowIndex, endRow.$.rowIndex );
+		clearTableSelection( table );
 
 		var selectedCellsCount = 0;
-
-		for ( var i = 0 ; i < table.$.rows.length ; i++ ) {
-			for ( var j = 0 ; j < table.$.rows[ i ].cells.length ; j++ ) {
-				var cell = new CKEDITOR.dom.element( table.$.rows[ i ].cells[ j ] );
-				if ( i >= fromRowIndex && i <= toRowIndex && j >= fromCellIndex && j <= toCellIndex ) {
+		for ( var i = fromRowIndex ; i <= toRowIndex ; i++ ) {
+			for ( var j = fromCellIndex ; j <= toCellIndex ; j++ ) {
+				var cell = new CKEDITOR.dom.element( map[ i ][ j ] );
+				if ( !cell.data( 'cke-cell-selected' ) ) {
 					cell.data( 'cke-cell-selected', 1 );
 					selectedCellsCount++;
-				} else {
-					cell.data( 'cke-cell-selected', false );
 				}
 			}
 		}
@@ -86,26 +116,17 @@
 
 		for ( var k = 0 ; k < tables.count(); k++ ) {
 			var table = tables.getItem( k ),
-				firstCell = null;
-			for ( var i = 0 ; i < table.$.rows.length ; i++ ) {
-				for ( var j = 0 ; j < table.$.rows[ i ].cells.length ; j++ ) {
-					var cell = new CKEDITOR.dom.element( table.$.rows[ i ].cells[ j ] );
-					if ( cell.data( 'cke-cell-selected' ) ) {
-						cell.data( 'cke-cell-selected', false );
-						firstCell = firstCell || cell;
-					}
-				}
-			}
+				cells = clearTableSelection( table );
 
-			if ( firstCell ) {
+			if ( cells.length ) {
 				var selection = editor.getSelection();
 				if ( selection ) {
 					selection.removeAllRanges();
 
 					if ( selectFirst ) {
-						var range = new CKEDITOR.dom.range( firstCell.getDocument() );
-						if ( !range.moveToElementEditEnd( firstCell ) ) {
-							range.selectNodeContents( firstCell );
+						var range = new CKEDITOR.dom.range( cells[ 0 ].getDocument() );
+						if ( !range.moveToElementEditEnd( cells[ 0 ] ) ) {
+							range.selectNodeContents( cells[ 0 ] );
 							range.collapse();
 						}
 						range.select( true );
@@ -151,6 +172,7 @@
 	}
 
 	CKEDITOR.plugins.add( 'mindtouch/tableselection', {
+		requires: 'tabletools',
 		init: function( editor ) {
 			editor.on( 'contentDom', function() {
 				var target = editor.editable(),
@@ -297,23 +319,26 @@
 								}
 							} else {
 								var table = keyStartCell.getAscendant( 'table', true ),
+									map = CKEDITOR.tools.buildTableMap( table ),
 									endRow = keyEndCell.getParent(),
 									rowIndex = endRow.$.rowIndex,
-									cellIndex = keyEndCell.$.cellIndex;
+									cellIndex = getCellIndex( keyEndCell, endRow, map );
 
-								switch ( keyCode ) {
-									case CKEDITOR.SHIFT + 37: cellIndex--; break;
-									case CKEDITOR.SHIFT + 38: rowIndex--; break;
-									case CKEDITOR.SHIFT + 39: cellIndex++; break;
-									case CKEDITOR.SHIFT + 40: rowIndex++; break;
-								}
+								do {
+									switch ( keyCode ) {
+										case CKEDITOR.SHIFT + 37: cellIndex--; break;
+										case CKEDITOR.SHIFT + 38: rowIndex--; break;
+										case CKEDITOR.SHIFT + 39: cellIndex++; break;
+										case CKEDITOR.SHIFT + 40: rowIndex++; break;
+									}									
+								} while ( map[ rowIndex ] && map[ rowIndex ][ cellIndex ] && CKEDITOR.dom.element.get( map[ rowIndex ][ cellIndex ] ).equals( keyEndCell ) );
 
 								rowIndex = Math.max( rowIndex, 0 );
 								rowIndex = Math.min( rowIndex, table.$.rows.length - 1 );
 								cellIndex = Math.max( cellIndex, 0 );
-								cellIndex = Math.min( cellIndex, endRow.$.cells.length - 1 );
+								cellIndex = Math.min( cellIndex, map[ rowIndex ].length - 1 );
 
-								keyEndCell = new CKEDITOR.dom.element( table.$.rows[ rowIndex ].cells[ cellIndex ] );
+								keyEndCell = new CKEDITOR.dom.element( map[ rowIndex ][ cellIndex ] );
 							}
 
 							if ( CKEDITOR.env.webkit && keyStartCell ) {
@@ -419,7 +444,7 @@
 				return cells;
 			};
 
-			var selectedCells = getSelectedCells( td ).concat( getSelectedCells( th ) );
+			var selectedCells = getSelectedCells( th ).concat( getSelectedCells( td ) );
 
 			if ( selectedCells.length ) {
 				var ranges = [];
