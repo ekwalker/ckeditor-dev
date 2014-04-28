@@ -218,6 +218,20 @@
 						var target = ev.data.getTarget(),
 							endCell = target && target.getAscendant( { td:1, th:1 }, true );
 
+						// allow to select lines inside the cell
+						// @see EDT-690
+						if ( mouseStartCell.equals( endCell ) ) {
+							var selection = editor.getSelection(),
+								ranges = selection && selection.getRanges();
+							if ( ranges.length === 1 ) {
+								var range = ranges[ 0 ];
+								if ( !( range.checkBoundaryOfElement( endCell, CKEDITOR.START ) &&
+										range.checkBoundaryOfElement( endCell, CKEDITOR.END ) ) ) {
+									return;
+								}
+							}
+						}
+
 						CKEDITOR.env.webkit && editor.setReadOnly( true );
 
 						if ( selectCells.call( editor, mouseStartCell, endCell ) ) {
