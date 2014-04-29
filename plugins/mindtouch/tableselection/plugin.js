@@ -194,9 +194,7 @@
 					mouseStartCell = target.getAscendant( { td:1, th:1 }, true );
 
 					if ( mouseStartCell ) {
-						var editable = editor.editable();
-						editable.$.style.webkitUserSelect = 'none';
-						editable.on( 'mousemove', cancelTableResizer );
+						editor.editable().on( 'mousemove', cancelTableResizer );
 						editor.focusManager.lock();
 					}
 				});
@@ -235,6 +233,7 @@
 						CKEDITOR.env.webkit && editor.setReadOnly( true );
 
 						if ( selectCells.call( editor, mouseStartCell, endCell ) ) {
+							editor.editable().$.style.webkitUserSelect = 'none';
 							forceReselectRange = true;
 							ev.data.preventDefault( 1 );
 						}
