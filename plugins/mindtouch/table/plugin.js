@@ -424,7 +424,7 @@
 					if ( cell && !cell.isReadOnly() ) {
 						return {
 							// cellalign: CKEDITOR.TRISTATE_OFF
-							tablecell_mergeSelected: tablecellMenuItem ? tablecellMenuItem.getItems().tablecell_merge : CKEDITOR.TRISTATE_DISABLED,
+							// tablecell_mergeSelected: tablecellMenuItem ? tablecellMenuItem.getItems().tablecell_merge : CKEDITOR.TRISTATE_DISABLED,
 							tablerow_insertBefore: CKEDITOR.TRISTATE_OFF,
 							tablerow_insertAfter: CKEDITOR.TRISTATE_OFF,
 							tablecolumn_insertBefore: CKEDITOR.TRISTATE_OFF,
