@@ -36,7 +36,6 @@ CKEDITOR.editorConfig = function( config ) {
 		'link,' +
 		'list,' +
 		'liststyle,' +
-		'magicline,' +
 		'newpage,' +
 		'pagebreak,' +
 		'pastefromword,' +
