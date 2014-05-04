@@ -44,6 +44,8 @@
 				if ( sel && sel.getStartElement().hasAscendant( 'pre', true ) ) {
 					evt.data.type = 'text';
 					evt.data.preSniffing = 'html';
+					// @see EDT-656
+					evt.data.dataValue = evt.data.dataValue.replace( /<pre[^>]*>(.+?)<\/pre>/ig, '$1' );
 				}
 			}, null, null, 3 );
 

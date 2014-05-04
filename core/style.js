@@ -1276,8 +1276,15 @@ CKEDITOR.STYLE_OBJECT = 3;
 		el = new CKEDITOR.dom.element( elementName, targetDocument );
 
 		// #6226: attributes should be copied before the new ones are applied
-		if ( element )
-			element.copyAttributes( el );
+		if ( element ) {
+			// allow to skip certain attributes on coping
+			// @author MindTouch
+			// @see EDT-652
+			var skipAttributes = {};
+			CKEDITOR.fire( 'style.copyAttributes', { currentElement: element, newElement: el, skipAttributes: skipAttributes } );
+
+			element.copyAttributes( el, skipAttributes );
+		}
 
 		el = setupElement( el, style );
 

@@ -58,6 +58,11 @@ table {
     border-spacing: 0;
 }
 
+/* @see EDT-678 */
+th {
+    text-alignment: left;
+}
+
 .mt-style-conditional {
     background: #e8fffb;
     border: 1px dashed #666;
@@ -96,19 +101,19 @@ p.comment {
 
 td[data-cke-cell-selected],
 th[data-cke-cell-selected] {
-    background-color: #42aae7;
+    background: #42aae7 !important;
 }
 
 td[data-cke-cell-selected]::-moz-selection,
 th[data-cke-cell-selected]::-moz-selection,
 td[data-cke-cell-selected] *::-moz-selection,
 th[data-cke-cell-selected] *::-moz-selection {
-    background:rgba(255, 255, 255, 0.0);
+    background: rgba(255, 255, 255, 0.0);
 }
 
 td[data-cke-cell-selected]::selection,
 th[data-cke-cell-selected]::selection,
 td[data-cke-cell-selected] *::selection,
 th[data-cke-cell-selected] *::selection {
-    background:rgba(255, 255, 255, 0.0);
+    background: rgba(255, 255, 255, 0.0);
 }

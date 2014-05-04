@@ -53,6 +53,16 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 							selectionNode = new CKEDITOR.dom.node( selectionNode );
 						}
 
+						// IE selection issue
+						// @see EDT-693
+						if ( CKEDITOR.env.ie && this._focused && this.scayt3 ) {
+							this.bookmark.toggleBookmark( this );
+							this.bookmark.moveToBookmark( this );
+							if ( !this.scayt3.bookmark.rangeInfos.length ) {
+								editor.editable().focus();
+							}
+						}
+
 						// if user is editing pre element or highlighting text
 						// set "focused" to false to prevent inserting of bookmarks by scayt
 						// @see EDT-521
