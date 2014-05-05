@@ -188,6 +188,14 @@ CKEDITOR.STYLE_OBJECT = 3;
 		},
 
 		/**
+		 * @param {CKEDITOR.dom.element} element
+		 * @author MindTouch
+		 */
+		removeFromObject: function( element ) {
+			removeFromElement.call( this, element );
+		},
+
+		/**
 		 * Get the style state inside an element path.
 		 *
 		 * @param {CKEDITOR.dom.elementPath} elementPath
