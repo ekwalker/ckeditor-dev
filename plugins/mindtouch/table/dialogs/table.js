@@ -25,7 +25,7 @@
 			if ( element ) {
 				// Commit this field and broadcast to target fields.
 				var data = {};
-				this.commit( data, element );
+				this.commit( data, element, true );
 
 				targetFields = [].concat( targetFields );
 				var length = targetFields.length,
@@ -342,11 +342,31 @@
 											styles[ name ].checkElementRemovable( selectedTable, true ) && this.setValue( name, 1 );
 										}
 									},
-									commit: function( data, selectedTable ) {
+									commit: function( data, selectedTable, internal ) {
 										var styleName;
 										if ( ( styleName = this.getValue() ) ) {
 											var style = styles[ styleName ];
 											style.applyToObject( selectedTable );
+										} else {
+											for ( var name in styles ) {
+												var style = styles[ name ];
+												
+												if ( internal ) {
+													var def = style.getDefinition();
+													def.ignoreReadonly = true;
+													def.alwaysRemoveElement = true;
+													style = new CKEDITOR.style( def );
+												}
+
+												if ( style.checkElementRemovable( selectedTable, true ) ) {
+													if ( internal ) {
+														style.removeFromObject( selectedTable );
+													} else {
+														style.remove( selectedTable.getDocument() );
+													}
+													break;
+												}
+											}
 										}
 									}
 								},
