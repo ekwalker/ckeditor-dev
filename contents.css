@@ -60,7 +60,7 @@ table {
 
 /* @see EDT-678 */
 th {
-    text-alignment: left;
+    text-align: left;
 }
 
 .mt-style-conditional {
