@@ -102,10 +102,6 @@
 			}
 		}
 
-		if ( selectedCellsCount > 0 ) {
-			reselectRanges.call( editor );
-		}
-
 		return !!selectedCellsCount;
 	}
 
@@ -142,8 +138,9 @@
 	function reselectRanges() {
 		var selection = this.getSelection();
 		if ( selection ) {
+			selection.reset();
 			selection.removeAllRanges();
-			!CKEDITOR.env.gecko && selection.selectRanges( selection.getRanges() );
+			selection.selectRanges( selection.getRanges() );
 			this.forceNextSelectionCheck();
 			this.selectionChange( 1 );
 		}
@@ -443,41 +440,41 @@
 	});
 
 	CKEDITOR.dom.selection.prototype.getRanges = CKEDITOR.tools.override( CKEDITOR.dom.selection.prototype.getRanges, function( originalGetRanges ) {
+		var getSelectedCells = function( cellList ) {
+			var cells = [];
+			for ( var i = 0 ; i < cellList.count() ; i++ ) {
+				if ( cellList.getItem( i ).data( 'cke-cell-selected' ) ) {
+					cells.push( cellList.getItem( i ) );
+				}
+			}
+			return cells;
+		};
+
 		return function( onlyEditables ) {
-			var td = this.document.getElementsByTag( 'td' ),
-				th = this.document.getElementsByTag( 'th' );
+			var cache = this._.cache;
+			if ( !cache.ranges || !cache.ranges.length ) {
+				var td = this.document.getElementsByTag( 'td' ),
+					th = this.document.getElementsByTag( 'th' ),
+					selectedCells = getSelectedCells( th ).concat( getSelectedCells( td ) );
 
-			var getSelectedCells = function( cellList ) {
-				var cells = [];
-				for ( var i = 0 ; i < cellList.count() ; i++ ) {
-					if ( cellList.getItem( i ).data( 'cke-cell-selected' ) ) {
-						cells.push( cellList.getItem( i ) );
-					}
-				}
-				return cells;
-			};
+				if ( selectedCells.length ) {
+					var ranges = [];
+					for ( var i = 0 ; i < selectedCells.length ; i++ ) {
+						var cell = selectedCells[ i ];
 
-			var selectedCells = getSelectedCells( th ).concat( getSelectedCells( td ) );
+						if ( onlyEditables && !cell.isEditable() ) {
+							continue;
+						}
 
-			if ( selectedCells.length ) {
-				var ranges = [];
-				for ( var i = 0 ; i < selectedCells.length ; i++ ) {
-					var cell = selectedCells[ i ];
+						var range = new CKEDITOR.dom.range( this.root );
+						range.setStartBefore( cell );
+						range.setEndAfter( cell );
 
-					if ( onlyEditables && !cell.isEditable() ) {
-						continue;
+						ranges.push( range );
 					}
 
-					var range = new CKEDITOR.dom.range( this.document );
-					range.setStartBefore( cell );
-					range.setEndAfter( cell );
-
-					ranges.push( range );
+					cache.ranges = new CKEDITOR.dom.rangeList( ranges );
 				}
-
-				this.reset();
-				this._.cache.ranges = new CKEDITOR.dom.rangeList( ranges );
-				return this._.cache.ranges;
 			}
 
 			return originalGetRanges.call( this, onlyEditables );
