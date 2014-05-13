@@ -1,5 +1,4 @@
 CKEDITOR.plugins.setLang('mindtouch/table', 'en', {
-	'cellAlignment': 'Cell alignment',
 	'deleteRow': 'Delete row',
 	'deleteColumn': 'Delete column',
 	'headings': 'Headings',
@@ -9,5 +8,6 @@ CKEDITOR.plugins.setLang('mindtouch/table', 'en', {
 	'insertColumnRight': 'Insert column right',
 	'mergeSelected': 'Merge selected cells',
 	'styleSelectLabel': 'Style',
-	'unmergeCell': 'Unmerge cell'
+	'unmergeCell': 'Unmerge cell',
+	'vertAlign': 'Vertical align'
 });
