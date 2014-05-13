@@ -8,5 +8,6 @@ CKEDITOR.plugins.setLang('mindtouch/table', 'en', {
 	'insertColumnLeft': 'Insert column left',
 	'insertColumnRight': 'Insert column right',
 	'mergeSelected': 'Merge selected cells',
-	'styleSelectLabel': 'Style'
+	'styleSelectLabel': 'Style',
+	'unmergeCell': 'Unmerge cell'
 });
