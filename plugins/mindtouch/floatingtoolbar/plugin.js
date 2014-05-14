@@ -156,9 +156,16 @@
 					fixToolbar.call( editor );
 				});
 
+				var updateToolbarPosition = CKEDITOR.tools.bind( fixToolbar, editor ),
+					$doc = $( CKEDITOR.document.$ );
+				$doc.on( 'Deki.Ui.Events.Flash.Show', updateToolbarPosition );
+				$doc.on( 'Deki.Ui.Events.Flash.Hide', updateToolbarPosition );
+
 				editor.on( 'destroy', function ( ev ) {
 					win.removeListener( 'scroll', fixToolbar );
 					win.removeListener( 'resize', fixToolbar );
+					$doc.off( 'Deki.Ui.Events.Flash.Show', updateToolbarPosition );
+					$doc.off( 'Deki.Ui.Events.Flash.Hide', updateToolbarPosition );
 					toolbarContainer.remove();
 					toolbarDock.remove();
 					$toolbar = $dock = $inner = prevPosition = prevHeight = editorPosition = null;

@@ -324,6 +324,9 @@
 
 	CKEDITOR.plugins.add( 'mindtouch/keystrokes', {
 		requires: 'tab',
+		onLoad: function() {
+			CKEDITOR.addCss( 'i[data-style-wrapper] { font-style: inherit; }' );
+		},
 		init: function( editor ) {
 			editor.addCommand( 'toggleList', toggleListCmd );
 
@@ -496,7 +499,6 @@
 				});
 
 				editor.on( 'contentDom', function() {
-					editor.document.appendStyleText( 'i[data-style-wrapper] { font-style: inherit; }' );
 					editor.editable().on( 'keydown', function( evt ) {
 						var keyCode = evt.data.getKeystroke();
 

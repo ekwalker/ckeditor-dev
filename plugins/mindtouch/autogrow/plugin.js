@@ -150,42 +150,6 @@
 					inner.setStyle('display', 'table');
 				}
 			});
-		},
-
-		beforeInit: function(editor) {
-			var css = "\
-				.cke_autogrow_source			\
-				{								\
-					position: relative;			\
-					background-color: #fff		\
-				}								\
-				.cke_autogrow_source textarea.cke_source,	\
-				.cke_autogrow_source pre		\
-				{								\
-					padding: 20px 10px;			\
-					background: transparent;	\
-					white-space: pre-wrap;		\
-					word-wrap: break-word;		\
-				}								\
-				.cke_autogrow_source textarea	\
-				{								\
-					-webkit-box-sizing: border-box;	\
-					 -moz-box-sizing: border-box;	\
-					  -ms-box-sizing: border-box;	\
-					      box-sizing: border-box;	\
-					overflow: hidden;				\
-					position: absolute;				\
-					top: 0;							\
-					left: 0;						\
-				}									\
-				.cke_autogrow_source pre			\
-				{									\
-					display: block;					\
-					visibility: hidden;				\
-				}									\
-			";
-
-			CKEDITOR.document.appendStyleText(css);
 		}
 	});
 })();

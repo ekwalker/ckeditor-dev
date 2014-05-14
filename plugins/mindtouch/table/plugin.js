@@ -273,6 +273,73 @@
 		addCmd( 'cellAlignmentBottom', createDef( 'bottom' ) );
 	}
 
+	function placeCursorInCell( cell ) {
+		var range = new CKEDITOR.dom.range( cell.getDocument() );
+		if ( !range.moveToElementEditStart( cell ) ) {
+			range.selectNodeContents( cell );
+			range.collapse( true );
+		}
+		range.select( true );
+	}
+
+	function unmergeCell( selection, isDetect ) {
+		var editor = this,
+			cells = CKEDITOR.plugins.tabletools.getSelectedCells( selection );
+		
+		if ( cells.length > 1 ) {
+			return false;
+		}
+
+		var cell = cells[ 0 ],
+			rowSpan = parseInt( cell.getAttribute( 'rowSpan' ), 10 ) || 1,
+			colSpan = parseInt( cell.getAttribute( 'colSpan' ), 10 ) || 1;
+
+		if ( rowSpan == 1 && colSpan == 1 ) {
+			return false;
+		} else if ( isDetect ) {
+			return true;
+		}
+
+		while ( cell.getAttribute( 'rowSpan' ) > 1 ) {
+			editor.execCommand( 'cellVerticalSplit' );
+			editor.execCommand( 'cellUnmerge', true );
+			placeCursorInCell( cell );
+		}
+
+		while ( cell.getAttribute( 'colSpan' ) > 1 ) {
+			editor.execCommand( 'cellHorizontalSplit' );
+			editor.execCommand( 'cellUnmerge', true );
+			placeCursorInCell( cell );
+		}
+	}
+
+	var unmergeCellCmd = {
+		allowedContent: 'td[colspan,rowspan]',
+		requiredContent: 'td[colspan,rowspan]',
+		contextSensitive: 1,
+		refresh: function( editor, path ) {
+			var selection = editor.getSelection(),
+				cells = ( selection && CKEDITOR.plugins.tabletools.getSelectedCells( selection ) ) || [];
+			this.setState( cells.length === 1 ? CKEDITOR.TRISTATE_OFF : CKEDITOR.TRISTATE_DISABLED );
+		},
+		exec: function( editor, isRecursive ) {
+			// lock snapshot once right after the first split command is executed
+			if ( isRecursive && !this.snapshotLocked ) {
+				editor.fire( 'lockSnapshot' );
+				this.snapshotLocked = true;
+			}
+
+			var selection = editor.getSelection();
+			unmergeCell.call( editor, selection );
+
+			// unlock snapshot after all commands are executed
+			if ( !isRecursive ) {
+				this.snapshotLocked = false;
+				editor.fire( 'unlockSnapshot' );
+			}
+		}
+	};
+
 	/**
 	 * @see EDT-628
 	 */
@@ -298,6 +365,19 @@
 
 			CKEDITOR.dialog.add( 'mindtouchTableProperties', this.path + 'dialogs/table.js' );
 
+			var cmd = editor.addCommand( 'cellUnmerge', unmergeCellCmd );
+			editor.addFeature( cmd );
+
+			cmd = editor.getCommand( 'cellMerge' );
+			cmd && cmd.on( 'refresh', function( ev ) {
+				var selection = editor.getSelection(),
+					cells = ( selection && CKEDITOR.plugins.tabletools.getSelectedCells( selection ) ) || [];
+				if ( cells.length < 2 ) {
+					this.disable();
+					ev.cancel();
+				}
+			}, cmd );
+
 			// keep reference to tablecell menu item before we remove it:
 			// we need tablecell_merge item from it to get its state in context menu listener
 			// @see EDT-668
@@ -322,7 +402,7 @@
 			if ( editor.addMenuItems ) {
 				editor.addMenuItems({
 					cellalign: {
-						label: tableLang.cellAlignment,
+						label: tableLang.vertAlign,
 						group: 'tablecellalignment',
 						order: 1,
 						getItems: function() {
@@ -359,6 +439,12 @@
 						group: 'tablecell',
 						command: 'cellMerge',
 						order: 5
+					},
+					tablecell_unmerge: {
+						label: tableLang.unmergeCell,
+						group: 'tablecell',
+						command: 'cellUnmerge',
+						order: 10
 					},
 					tablerow_insertBefore: {
 						label: tableLang.insertRowAbove,
@@ -423,8 +509,9 @@
 					var cell = path.contains( { 'td':1,'th':1 }, 1 );
 					if ( cell && !cell.isReadOnly() ) {
 						return {
-							// cellalign: CKEDITOR.TRISTATE_OFF
+							cellalign: CKEDITOR.TRISTATE_OFF,
 							tablecell_mergeSelected: tablecellMenuItem ? tablecellMenuItem.getItems().tablecell_merge : CKEDITOR.TRISTATE_DISABLED,
+							tablecell_unmerge: unmergeCell.call( editor, selection, true ) ? CKEDITOR.TRISTATE_OFF : CKEDITOR.TRISTATE_DISABLED,
 							tablerow_insertBefore: CKEDITOR.TRISTATE_OFF,
 							tablerow_insertAfter: CKEDITOR.TRISTATE_OFF,
 							tablecolumn_insertBefore: CKEDITOR.TRISTATE_OFF,

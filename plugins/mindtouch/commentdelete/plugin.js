@@ -153,6 +153,9 @@
 
 	CKEDITOR.plugins.add('mindtouch/commentdelete', {
 		lang : 'en',
+		onLoad: function() {
+			CKEDITOR.addCss('.comment[data-cke-comment-hover] { background-position: 0 -25px !important; }');
+		},
 		init : function(editor) {
 			var commentDeleteButton = new commentDelete(editor),
 				checkMouseTimer,
@@ -172,8 +175,6 @@
 			editor.on('contentDom', function() {
 				var editable = editor.editable(),
 					doc = editor.document;
-
-				doc.appendStyleText('.comment[data-cke-comment-hover] { background-position: 0 -25px !important; }');
 
 				editable.attachListener(editable.isInline() ? editable : doc, 'mousemove', function(ev) {
 					if (editor.readOnly || checkMouseTimer) {

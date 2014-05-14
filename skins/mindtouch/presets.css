@@ -36,42 +36,6 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	background-color: #fff;
 }
 
-.cke_button__tableoneclick .cke_button_label {
-	display: inline;
-	margin: 0;
-	padding-right: 2px;
-}
-
-.cke_inner .cke_infobar
-{
-	background: transparent;
-	clear: both;
-	height: 1.6em;
-	margin-left: -.8em;
-	padding: 0;
-	position: static;
-	visibility: visible !important;
-}
-
-.cke_top .cke_infobar .cke_infopanel_group
-{
-	padding: 0 .75em;
-}
-
-.cke_inner .cke_infobar .cke_infopanel_group
-{
-	background-position: left center;
-}
-
-.cke_infobar .cke_infopanel_group span
-{
-	color: #333;
-	display: inline-block;
-	font-size: .9em;
-	opacity: 1;
-	padding: .1em 0;
-}
-
 .deki-extension-list
 {
 	float: right;
@@ -129,26 +93,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 	padding-right: 2px;
 }
 
-.cke_menubutton__preltpregtpre_format pre {
-	cursor: default;
-	float: left;
-	font-family: monospace;
-	line-height: 16px;
-	margin-right: 0.2em;
-}
-
-.cke_browser_ie6 .cke_menubutton__preltpregtpre_format pre,
-.cke_browser_ie7 .cke_menubutton__preltpregtpre_format pre,
-.cke_browser_ie8 .cke_menubutton__preltpregtpre_format pre {
-	line-height: 13px;
-}
-
 /* ie specific styles */
-.cke_infobar .cke_infopanel_group span
-{
-	filter: alpha(opacity=100);
-}
-
 .cke_menubutton_disabled:hover .cke_menubutton_icon,
 .cke_menubutton_disabled:focus .cke_menubutton_icon,
 .cke_menubutton_disabled:active .cke_menubutton_icon

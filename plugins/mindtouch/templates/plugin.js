@@ -74,12 +74,6 @@
 				command: pluginName,
 				toolbar: 'insert,70'
 			});
-		},
-		onLoad: function() {
-			var css = [
-				'.cke .cke_button__mindtouchtemplates .cke_button_label { display: inline; line-height: 16px; }'
-			];
-			CKEDITOR.document.appendStyleText(css.join(''));
 		}
 	});
 })();
