@@ -520,9 +520,6 @@
 					});
 				});
 			}
-		},
-		onLoad : function() {
-			CKEDITOR.document.appendStyleText('.cke .cke_button__mindtouchsave .cke_button_label, .cke .cke_button__mindtouchcancel .cke_button_label { display: inline; line-height: 16px; }');
 		}
 	});
 })(window);

@@ -42,6 +42,21 @@ img:hover {
     filter: alpha(opacity = 80);
 }
 
+dl {
+    padding: 0;
+    margin: 0;
+}
+
+dl dt {
+    font-weight: bold;
+}
+
+dl dd {
+    border-bottom: 1px dashed #999;
+    margin: 0 0 20px 0;
+    padding: 2px 0 4px 16px;
+}
+
 /* @see MT-10386 */
 pre {
     white-space: pre-wrap;

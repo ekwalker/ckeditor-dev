@@ -214,13 +214,6 @@
 			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 51 /*3*/, 'h3' );
 			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 52 /*4*/, 'h4' );
 			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 53 /*5*/, 'h5' );
-		},
-		onLoad: function() {
-			var css = [
-				'.cke .cke_button__normal .cke_button_icon { display: none; }',
-				'.cke .cke_button__normal .cke_button_label { display: inline; margin: 0; padding: 0 2px 0 0; }'
-			];
-			CKEDITOR.document.appendStyleText( css.join( '' ) );
 		}
 	});
 })();

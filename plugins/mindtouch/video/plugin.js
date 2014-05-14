@@ -94,8 +94,6 @@
 					'height: 360px;' +
 				'}'
 			);
-
-			CKEDITOR.document.appendStyleText('.cke .cke_button__video .cke_button_label { display: inline; line-height: 16px; }');
 		},
 		beforeInit: function(editor) {
 			CKEDITOR.tools.extend(editor.lang.fakeobjects, {

@@ -157,13 +157,6 @@
 					});
 				}
 			});
-		},
-		onLoad: function() {
-			var css = [
-				'.cke .cke_button__viewmenu .cke_button_icon { display: none; }',
-				'.cke .cke_button__viewmenu .cke_button_label { display: inline; margin: 0; padding: 0 2px 0 6px; width: 40px; }'
-			];
-			CKEDITOR.document.appendStyleText(css.join(''));
 		}
 	});
 })();

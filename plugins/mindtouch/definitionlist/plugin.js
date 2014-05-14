@@ -754,21 +754,6 @@
 			});
 
 			editor.setKeystroke(CKEDITOR.CTRL + CKEDITOR.SHIFT + 57 /*9*/, 'definitionlist');
-		},
-		onLoad: function() {
-			CKEDITOR.addCss('dl {' +
-					'padding: 0;' +
-					'margin: 0;' +
-				'}' +
-				'dl dt {' +
-					'font-weight: bold;' +
-				'}' +
-				'dl dd {' +
-					'border-bottom: 1px dashed #999;' +
-					'margin: 0 0 20px 0;' +
-					'padding: 2px 0 4px 16px;' +
-				'}'
-			);
 		}
 	});
 })();
