@@ -85,9 +85,6 @@
 				label: editor.lang['mindtouch/extensions'].toolbar,
 				command: pluginName
 			});	
-		},
-		onLoad: function() {
-			CKEDITOR.document.appendStyleText('.cke .cke_button__extensions .cke_button_label { display: inline; line-height: 16px; }');
 		}
 	});
 })();

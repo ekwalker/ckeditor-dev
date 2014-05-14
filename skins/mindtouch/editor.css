@@ -45,6 +45,8 @@ other files.
 
 @import url("icons.css");
 
+@import url("plugins.css");
+
 /* Important!
    To avoid showing the editor UI while its styles are still not available, the
    editor creates it with visibility:hidden. Here, we restore the UI visibility. */

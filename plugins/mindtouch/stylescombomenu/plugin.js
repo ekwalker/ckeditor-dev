@@ -30,9 +30,6 @@
 	CKEDITOR.plugins.add('mindtouch/stylescombomenu', {
 		icons: 'none,preltpregtpre_format,comment,dekiscript,javascript_jem,css,conditional_text_anonymous_only,conditional_text_community_member_only,conditional_text_pro_member_only', // %REMOVE_LINE_CORE%
 		requires: 'mindtouch/richcombomenu',
-		onLoad : function() {
-			CKEDITOR.document.appendStyleText('.cke_combo__stylesmenu .cke_combo_text {width: 90px;}');
-		},
 		init: function(editor) {
 			var config = editor.config,
 				lang = editor.lang.stylescombo,
