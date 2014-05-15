@@ -117,7 +117,6 @@
                             _(items).chain().filter(function(item) {
                                 return _.str.include(item.type, 'image');
                             }).each(function(image) {
-                                Deki.Log('adding ' + image.type);
                                 if(editor.config.mindtouch.pageId === 0) {
                                     CKEDITOR.plugins.mindtouchsave.confirmSave(editor);
                                 } else {
@@ -125,7 +124,8 @@
                                     editor.lock();
 
                                     // We need to represent the image as a file
-                                    var extension = _(image.type).strRightBack('/');
+                                    var imageType = image.type;
+                                    var extension = _(imageType).strRightBack('/');
                                     var blob = image.getAsFile();
                                     var reader = new FileReader();
                                     reader.onload = function(e) {
@@ -133,7 +133,8 @@
                                             base64: true,
                                             size: e.total,
                                             name: 'clipboard_' + new Date().getTime() + '.' + extension,
-                                            encoded: this.result
+                                            encoded: this.result,
+                                            contentType: imageType
                                         };
                                         try {
                                             attachImages(editor, fileInfo);
