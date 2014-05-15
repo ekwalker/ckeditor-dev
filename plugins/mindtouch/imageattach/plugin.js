@@ -86,10 +86,22 @@
             Deki.Log(arguments);
         });
     }
+    var doAttachCmd = {
+        canUndo: false,
+        execCounter: 0,
+        exec: function(editor, files) {
+            if (editor.config.mindtouch.pageId === 0) {
+                CKEDITOR.plugins.mindtouchsave.confirmSave(editor, 'attachimage', files);
+            } else {
+                attachImages(editor, files);
+            }
+        }
+    };
     CKEDITOR.plugins.add('mindtouch/imageattach', {
         lang: 'en', // %REMOVE_LINE_CORE%
         requires: 'dialog,mindtouch/dialog,mindtouch/save',
-        init: function(editor) {
+        init: function(editor) {// enable attaching files on drag and drop
+            editor.addCommand('attachimage', doAttachCmd);
             editor.on('contentDom', function() {
                 editor.document.getBody().on('paste', function(ev) {
                     var e = ev.data.$;
@@ -136,16 +148,6 @@
                     }}
                 });
             });
-
-            // enable attaching files on drag and drop
-            var doAttach = function(e) {
-                Deki.Log(arguments);
-                stopPropagation(e);
-                if(e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
-                    var files = e.originalEvent.dataTransfer.files;
-                    attachImages(editor, files);
-                }
-            };
             var stopPropagation = function(event) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -156,7 +158,13 @@
                     if(body) {
                         body.removeListener('dragenter', stopPropagation);
                         body.removeListener('dragover', stopPropagation);
-                        body.removeListener('drop', doAttach);
+                        body.removeListener('drop', function(e) {
+                            stopPropagation(e);
+                            if(e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
+                                var files = e.originalEvent.dataTransfer.files;
+                                editor.execCommand('attachimage', files);
+                            }
+                        });
                     }
                 }
             };
@@ -165,7 +173,13 @@
                 // prevent bubbling event to window when files are not transfered
                 // to allow drag/drop operations available into editor
                 var $body = $(editor.document.getBody().$);
-                $body.on('dragenter', stopPropagation).on('dragover', stopPropagation).on('drop', doAttach);
+                $body.on('dragenter', stopPropagation).on('dragover', stopPropagation).on('drop', function(e) {
+                    stopPropagation(e);
+                    if(e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
+                        var files = e.originalEvent.dataTransfer.files;
+                        editor.execCommand('attachimage', files);
+                    }
+                });
             };
             editor.on('contentDom', initUploader);
             editor.on('contentDomUnload', destroyUploader);

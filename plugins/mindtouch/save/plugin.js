@@ -32,8 +32,8 @@
 
 (function(global) {
 	// window.saveAs
-	// Shims the saveAs method, using saveBlob in IE10. 
-	// And for when Chrome and FireFox get round to implementing saveAs we have their vendor prefixes ready. 
+	// Shims the saveAs method, using saveBlob in IE10.
+	// And for when Chrome and FireFox get round to implementing saveAs we have their vendor prefixes ready.
 	// But otherwise this creates a object URL resource and opens it on an anchor tag which contains the "download" attribute (Chrome)
 	// ... or opens it in a new tab (FireFox)
 	// @author Andrew Dodson
@@ -75,16 +75,16 @@
 	})());
 
 	CKEDITOR.plugins.mindtouchsave = {
-		confirmSave : function(editor, callbackCommand) {
+		confirmSave : function(editor, callbackCommand, data) {
 			var onPageSaved = function() {
-				callbackCommand && editor.execCommand(callbackCommand);
+				callbackCommand && editor.execCommand(callbackCommand, data);
 			};
-			
+
 			var removeDialogListeners = function(evt) {
 				evt.listenerData.removeListener('ok', onPageSaved);
 				evt.listenerData.removeListener('hide', removeDialogListeners);
 			};
-			
+
 			editor.openDialog('confirmsave', function( dialog ) {
 				dialog.on('ok', onPageSaved);
 				dialog.on('hide', removeDialogListeners, null, dialog);
