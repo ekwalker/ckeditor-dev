@@ -441,7 +441,7 @@
 						order: 5
 					},
 					tablecell_unmerge: {
-						label: tableLang.unmergeCell,
+						label: tableLang.unmergeCells,
 						group: 'tablecell',
 						command: 'cellUnmerge',
 						order: 10

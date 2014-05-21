@@ -413,9 +413,6 @@
 				};
 			});
 
-			var newPageTitleElement = CKEDITOR.document.getById('deki-new-page-title'),
-				defaultTitle = newPageTitleElement && newPageTitleElement.getValue();
-
 			CKEDITOR.dialog.add('confirmsave', function(editor) {
 				return {
 					title: langSave.saveTitle,
@@ -427,8 +424,13 @@
 							okButton = this.getButton('ok'),
 							html;
 
-						if (newPageTitleElement && defaultTitle == newPageTitleElement.getValue()) {
-							html = langSave.changeTitle.replace('%1', '<strong>' + defaultTitle + '</strong>');
+						var defaultTitleElement = CKEDITOR.document.getById('mt-new-page-default-title'),
+							titleElement = CKEDITOR.document.getById('deki-new-page-title'),
+							defaultTitle = defaultTitleElement && defaultTitleElement.getValue() || '',
+							title = titleElement && titleElement.getValue() || '';
+
+						if (defaultTitle.toLowerCase() == title.toLowerCase()) {
+							html = langSave.changeTitle.replace('%1', '<strong>' + title + '</strong>');
 							CKEDITOR.document.getById(okButton.domId).hide();
 						} else {
 							html = langSave.newPageAlert;
