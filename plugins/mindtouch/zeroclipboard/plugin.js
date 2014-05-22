@@ -178,32 +178,6 @@
 		return html;
 	}
 
-	function getPlainText(editor, data) {
-		var html = editor.dataProcessor.toDataFormat(data);
-		html = html.split("\n");
-		result = [];
-		for (var i = 0; i < html.length; i++) {
-			var str = html[i];
-			// remove leading tabs
-			str = str.replace(/^\t+/ig, '');
-			// strip tags
-			str = str.replace(/<[^>]+>/ig, '');
-
-			if (str.length) {
-				result.push(str);
-			}
-		}
-
-		html = result.join("\n");
-
-		// set html to dummy element to convert html entities
-		var dummy = new CKEDITOR.dom.element('div', CKEDITOR.document);
-		dummy.setHtml(html);
-		data = dummy.getText();
-
-		return data;
-	}
-
 	function tryToCutCopy(editor, type) {
 		try {
 			return editor.document.$.execCommand(type, false, null);
@@ -240,7 +214,7 @@
 
 		clipboard.addEventListener('mouseDown', function(client) {
 			if (editor.getCommand(name).state != CKEDITOR.TRISTATE_DISABLED) {
-				var cancel = (editor.fire('zcBefore' + CKEDITOR.tools.capitalize(name)) === false);
+				var cancel = (editor.fire('zcBefore' + CKEDITOR.tools.capitalize(name), {zcClient: client}) === false);
 				if (!cancel) {
 					var isCut = (name == 'cut');
 					isCut && editor.fire('saveSnapshot');

@@ -27,342 +27,340 @@
  */
 
 (function() {
-	var tableClipboard = function( editor ) {
-		this.editor = editor;
-		this.reset();
-	};
+	function markCells( cells ) {
+		cells = cells || [];
+		for ( var i = 0; i < cells.length; i++ ) {
+			cells[ i ].setCustomData( 'cell_selected', 1 );
+		}
+		return cells;
+	}
 
-	tableClipboard.prototype = {
-		reset: function() {
-			this.table = null;
-			this.map = [];
-		},
+	function getSelectedTableData( editor, removeCellContent ) {
+		var selection = editor.getSelection(),
+			cells = ( selection && CKEDITOR.plugins.tabletools.getSelectedCells( selection ) ) || [];
 
-		isEmpty: function() {
-			return !this.table || !this.map.length;
-		},
+		if ( cells.length < 2 ) {
+			return null;
+		}
 
-		_markCells: function( cells ) {
-			cells = cells || [];
-			for ( var i = 0; i < cells.length; i++ ) {
-				cells[ i ].setCustomData( 'cell_selected', 1 );
+		// check if only table content is selected
+		var range = selection.getRanges()[ 0 ];
+		if ( !range.startContainer.hasAscendant( 'table', true ) ) {
+			return null;
+		}
+
+		if ( !range.collapsed && !range.endContainer.hasAscendant( 'table', true ) ) {
+			return null;
+		}
+
+		// check if content of single table is selected
+		var sourceTable;
+		for ( var i = 1 ; i < cells.length ; i++ ) {
+			sourceTable = cells[ i ].getAscendant( 'table' );
+			if ( !sourceTable || !sourceTable.equals( cells[ i - 1 ].getAscendant( 'table' ) ) ) {
+				return null;
 			}
-			return cells;
-		},
+		}
 
-		_setClipboardData: function( selection, removeCellContent ) {
-			this.reset();
+		var targetTable = sourceTable.clone(),
+			map = CKEDITOR.tools.buildTableMap( sourceTable ),
+			data = {};
 
-			var cells = CKEDITOR.plugins.tabletools.getSelectedCells( selection ),
-				table = cells.length && cells.length > 1 && cells[ 0 ].getAscendant( 'table' );
+		markCells( cells );
 
-			if ( !table ) {
-				return false;
-			}
-
-			this.table = table.clone();
-			this._markCells( cells );
-
-			var map = CKEDITOR.tools.buildTableMap( table ),
-				i, j, row, cell;
-
-			// save the map of the selected cells
-			for ( i = 0 ; i < map.length ; i++ ) {
-				row = [];
-				for ( j = 0 ; j < map[ i ].length ; j++ ) {
-					cell = new CKEDITOR.dom.element( map[ i ][ j ] );
-					if ( cell.getCustomData( 'cell_selected' ) ) {
-						var clone = cell.clone( !cell.getCustomData( 'cell_processed' ) );
-						clone.removeAttribute( 'colSpan' );
-						clone.removeAttribute( 'rowSpan' );
-						row.push( clone.$ );
-						cell.setCustomData( 'cell_processed', 1 );
-					}
-				}
-				row.length && this.map.push( row );
-			}
-
-			// remove custom markers and content if necessary
-			for ( i = 0 ; i < cells.length ; i++ ) {
-				cell = cells[ i ];
-				cell.removeCustomData( 'cell_selected' );
-				cell.removeCustomData( 'cell_processed' );
-
-				if ( removeCellContent ) {
-					var children = cell.getChildren(),
-						count = children.count();
-
-					for ( j = count - 1; j >= 0; j-- ) {
-						children.getItem( j ).remove();
-					}
-
-					if ( !CKEDITOR.env.ie ) {
-						cell.append( cell.getDocument().createElement( 'br' ) );
-					}
+		// save the selected cells to the new table
+		var i, j, row, cell;
+		for ( i = 0 ; i < map.length ; i++ ) {
+			row = new CKEDITOR.dom.element( map[ i ][ 0 ].parentNode );
+			row = row.clone();
+			for ( j = 0 ; j < map[ i ].length ; j++ ) {
+				cell = new CKEDITOR.dom.element( map[ i ][ j ] );
+				if ( cell.getCustomData( 'cell_selected' ) ) {
+					var clone = cell.clone( !cell.getCustomData( 'cell_processed' ) );
+					clone.removeAttribute( 'colSpan' );
+					clone.removeAttribute( 'rowSpan' );
+					row.append( clone );
+					cell.setCustomData( 'cell_processed', 1 );
 				}
 			}
+			row.getChildCount() && targetTable.append( row );
+		}
 
-			return true;
-		},
+		// remove custom markers and content if necessary
+		for ( i = 0 ; i < cells.length ; i++ ) {
+			cell = cells[ i ];
+			cell.removeCustomData( 'cell_selected' );
+			cell.removeCustomData( 'cell_processed' );
 
-		cutCells: function( selection ) {
-			return this._setClipboardData( selection, true );
-		},
+			if ( removeCellContent ) {
+				var children = cell.getChildren(),
+					count = children.count();
 
-		copyCells: function( selection ) {
-			return this._setClipboardData( selection );
-		},
-
-		paste: function( selection ) {
-			if ( this.isEmpty() ) {
-				return false;
-			}
-
-			var editor = this.editor,
-				doc = editor.document,
-				cells = CKEDITOR.plugins.tabletools.getSelectedCells( selection ),
-				i, j;
-
-			// if we are not inside of the table, create the new one
-			if ( !cells.length ) {
-				var table = this.table.clone(),
-					tbody = doc.createElement( 'tbody' );
-				table.append( tbody );
-				for ( i = 0 ; i < this.map.length ; i++ ) {
-					var row = doc.createElement( 'tr' );
-					tbody.append( row );
-					for ( j = 0 ; j < this.map[ i ].length ; j++ ) {
-						var cell = new CKEDITOR.dom.element( this.map[ i ][ j ] );
-						row.append( cell.clone( true ) );
-					}
+				for ( j = count - 1; j >= 0; j-- ) {
+					children.getItem( j ).remove();
 				}
-				editor.insertElement( table );
-				return true;
-			}
 
-			var startCell = cells[ 0 ],
-				startRow = startCell.getAscendant( 'tr' ),
-				table = startRow && startRow.getAscendant( 'table' );
-
-			if ( !table ) {
-				return false;
-			}
-
-			var pasteCell = function( source, target ) {
-				// if target was already processed, just append the data
-				// and clear it otherwise
-				if ( !target.getCustomData( 'cell_processed' ) ) {
-					var child;
-					while ( child = target.$.lastChild ) {
-						target.$.removeChild( child );
-					}
-				}
-				source.clone( true ).moveChildren( target );
-				target.setCustomData( 'cell_processed', 1 );
-			};
-
-			editor.fire( 'saveSnapshot' );
-
-			var map = CKEDITOR.tools.buildTableMap( table ),
-				startRowIndex = startRow.$.rowIndex,
-				startCellIndex = -1;
-
-			// look for the start cell index
-			for ( var i = 0 ; i < map[ startRowIndex ].length ; i++ ) {
-				var cell = new CKEDITOR.dom.element( map[ startRowIndex ][ i ] );
-				if ( cell.equals( startCell ) ) {
-					startCellIndex = i;
-					break;
+				if ( !CKEDITOR.env.ie ) {
+					cell.append( cell.getDocument().createElement( 'br' ) );
 				}
 			}
+		}
 
-			// if there two and more cells are selected, paste data only into the selected cells
-			if ( cells.length > 1 ) {
-				this._markCells( cells );
+		// extract the plain text data
+		map = CKEDITOR.tools.buildTableMap( targetTable );
+		var text = [];
+		for ( i = 0 ; i < map.length ; i++ ) {
+			for ( j = 0 ; j < map[ i ].length ; j++ ) {
+				cell = new CKEDITOR.dom.element( map[ i ][ j ] );
+				text.push( cell.getText(), '\t' );
+			}
+			text.pop();
+			text.push( '\n' );
+		}
+		text.pop();
+		data.text = text.join( '' );
+		
+		data.html = targetTable.getOuterHtml();
 
-				// find the source cell which should be pasted into the provided target position
-				var getSourceCell = ( function( sourceMap ) {
-					var sourceDimensions = { cols: sourceMap[ 0 ].length, rows: sourceMap.length },
-						getSourceIndex = function( targetIndex, sourceSize ) {
-							var index = targetIndex / sourceSize;
-							// get the decimal part
-							index = index - Math.floor( index );
-							index = Math.round( index * sourceSize );
-							return index;
-						};
-					return function( targetPosition ) {
-						return new CKEDITOR.dom.element( sourceMap[ getSourceIndex( targetPosition.row, sourceDimensions.rows ) ][ getSourceIndex( targetPosition.col, sourceDimensions.cols ) ] );
+		if ( editor.dataProcessor ) {
+			data.html = editor.dataProcessor.toDataFormat( data.html );
+		}
+
+		return data;
+	}
+
+	function pasteCell( source, target ) {
+		// if target was already processed, just append the data
+		// and clear it otherwise
+		if ( !target.getCustomData( 'cell_processed' ) ) {
+			var child;
+			while ( child = target.$.lastChild ) {
+				target.$.removeChild( child );
+			}
+		}
+		source.clone( true ).moveChildren( target );
+		target.setCustomData( 'cell_processed', 1 );
+	}
+
+	function pasteTable( editor, sourceTable ) {
+		var selection = editor.getSelection(),
+			cells = selection && CKEDITOR.plugins.tabletools.getSelectedCells( selection ) || [];
+
+		if ( !cells.length ) {
+			return false;
+		}
+
+		var startCell = cells[ 0 ],
+			startRow = startCell.getAscendant( 'tr' ),
+			targetTable = startRow && startRow.getAscendant( 'table' );
+
+		if ( !targetTable ) {
+			return false;
+		}
+
+		editor.fire( 'saveSnapshot' );
+
+		var targetMap = CKEDITOR.tools.buildTableMap( targetTable ),
+			sourceMap = CKEDITOR.tools.buildTableMap( sourceTable ),
+			startRowIndex = startRow.$.rowIndex,
+			startCellIndex = -1,
+			i, j;
+
+		// looking for the start cell index
+		for ( i = 0 ; i < targetMap[ startRowIndex ].length ; i++ ) {
+			var cell = new CKEDITOR.dom.element( targetMap[ startRowIndex ][ i ] );
+			if ( cell.equals( startCell ) ) {
+				startCellIndex = i;
+				break;
+			}
+		}
+
+		// if there two and more cells are selected, paste data only into the selected cells
+		if ( cells.length > 1 ) {
+			markCells( cells );
+
+			// find the source cell which should be pasted into the provided target position
+			var getSourceCell = (function( sourceMap ) {
+				var sourceDimensions = { cols: sourceMap[ 0 ].length, rows: sourceMap.length },
+					getSourceIndex = function( targetIndex, sourceSize ) {
+						var index = targetIndex / sourceSize;
+						// get the decimal part
+						index = index - Math.floor( index );
+						index = Math.round( index * sourceSize );
+						return index;
 					};
-				})( this.map );
+				return function( targetPosition ) {
+					return new CKEDITOR.dom.element( sourceMap[ getSourceIndex( targetPosition.row, sourceDimensions.rows ) ][ getSourceIndex( targetPosition.col, sourceDimensions.cols ) ] );
+				};
+			})( sourceMap );
 
-				for ( i = startRowIndex ; i < map.length ; i++ ) {
-					for ( j = startCellIndex ; j < map[ i ].length ; j++ ) {
-						var targetCell = new CKEDITOR.dom.element( map[ i ][ j ] );
-						if ( targetCell.getCustomData( 'cell_selected' ) ) {
-							var targetRowIndex = i - startRowIndex,
-								targetColIndex = j - startCellIndex,
-								sourceCell = getSourceCell( { col: targetColIndex, row: targetRowIndex } );
-
-							pasteCell( sourceCell, targetCell );
-						}
-					}
-				}
-			} else {
-				var colsLack = this.map[ 0 ].length - ( map[ 0 ].length - startCellIndex ),
-					rowsLack = this.map.length - ( map.length - startRowIndex );
-
-				if ( colsLack > 0 || rowsLack > 0 ) {
-					editor.fire( 'lockSnapshot' );
-
-					for ( i = 0 ; i < colsLack ; i++ ) {
-						editor.execCommand( 'columnInsertAfter' );
-					}
-
-					for ( i = 0 ; i < rowsLack ; i++ ) {
-						editor.execCommand( 'rowInsertAfter' );
-					}
-
-					editor.fire( 'unlockSnapshot' );
-
-					// rebuild the map after rows/cols insertion
-					map = CKEDITOR.tools.buildTableMap( table );					
-				}
-
-				for ( i = 0 ; i < this.map.length ; i++ ) {
-					for ( j = 0 ; j < this.map[ i ].length ; j++ ) {
-						var sourceCell = new CKEDITOR.dom.element( this.map[ i ][ j ] ),
-							targetCell = new CKEDITOR.dom.element( map[ startRowIndex + i ][ startCellIndex + j ] );
+			for ( i = startRowIndex ; i < targetMap.length ; i++ ) {
+				for ( j = startCellIndex ; j < targetMap[ i ].length ; j++ ) {
+					var targetCell = new CKEDITOR.dom.element( targetMap[ i ][ j ] );
+					if ( targetCell.getCustomData( 'cell_selected' ) ) {
+						var targetRowIndex = i - startRowIndex,
+							targetColIndex = j - startCellIndex,
+							sourceCell = getSourceCell( { col: targetColIndex, row: targetRowIndex } );
 
 						pasteCell( sourceCell, targetCell );
 					}
 				}
 			}
+		} else {
+			var colsLack = sourceMap[ 0 ].length - ( targetMap[ 0 ].length - startCellIndex ),
+				rowsLack = sourceMap.length - ( targetMap.length - startRowIndex );
 
-			for ( i = 0 ; i < map.length ; i++ ) {
-				for ( j = 0 ; j < map[ i ].length ; j++) {
-					var cell = new CKEDITOR.dom.element( map[ i ][ j ] );
-					cell.removeCustomData( 'cell_processed' );
-					cell.removeCustomData( 'cell_selected' );
+			if ( colsLack > 0 || rowsLack > 0 ) {
+				editor.fire( 'lockSnapshot' );
+
+				for ( i = 0 ; i < colsLack ; i++ ) {
+					editor.execCommand( 'columnInsertAfter' );
 				}
+
+				for ( i = 0 ; i < rowsLack ; i++ ) {
+					editor.execCommand( 'rowInsertAfter' );
+				}
+
+				editor.fire( 'unlockSnapshot' );
+
+				// rebuild the map after rows/cols insertion
+				map = CKEDITOR.tools.buildTableMap( targetTable );					
 			}
 
-			editor.fire( 'saveSnapshot' );
-			return true;
+			for ( i = 0 ; i < sourceMap.length ; i++ ) {
+				for ( j = 0 ; j < sourceMap[ i ].length ; j++ ) {
+					var sourceCell = new CKEDITOR.dom.element( sourceMap[ i ][ j ] ),
+						targetCell = new CKEDITOR.dom.element( targetMap[ startRowIndex + i ][ startCellIndex + j ] );
+
+					pasteCell( sourceCell, targetCell );
+				}
+			}
 		}
-	};
+
+		for ( i = 0 ; i < targetMap.length ; i++ ) {
+			for ( j = 0 ; j < targetMap[ i ].length ; j++) {
+				var cell = new CKEDITOR.dom.element( targetMap[ i ][ j ] );
+				cell.removeCustomData( 'cell_processed' );
+				cell.removeCustomData( 'cell_selected' );
+			}
+		}
+
+		editor.fire( 'saveSnapshot' );
+		return true;
+	}
+
+	function cancelEvent( evt ) {
+		if ( evt.data && evt.data.preventDefault ) {
+			evt.data.preventDefault( true );
+		} else {
+			evt.cancel();
+		}
+	}
+
+	function onCopyCut( evt ) {
+		var editor = this,
+			data = getSelectedTableData( editor, ( evt.name in { 'cut':1, 'beforecut':1, 'zcBeforeCut':1 } ) );
+
+		if ( data && data.html && data.html.length ) {
+			var clipboard = evt.data.zcClient || evt.data.$ && evt.data.$.clipboardData || null;
+			setClipboardData.call( editor, clipboard, data );
+			cancelEvent( evt );
+		}
+	}
+
+	function setClipboardData( clipboard, data ) {
+		var editor = this;
+
+		editor.fire( 'tableClipboard', data );
+		
+		if ( clipboard ) {
+			if ( typeof clipboard.setText == 'function' ) {
+				// ZeroClipboard
+				clipboard.setText( data.html );
+			} else {
+				// W3C clipboardData
+				clipboard.setData( 'text/plain', data.text );
+				clipboard.setData( 'text/html', data.html );
+			}
+		} else {
+			var div = CKEDITOR.document.createElement( 'div' );
+			div.setStyles({
+				'position': 'absolute',
+				'left': '-9999px',
+				'top': CKEDITOR.document.getWindow().getScrollPosition().y + 'px',
+				'width': '1px',
+				'height': '1px'
+			});
+			div.setAttribute( 'contenteditable', 'true' );
+			div.setAttribute( 'id', 'cke_tableclipboard' );
+			div.data( 'cke-temp', 1 );
+			div.setHtml( data.html );
+
+			CKEDITOR.document.getBody().append( div );
+			div.focus();
+
+			var range = new CKEDITOR.dom.range( CKEDITOR.document );
+			range.selectNodeContents( div );
+			range.select();
+
+			window.setTimeout(function() {
+				div.remove();
+				editor.focus();
+			}, 0 );
+		}
+	}
+
+	function onIECommandExec( evt ) {
+		var editor = this,
+			command = evt.listenerData.command,
+			data = getSelectedTableData( editor, command === 'cut' );
+		
+		if ( data ) {
+			setClipboardData.call( editor, null, data );
+			CKEDITOR.document.$.execCommand( command );
+			evt.cancel();
+		}
+	}
 
 	CKEDITOR.plugins.add( 'mindtouch/tableclipboard', {
 		requires: 'tabletools',
 		init: function( editor ) {
-			var clipboard = new tableClipboard( editor );
-
-			editor.addCommand( 'cellsCut', {
-				exec: function( editor ) {
-					var selection = editor.getSelection();
-					selection && clipboard.cutCells( selection );
-				}
-			});
-
-			editor.addCommand( 'cellsCopy', {
-				canUndo: false,
-				exec: function( editor ) {
-					var selection = editor.getSelection();
-					selection && clipboard.copyCells( selection );
-				}
-			});
-
-			editor.addCommand( 'cellsPaste', {
-				canUndo: false,
-				exec: function( editor ) {
-					var selection = editor.getSelection();
-					selection && clipboard.paste( selection );
-				}
-			});
-
-			var cancelEvent = function( evt ) {
-				if ( evt.data && evt.data.preventDefault ) {
-					evt.data.preventDefault( true );
-				} else {
-					evt.cancel();
-				}
-			};
-
-			var onCopyCut = function( evt ) {
-				clipboard.reset();
-
-				var sel = editor.getSelection(),
-					cells = ( sel && CKEDITOR.plugins.tabletools.getSelectedCells( sel ) ) || [];
-
-				if ( !cells.length ) {
-					return;
-				}
-
-				// check if only table content is selected
-				var range = sel.getRanges()[ 0 ];
-				if ( !range.startContainer.hasAscendant( 'table' ) ) {
-					return;
-				}
-
-				if ( !range.collapsed && !range.endContainer.hasAscendant( 'table' ) ) {
-					return;
-				}
-
-				// check if content of single table is selected
-				var table = prevTable = null,
-					i;
-				for ( i = 0 ; i < cells.length ; i++ ) {
-					table = cells[ i ].getAscendant( 'table' );
-					if ( i > 0 && !table.equals( prevTable ) ) {
-						return;
-					}
-					prevTable = table;
-				}
-
-				// try to copy/cut selected cells
-				var command = ( evt.name in { 'copy': 1, 'zcBeforeCopy': 1 } ) ? 'cellsCopy' : 'cellsCut';
-				editor.execCommand( command );
-
-				!clipboard.isEmpty() && cancelEvent( evt );
-			};
-
 			editor.on( 'contentDom', function() {
 				var editable = editor.editable();
-				for ( var eventName in { 'copy': 1, 'cut': 1 } ) {
-					editable.on( eventName, onCopyCut, null, null, 1 );
-				}
+				editable.on( 'copy', onCopyCut, editor );
+				editable.on( 'cut', onCopyCut, editor );
 
-				// IE does not fire cut event for selected table cells
 				if ( CKEDITOR.env.ie ) {
-					editable.on( 'beforecut', onCopyCut, null, null, 1 );
+					editable.on( 'beforecopy', onCopyCut, editor );
+					editable.on( 'beforecut', onCopyCut, editor );
 				}
 			});
 
-			editor.on( 'beforePaste', function( evt ) {
-				// if clipboard is not empty,
-				// paste stored cells and cancel event
-				if ( !clipboard.isEmpty() ) {
-					editor.execCommand( 'cellsPaste' );
-					evt.cancel();
+			if ( CKEDITOR.env.ie ) {
+				for ( var command in { 'copy': 1, 'cut': 1 } ) {
+					var cmd = editor.getCommand( command );
+					cmd && cmd.on( 'exec', onIECommandExec, editor, { command: command } );
+				}
+			}
+
+			editor.on( 'paste', function( evt ) {
+				if ( evt.data.type == 'html' ) {
+					var html = evt.data.dataValue,
+						wrapper = editor.document.createElement( 'div' );
+
+					wrapper.setHtml( html );
+					wrapper.trim();
+
+					var first = wrapper.getFirst();
+					if ( first && first.is && first.is( 'table' ) && wrapper.getChildCount() == 1 ) {
+						pasteTable( editor, first ) && cancelEvent( evt );
+					}
 				}
 			});
-
-			// when we cancel beforePaste event
-			// ckeditor still calls getClipboardDataByPastebin()
-			// it causes saving of pastebin in snapshot (because of insertElement in pasteCells)
-			editor.on( 'getSnapshot', function( ev ) {
-				if ( typeof ev.data == 'string' ) {
-					ev.data = ev.data.replace( /<(?:body|div)\s+.*?id="cke_pastebin"[^>]*>.*?<\/(?:body|div)>/g, '' );
-				}
-			}, null, null, 1000 );
 
 			// override ZeroClipboard behavior
-			editor.on( 'zcBeforeCopy', onCopyCut );
-			editor.on( 'zcBeforeCut', onCopyCut );
-
-			// @see EDT-637
-			editor.on( 'blur', function() {
-				clipboard.reset();
-			});
+			editor.on( 'zcBeforeCopy', onCopyCut, editor, null, 100 );
+			editor.on( 'zcBeforeCut', onCopyCut, editor, null, 100 );
 		}
 	});
 })();

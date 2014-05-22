@@ -97,27 +97,21 @@
 				var clipboard = '';
 
 				var saveSelectedText = function() {
-					var sel = editor.getSelection();
+					var sel = this.getSelection();
 					clipboard = sel ? sel.getSelectedText().replace( /\s+/g, '' ) : '';
 				};
 
-				editor.on( 'key', function( evt ) {
-					switch ( evt.data.keyCode ) {
-						case CKEDITOR.CTRL + 67:
-						case CKEDITOR.CTRL + 88:
-							saveSelectedText();
-							break;
-					}
+				editor.on( 'contentDom', function() {
+					var editable = editor.editable();
+					editable.on( 'copy', saveSelectedText, editor );
+					editable.on( 'cut', saveSelectedText, editor );
 				});
 
-				editor.on( 'beforeCommandExec', function( evt ) {
-					if ( evt.data.name in { 'copy':1, 'cut':1 } ) {
-						saveSelectedText();
-					}
+				editor.on( 'zcBeforeCopy', saveSelectedText, editor );
+				editor.on( 'zcBeforeCut', saveSelectedText, editor );
+				editor.on( 'tableClipboard', function( ev ) {
+					clipboard = ev.data.text.replace( /\s+/g, '' );
 				});
-
-				editor.on( 'zcBeforeCopy', saveSelectedText, null, null, 100 );
-				editor.on( 'zcBeforeCut', saveSelectedText, null, null, 100 );
 
 				/*
 				 * Webkit adds inline styles on copying,
