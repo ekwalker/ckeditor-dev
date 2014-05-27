@@ -28,11 +28,12 @@
 
 (function() {
 	CKEDITOR.plugins.add('mindtouch/stylescombomenu', {
-		icons: 'none,preltpregtpre_format,comment,dekiscript,javascript_jem,css,conditional_text_anonymous_only,conditional_text_community_member_only,conditional_text_pro_member_only', // %REMOVE_LINE_CORE%
+		icons: 'none,formatted,comment,dekiscript,javascript,css,conditional_text_anonymous_only,conditional_text_community_member_only,conditional_text_pro_member_only', // %REMOVE_LINE_CORE%
 		requires: 'mindtouch/richcombomenu',
 		init: function(editor) {
 			var config = editor.config,
 				lang = editor.lang.stylescombo,
+				stylesLang = editor.lang['mindtouch/stylescombomenu'],
 				styles = [],
 				combo,
 				allowedContent = [];
@@ -49,22 +50,24 @@
 					return;
 				}
 
-				var style, styleName;
-
-				for (var i = 0, count = stylesDefinitions.length; i < count; i++) {
+				var i, count, style, styleName;
+				for (i = 0, count = stylesDefinitions.length; i < count; i++) {
 					var styleDefinition = stylesDefinitions[i],
-						styleName = styleDefinition.name,
-						group = styleDefinition.group || 'user',
-						buttonName = styleName.toLowerCase();
-
-					var style = new CKEDITOR.style(styleDefinition);
+						style = new CKEDITOR.style(styleDefinition);
 
 					if ( !editor.filter.customConfig || editor.filter.check( style ) ) {
+						var styleName = styleDefinition.name,
+							group = styleDefinition.group || 'user';
+
 						// filter the style name
+						var buttonName = styleName.toLowerCase();
 						buttonName = buttonName.replace(/\s+|-+/g, '_');
 						buttonName = buttonName.replace(/[^a-zA-Z0-9_]/g, '');
 
-						style._name = styleName;
+						stylesLang[ buttonName ] = stylesLang[ buttonName ] || {};
+
+						style._label = stylesLang[ buttonName ].menuLabel || styleName;
+						style._title = stylesLang[ buttonName ].comboLabel;
 						style._button = buttonName;
 						style._.enterMode = config.enterMode;
 
@@ -73,7 +76,7 @@
 
 							if (style._.definition.group == 'conditional' && (!style._.definition.attributes || !style._.definition.attributes.title)) {
 								style._.definition.attributes = style._.definition.attributes || {};
-								style._.definition.attributes.title = style._name;
+								style._.definition.attributes.title = style._label;
 							}
 
 							editor.focus();
@@ -95,13 +98,11 @@
 							}, this, {keystroke: styleDefinition.keystroke, style: style});
 						}
 
-						styleDefinition.title = styleDefinition.title || '';
-
 						editor.addMenuItem(buttonName, {
 							group: 'style_' + group,
-							label: styleName,
+							label: stylesLang[ buttonName ].menuLabel || styleName,
 							style: style,
-							title: CKEDITOR.tools.htmlEncode(styleDefinition.title),
+							title: CKEDITOR.tools.htmlEncode( stylesLang[ buttonName ].menuTitle || '' ),
 							onClick: function() {
 								styleCommand(this.style);
 							}
@@ -172,11 +173,11 @@
 							// the styles.
 							for (var j = 0; j < styles.length; j++) {
 								var style = styles[j],
-									value = style._name;
+									value = style._label;
 
 								if (style.checkElementRemovable(element, true)) {
 									if (value != currentValue && (!prevStyle || !prevStyle._.definition.priority || prevStyle._.definition.priority < style._.definition.priority)) {
-										this.setValue(value, style._.definition.label);
+										this.setValue(value, style._title);
 										currentValue = value;
 									}
 

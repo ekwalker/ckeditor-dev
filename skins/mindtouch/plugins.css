@@ -179,7 +179,7 @@ This file contains css styles of all MindTouch plugins.
 	width: 90px;
 }
 
-.cke_menubutton__preltpregtpre_format pre
+.cke_menubutton__formatted pre
 {
 	cursor: default;
 	float: left;
@@ -188,9 +188,9 @@ This file contains css styles of all MindTouch plugins.
 	margin-right: 0.2em;
 }
 
-.cke_browser_ie6 .cke_menubutton__preltpregtpre_format pre,
-.cke_browser_ie7 .cke_menubutton__preltpregtpre_format pre,
-.cke_browser_ie8 .cke_menubutton__preltpregtpre_format pre
+.cke_browser_ie6 .cke_menubutton__formatted pre,
+.cke_browser_ie7 .cke_menubutton__formatted pre,
+.cke_browser_ie8 .cke_menubutton__formatted pre
 {
 	line-height: 13px;
 }
