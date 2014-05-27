@@ -257,7 +257,7 @@ CKEDITOR.skin.chameleon = (function() {
 			'definitionterm,extensions,code,h1,h2,h3,h4,h5,h6,hx,plaintext,mindtouchimage,pasteimage,' +
 			'mindtouchlink,mindtouchcancel,mindtouchsave,comment,conditional_text_anonymous_only,' +
 			'conditional_text_community_member_only,conditional_text_pro_member_only,css,dekiscript,' +
-			'javascript_jem,none,preltpregtpre_format,tableoneclick,tablerow_copy,tablerow_cut,' +
+			'javascript,none,formatted,tableoneclick,tablerow_copy,tablerow_cut,' +
 			'tablerow_pasteAfter,tablerow_pasteBefore,mindtouchtemplates-rtl,mindtouchtemplates,' +
 			'video,whoisediting,newpage-rtl,newpage,pagebreak-rtl,pagebreak,pastefromword-rtl,pastefromword,' +
 			'pastetext-rtl,pastetext,placeholder,preview-rtl,preview,print,removeformat,save,scayt,selectall,' +
