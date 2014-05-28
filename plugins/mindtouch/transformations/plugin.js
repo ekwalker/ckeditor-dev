@@ -407,7 +407,7 @@
 
 	CKEDITOR.plugins.add('mindtouch/transformations', {
 		requires: 'mindtouch/elementbubble',
-		lang: 'en',
+		lang: 'en', // %REMOVE_LINE_CORE%
 		transformations : {},
 		onLoad: function() {
 			var i, j, transformation, name, def;

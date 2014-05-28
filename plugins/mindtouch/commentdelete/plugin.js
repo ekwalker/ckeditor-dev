@@ -152,7 +152,7 @@
 	};
 
 	CKEDITOR.plugins.add('mindtouch/commentdelete', {
-		lang : 'en',
+		lang: 'en', // %REMOVE_LINE_CORE%
 		onLoad: function() {
 			CKEDITOR.addCss('.comment[data-cke-comment-hover] { background-position: 0 -25px !important; }');
 		},
