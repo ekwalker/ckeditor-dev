@@ -76,8 +76,8 @@
 	};
 	
 	CKEDITOR.plugins.add( pluginName, {
-		lang: 'en',  // %REMOVE_LINE_CORE%
-		icons: 'extensions',  // %REMOVE_LINE_CORE%
+		lang: 'en', // %REMOVE_LINE_CORE%
+		icons: 'extensions', // %REMOVE_LINE_CORE%
 		requires: 'mindtouch/dialog',
 		init: function( editor ) {
 			editor.addCommand( pluginName, extensionsCmd );
