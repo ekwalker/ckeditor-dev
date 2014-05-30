@@ -53,6 +53,8 @@
 				var cell = new CKEDITOR.dom.element( table.$.rows[ i ].cells[ j ] );
 				if ( cell.data( 'cke-cell-selected' ) ) {
 					cell.data( 'cke-cell-selected', false );
+					// IE8: force to redraw
+					cell.$.className = cell.$.className;
 					cells.push(  cell );
 				}
 			}
@@ -211,13 +213,13 @@
 				target.on( 'mouseover', function( ev ) {
 					if ( mouseStartCell ) {
 						var target = ev.data.getTarget(),
-							endCell = target && target.getAscendant( { td:1, th:1 }, true );
+							endCell = target && target.getAscendant( { td:1, th:1 }, true ),
+							selection = editor.getSelection();
 
 						// allow to select lines inside the cell
 						// @see EDT-690
 						if ( mouseStartCell.equals( endCell ) ) {
-							var selection = editor.getSelection(),
-								ranges = selection && selection.getRanges();
+							var ranges = selection && selection.getRanges();
 							if ( ranges.length === 1 ) {
 								var range = ranges[ 0 ];
 								if ( !( range.checkBoundaryOfElement( endCell, CKEDITOR.START ) &&
@@ -230,6 +232,7 @@
 						CKEDITOR.env.webkit && editor.setReadOnly( true );
 
 						if ( selectCells.call( editor, mouseStartCell, endCell ) ) {
+							selection && selection.removeAllRanges();
 							editor.editable().$.style.webkitUserSelect = 'none';
 							forceReselectRange = true;
 							ev.data.preventDefault( 1 );

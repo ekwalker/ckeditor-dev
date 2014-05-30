@@ -58,7 +58,7 @@ CKEDITOR.plugins.add('mindtouch/scaytcustom', {
 						if ( CKEDITOR.env.ie && this._focused && this.scayt3 ) {
 							this.bookmark.toggleBookmark( this );
 							this.bookmark.moveToBookmark( this );
-							if ( !this.scayt3.bookmark.rangeInfos.length ) {
+							if ( !this.scayt3.bookmark || !this.scayt3.bookmark.rangeInfos || !this.scayt3.bookmark.rangeInfos.length ) {
 								editor.editable().focus();
 							}
 						}
