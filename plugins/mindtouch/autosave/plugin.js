@@ -47,7 +47,7 @@
 	}
 
 	CKEDITOR.plugins.add('mindtouch/autosave', {
-		lang: 'en',  // %REMOVE_LINE_CORE%
+		lang: 'en', // %REMOVE_LINE_CORE%
 		requires: 'mindtouch/infobar,mindtouch/infopanel,mindtouch/storage',
 		beforeInit: function() {
 			CKEDITOR.plugins.draft = CKEDITOR.tools.createClass({
