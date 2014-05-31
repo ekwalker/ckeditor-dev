@@ -73,6 +73,8 @@
 				continue;
 			}
 
+			range.enlarge( CKEDITOR.ENLARGE_ELEMENT );
+
 			var div = editor.document.createElement('div'),
 				// create bookmark since cloneContents may lost selection
 				bookmark = range.createBookmark();
@@ -93,13 +95,7 @@
 					startBlock = startPath.block || startPath.blockLimit,
 					endBlock = endPath.block || endPath.blockLimit,
 					previousNode = startBlock && startBlock.getPrevious(),
-					nextNode = endBlock && endBlock.getNext(),
-					dtdTableContents = CKEDITOR.dtd.$tableContent;
-
-				// @see EDT-684
-				if ( startPath.contains( dtdTableContents ) ) {
-					range.enlarge( CKEDITOR.ENLARGE_ELEMENT );
-				}
+					nextNode = endBlock && endBlock.getNext();
 
 				range.deleteContents();
 
@@ -115,7 +111,7 @@
 				if ( startBlock && !startBlock.equals( endBlock ) ) {
 					// merge end block content into the start block
 					// except the case when end block is in the table
-					if ( startBlockExists && endBlockExists && !endPath.contains( dtdTableContents ) ) {
+					if ( startBlockExists && endBlockExists && !endPath.contains( CKEDITOR.dtd.$tableContent ) ) {
 						var span = CKEDITOR.dom.element.createFromHtml( '<span ' +
 							'data-cke-bookmark="1" style="display:none">&nbsp;</span>', range.document );
 
