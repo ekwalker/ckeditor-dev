@@ -323,8 +323,10 @@
 									var child = element.children[i];
 
 									if (child.type == CKEDITOR.NODE_TEXT) {
+										if (child.value !== '\n' && child.value !== '\r\n') {
+											child.value = child.value.replace(/^\n|\r\n/, '').replace('\n|\r\n$', '');
+										}
 										child.value = child.value.replace(/\n|\r\n/g, '<br>');
-										child.value = child.value.replace(/^<br>/, '').replace('/<br>$/', '');
 									} else {
 										replaceLineBreaks(child);
 									}
