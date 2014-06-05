@@ -26,28 +26,7 @@
  * A complete copy of the MSA is available at http://www.mindtouch.com/msa
  */
 
-CKEDITOR.plugins.add('mindtouch/elementbubble', {
-	onLoad: function() {
-		CKEDITOR.document.appendStyleText(
-			'.cke_element_bubble {' +
-			'	white-space: nowrap;' +
-			'	font-size: 90%;' +
-			'	position: absolute;' +
-			'	padding: 10px;' +
-			'	color: #666;' +
-			'	background-color: #fff;' +
-			'	background-image: none;' +
-			'	border: 1px solid #d3d3d3;' +
-			'	-moz-box-shadow: 0 1px 3px rgba(0, 0, 0, .2);' +
-			'	-ms-box-shadow: 0 1px 3px rgba(0, 0, 0, .2);' +
-			'	box-shadow: 0 1px 3px rgba(0, 0, 0, .2);' +
-			'	z-index: 2;' +
-			'	cursor: default;' +
-			'}' +
-			'.cke_element_bubble a { cursor: pointer; }');
-	}
-});
-
+CKEDITOR.plugins.add('mindtouch/elementbubble', {});
 CKEDITOR.ui.elementBubble = CKEDITOR.tools.createClass({
 	$: function(definition, doc, editor) {
 		CKEDITOR.tools.extend(this, definition);

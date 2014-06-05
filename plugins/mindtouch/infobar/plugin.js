@@ -48,16 +48,6 @@
 					evt.data.html += editor.ui.infobar.renderHtml(evt.editor );
 				}
 			});
-		},
-		onLoad : function() {
-			var css = [
-				'.cke_infobar { position: absolute; z-index: 1; height: 15px; padding: 5px 0; overflow: hidden; border-radius: 0 0 0 5px; background-color: #cfd1cf; bottom: -25px; right: 0; }',
-				'.cke_infobar .cke_infopanel_group a { text-decoration: underline; color: #333; cursor: pointer; }',
-				'.cke_infobar .cke_infopanel_group { float: left; background: transparent url(data:image/gif;base64,R0lGODlhAQANAIABAJmZmf///yH5BAEKAAEALAAAAAABAA0AAAIDhI9XADs=) scroll no-repeat right center; padding: 0 1em; }',
-				'.cke_infobar span { cursor: default; -ms-filter: alpha(opacity=70); opacity: 0.70; }',
-				'.cke_hc .cke_infobar span { opacity: 1.0; -ms-filter: alpha(opacity=100); }'
-			];
-			CKEDITOR.document.appendStyleText( css.join( '' ) );
 		}
 	});
 })();

@@ -33,7 +33,7 @@
 
 CKEDITOR.plugins.add('mindtouch/clearcontents', {
 	requires: 'newpage',
-	lang: 'en',  // %REMOVE_LINE_CORE%
+	lang: 'en', // %REMOVE_LINE_CORE%
 	beforeInit: function(editor) {
 		editor.lang.newpage.toolbar = editor.lang['mindtouch/clearcontents'].title;
 	},

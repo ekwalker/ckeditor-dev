@@ -407,17 +407,9 @@
 
 	CKEDITOR.plugins.add('mindtouch/transformations', {
 		requires: 'mindtouch/elementbubble',
-		lang: 'en',
+		lang: 'en', // %REMOVE_LINE_CORE%
 		transformations : {},
 		onLoad: function() {
-			CKEDITOR.document.appendStyleText(
-				'.cke_element_bubble__transformations .cke_element_bubble_transform_item {' +
-				'	padding-right: 5px;' +
-				'}' +
-				'.cke_element_bubble__transformations span.cke_element_bubble_transform_item {' +
-				'	font-weight: bold;' +
-				'}');
-
 			var i, j, transformation, name, def;
 
 			for (i = 0; i < transformations.length; i++) {

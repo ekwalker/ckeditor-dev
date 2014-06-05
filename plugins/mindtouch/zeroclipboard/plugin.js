@@ -73,6 +73,8 @@
 				continue;
 			}
 
+			range.enlarge( CKEDITOR.ENLARGE_ELEMENT );
+
 			var div = editor.document.createElement('div'),
 				// create bookmark since cloneContents may lost selection
 				bookmark = range.createBookmark();
@@ -93,13 +95,7 @@
 					startBlock = startPath.block || startPath.blockLimit,
 					endBlock = endPath.block || endPath.blockLimit,
 					previousNode = startBlock && startBlock.getPrevious(),
-					nextNode = endBlock && endBlock.getNext(),
-					dtdTableContents = CKEDITOR.dtd.$tableContent;
-
-				// @see EDT-684
-				if ( startPath.contains( dtdTableContents ) ) {
-					range.enlarge( CKEDITOR.ENLARGE_ELEMENT );
-				}
+					nextNode = endBlock && endBlock.getNext();
 
 				range.deleteContents();
 
@@ -115,7 +111,7 @@
 				if ( startBlock && !startBlock.equals( endBlock ) ) {
 					// merge end block content into the start block
 					// except the case when end block is in the table
-					if ( startBlockExists && endBlockExists && !endPath.contains( dtdTableContents ) ) {
+					if ( startBlockExists && endBlockExists && !endPath.contains( CKEDITOR.dtd.$tableContent ) ) {
 						var span = CKEDITOR.dom.element.createFromHtml( '<span ' +
 							'data-cke-bookmark="1" style="display:none">&nbsp;</span>', range.document );
 
@@ -178,32 +174,6 @@
 		return html;
 	}
 
-	function getPlainText(editor, data) {
-		var html = editor.dataProcessor.toDataFormat(data);
-		html = html.split("\n");
-		result = [];
-		for (var i = 0; i < html.length; i++) {
-			var str = html[i];
-			// remove leading tabs
-			str = str.replace(/^\t+/ig, '');
-			// strip tags
-			str = str.replace(/<[^>]+>/ig, '');
-
-			if (str.length) {
-				result.push(str);
-			}
-		}
-
-		html = result.join("\n");
-
-		// set html to dummy element to convert html entities
-		var dummy = new CKEDITOR.dom.element('div', CKEDITOR.document);
-		dummy.setHtml(html);
-		data = dummy.getText();
-
-		return data;
-	}
-
 	function tryToCutCopy(editor, type) {
 		try {
 			return editor.document.$.execCommand(type, false, null);
@@ -240,7 +210,7 @@
 
 		clipboard.addEventListener('mouseDown', function(client) {
 			if (editor.getCommand(name).state != CKEDITOR.TRISTATE_DISABLED) {
-				var cancel = (editor.fire('zcBefore' + CKEDITOR.tools.capitalize(name)) === false);
+				var cancel = (editor.fire('zcBefore' + CKEDITOR.tools.capitalize(name), {zcClient: client}) === false);
 				if (!cancel) {
 					var isCut = (name == 'cut');
 					isCut && editor.fire('saveSnapshot');

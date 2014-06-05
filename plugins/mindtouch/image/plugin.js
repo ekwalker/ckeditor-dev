@@ -226,12 +226,6 @@
 					}
 				}
 			}, this, null, 1);
-		},
-		onLoad: function() {
-			var css = [
-				'.cke .cke_button__mindtouchimage .cke_button_label { display: inline; line-height: 16px; }'
-			];
-			CKEDITOR.document.appendStyleText(css.join(''));
 		}
 	});
 })();

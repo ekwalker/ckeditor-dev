@@ -285,16 +285,17 @@
 			}, this, null, 1);
 
 			// removing style on unlink command works like general inline style
-			// at the end of the link
+			// at the start/end of the link
 			// so we need to process this case separately
 			// @see EDT-647
+			// @see EDT-708
 			var unlinkCmd = editor.getCommand('unlink');
 			unlinkCmd && unlinkCmd.on('exec', function(evt) {
 				var selection = editor.getSelection(),
 					range = selection && selection.getRanges()[0];
 				if (range && range.collapsed) {
 					var element = selection.getStartElement().getAscendant('a', true);
-					if (element && element.getAttribute('href') && element.getChildCount() && range.checkBoundaryOfElement(element, CKEDITOR.END)) {
+					if (element && element.getAttribute('href') && element.getChildCount() && (range.checkBoundaryOfElement(element, CKEDITOR.END) || range.checkBoundaryOfElement(element, CKEDITOR.START))) {
 						var bookmark = range.createBookmark();
 						element.remove(true);
 						range.moveToBookmark(bookmark);

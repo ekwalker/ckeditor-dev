@@ -47,7 +47,7 @@
 	}
 
 	CKEDITOR.plugins.add('mindtouch/autosave', {
-		lang: 'en',  // %REMOVE_LINE_CORE%
+		lang: 'en', // %REMOVE_LINE_CORE%
 		requires: 'mindtouch/infobar,mindtouch/infopanel,mindtouch/storage',
 		beforeInit: function() {
 			CKEDITOR.plugins.draft = CKEDITOR.tools.createClass({
@@ -450,18 +450,6 @@
 					Deki.Ui.Flash(message);
 				}
 			});
-		},
-
-		onLoad : function() {
-			var css = [
-				'.cke_autosavepanel { background-color: #ffff66; border-bottom: solid 2px #cccc99; border-top: solid 1px #ccc; color: #222; bottom: -52px; height: 50px; left: 0; position: absolute; z-index: 10; width: 100%; }',
-				'.cke_autosavepanel.cke_autosave_outdated { background-color: #ffd266; }',
-				'.cke_autosavepanel .cke_infopanel_group span { display: block; text-align: center; padding: 5px; cursor: default; }',
-				'.cke_autosavepanel .cke_infopanel_group a { margin-right: 1em; text-decoration: underline; cursor: pointer; font-weight: bold; font-size: 10pt; text-decoration: none; color: #333; }',
-				'.cke_autosavepanel .cke_infopanel_group .delimiter { margin-right: 1em; display: inline; }',
-				'.cke_autosavepanel .cke_infopanel_group a:hover { text-decoration: underline; color: #000; }'
-			];
-			CKEDITOR.document.appendStyleText(css.join(''));
 		}
 	});
 })();

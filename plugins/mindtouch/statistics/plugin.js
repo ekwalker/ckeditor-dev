@@ -105,7 +105,7 @@
 
 	CKEDITOR.plugins.add('mindtouch/statistics', {
 		requires: 'mindtouch/infobar',
-		lang: 'en',
+		lang: 'en', // %REMOVE_LINE_CORE%
 		init: function(editor) {
 			editor.on('contentDom', function() {
 				editor.document.getBody().on('keydown', calculateStatisticsTimeout, this, editor);

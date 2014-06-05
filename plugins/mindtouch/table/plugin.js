@@ -402,7 +402,7 @@
 			if ( editor.addMenuItems ) {
 				editor.addMenuItems({
 					cellalign: {
-						label: tableLang.cellAlignment,
+						label: tableLang.vertAlign,
 						group: 'tablecellalignment',
 						order: 1,
 						getItems: function() {
@@ -441,7 +441,7 @@
 						order: 5
 					},
 					tablecell_unmerge: {
-						label: tableLang.unmergeCell,
+						label: tableLang.unmergeCells,
 						group: 'tablecell',
 						command: 'cellUnmerge',
 						order: 10
@@ -509,7 +509,7 @@
 					var cell = path.contains( { 'td':1,'th':1 }, 1 );
 					if ( cell && !cell.isReadOnly() ) {
 						return {
-							// cellalign: CKEDITOR.TRISTATE_OFF
+							cellalign: CKEDITOR.TRISTATE_OFF,
 							tablecell_mergeSelected: tablecellMenuItem ? tablecellMenuItem.getItems().tablecell_merge : CKEDITOR.TRISTATE_DISABLED,
 							tablecell_unmerge: unmergeCell.call( editor, selection, true ) ? CKEDITOR.TRISTATE_OFF : CKEDITOR.TRISTATE_DISABLED,
 							tablerow_insertBefore: CKEDITOR.TRISTATE_OFF,
