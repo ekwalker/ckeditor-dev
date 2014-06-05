@@ -40,50 +40,12 @@
         return href;
     }
     function attachImages(editor, files) {
-        var file = new Deki.PageFile(Deki.PageId);
-        file.attachFile({ fileInput: files }).done(function (result) {
-            var elements = [];
-            _(result).each(function(file) {
-                if('@href' in file.contents) {
-                    var element = null;
-                    var url = stripHost(file.contents['@href']);
-                    var size = {
-                        width: file.contents['@width'],
-                        height: file.contents['@height']
-                    };
-                    if (size.width && size.height) {
-                        element = editor.document.createElement('img');
-                        element.setAttribute('src', url);
-                        element.data('cke-saved-src', url);
-                        element.setStyle('width', size.width + 'px');
-                        element.setStyle('height', size.height + 'px');
-                        element.setAttribute('alt', '');
-                    } else {
-                        element = editor.document.createElement('a');
-                        element.setAttribute('href', url);
-                        element.data('cke-saved-href', url);
-                        element.setAttribute('title', url);
-                        element.setHtml(url);
-                    }
-                    element.addClass('internal');
-                    elements.push(element);
-                    parent.postMessage(JSON.stringify(file), window.location.protocol + '//' + window.location.host);
-                }
-            });
-            CKEDITOR.tools.setTimeout(function() {
-                editor.focus();
-                if(CKEDITOR.env.ie) {
-                    var selection = editor.getSelection();
-                    selection.unlock(true);
-                }
-                for(var i = 0; i < elements.length; i++) {
-                    editor.insertElement(elements[i]);
-                }
-            }, 0);
-
-        }).fail(function() {
-            Deki.Log('FAIL');
-            Deki.Log(arguments);
+        $('<div></div>').modal({
+            width: 600,
+            naming: 'AttachFile',
+            load: function() {
+                Deki.Ui.Dialog.AttachFile.init(files);
+            }
         });
     }
     var doAttachCmd = {
@@ -98,9 +60,9 @@
         }
     };
     CKEDITOR.plugins.add('mindtouch/imageattach', {
-        lang: 'en', // %REMOVE_LINE_CORE%
+        lang: 'en',  // %REMOVE_LINE_CORE%
         requires: 'dialog,mindtouch/dialog,mindtouch/save',
-        init: function(editor) {// enable attaching files on drag and drop
+        init: function(editor) {  // enable attaching files on drag and drop
             editor.addCommand('attachimage', doAttachCmd);
             editor.on('contentDom', function() {
                 editor.document.getBody().on('paste', function(ev) {
@@ -138,15 +100,16 @@
                                         };
                                         try {
                                             attachImages(editor, fileInfo);
-                                        } catch (ex) {
+                                        } catch(ex) {
                                             window.alert(ex);
                                         }
                                     };
                                     reader.readAsDataURL(blob);
                                     editor.unlock();
                                 }
-                        });
-                    }}
+                            });
+                        }
+                    }
                 });
             });
             var stopPropagation = function(event) {
@@ -185,6 +148,47 @@
             editor.on('contentDom', initUploader);
             editor.on('contentDomUnload', destroyUploader);
             editor.on('destroy', destroyUploader);
+            $(document).on(Deki.Ui.Events.Files.UploadComplete, function(e, fileData) {
+                fileData = Deki.Utility.makeArray(fileData);
+                var elements = [];
+                _(fileData).each(function(file) {
+                    if('@href' in file.contents) {
+                        var element = null;
+                        var url = stripHost(file.contents['@href']);
+                        var size = {
+                            width: file.contents['@width'],
+                            height: file.contents['@height']
+                        };
+                        if(size.width && size.height) {
+                            element = editor.document.createElement('img');
+                            element.setAttribute('src', url);
+                            element.data('cke-saved-src', url);
+                            element.setStyle('width', size.width + 'px');
+                            element.setStyle('height', size.height + 'px');
+                            element.setAttribute('alt', '');
+                        } else {
+                            element = editor.document.createElement('a');
+                            element.setAttribute('href', url);
+                            element.data('cke-saved-href', url);
+                            element.setAttribute('title', url);
+                            element.setHtml(url);
+                        }
+                        element.addClass('internal');
+                        elements.push(element);
+                    }
+                });
+                CKEDITOR.tools.setTimeout(function() {
+                    editor.focus();
+                    if(CKEDITOR.env.ie) {
+                        var selection = editor.getSelection();
+                        selection.unlock(true);
+                    }
+                    for(var i = 0; i < elements.length; i++) {
+                        editor.insertElement(elements[i]);
+                    }
+                }, 0);
+
+            })
         }
     });
 })();
