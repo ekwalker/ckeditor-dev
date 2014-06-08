@@ -279,25 +279,16 @@ CKEDITOR.editor.prototype.unlock = function() {
 			 *
 			 * @see #0007517
 			 */
-			CKEDITOR.on( 'dialogDefinition', function( evt ) {
-				if ( evt.data.name == 'find' || evt.data.name == 'replace' ) {
-					var def = evt.data.definition;
-					def.contents[ 0 ].elements[ 0 ].children[ 0 ].setup = function() {
-						var inputElement = this;
-						this.getInputElement().on( 'keydown', function( evt ) {
-							if ( evt.data.getKeystroke() == 13 ) {
-								inputElement.getDialog().getContentElement( 'find', 'btnFind' ).click();
-								evt.data.preventDefault( 1 );
-							}
-						}, null, null, 1 );
-					};
-
-					def.onShow = CKEDITOR.tools.override( def.onShow, function( original ) {
-						return function() {
-							original.call( this );
-							this.setupContent();
+			CKEDITOR.ui.on( 'ready', function( evt ) {
+				var dialog = evt.data;
+				if ( dialog && dialog instanceof CKEDITOR.dialog && dialog.getName() == 'find' ) {
+					evt.removeListener();
+					dialog.getContentElement( 'find', 'txtFindFind' ).getInputElement().on( 'keydown', function( evt ) {
+						if ( evt.data.getKeystroke() == 13 ) {
+							this.getContentElement( 'find', 'btnFind' ).click();
+							evt.data.preventDefault( 1 );
 						}
-					});
+					}, dialog, null, 1 );
 				}
 			});
 
