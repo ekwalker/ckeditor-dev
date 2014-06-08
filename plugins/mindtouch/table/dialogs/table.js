@@ -396,13 +396,18 @@
 							label: editor.lang.table.caption,
 							setup: function( selectedTable ) {
 								this.enable();
+								this.refreshScayt = false;
 
 								var nodeList = selectedTable.getElementsByTag( 'caption' );
 								if ( nodeList.count() > 0 ) {
 									var caption = nodeList.getItem( 0 );
 									var firstElementChild = caption.getFirst( CKEDITOR.dom.walker.nodeType( CKEDITOR.NODE_ELEMENT ) );
 
-									if ( firstElementChild && !firstElementChild.equals( caption.getBogus() ) ) {
+									if ( firstElementChild && firstElementChild.data( 'scayt_word' ) && firstElementChild.data( 'scaytid' ) ) {
+										// ignore scayt node but refresh scayt after commit the dialog
+										// @see EDT-710
+										this.refreshScayt = true;
+									} else if ( firstElementChild && !firstElementChild.equals( caption.getBogus() ) ) {
 										this.disable();
 										this.setValue( caption.getText() );
 										return;
@@ -430,6 +435,7 @@
 											captionElement.appendTo( table );
 									}
 									captionElement.append( new CKEDITOR.dom.text( caption, editor.document ) );
+									this.refreshScayt && CKEDITOR.plugins.scayt.getScayt( editor ).refresh();
 								} else if ( captionElement.count() > 0 ) {
 									for ( var i = captionElement.count() - 1; i >= 0; i-- )
 										captionElement.getItem( i ).remove();
