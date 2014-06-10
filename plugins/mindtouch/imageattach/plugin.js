@@ -65,7 +65,6 @@
         init: function(editor) {  // enable attaching files on drag and drop
             editor.addCommand('attachimage', doAttachCmd);
             var stopPropagation = function(evt) {
-                Deki.Log(evt);
                 var stop = true;
 
                 // files.length in webkit is 0 if event default action is not cancelled
@@ -94,7 +93,6 @@
                     }
                 }
                 if(stop) {
-                    Deki.Log('STOPPING');
                     evt.data.$.stopImmediatePropagation();
                 }
             };
