@@ -1,199 +1,155 @@
-﻿/**
- * @license Copyright (c) 2003-2013, CKSource - Frederico Knabben. All rights reserved.
- * For licensing, see LICENSE.html or http://ckeditor.com/license
+/*
+ * MindTouch
+ * Copyright (c) 2006-2012 MindTouch Inc.
+ * http://mindtouch.com
+ *
+ * This file and accompanying files are licensed under the
+ * MindTouch Master Subscription Agreement (MSA).
+ *
+ * At any time, you shall not, directly or indirectly: (i) sublicense,
+ * resell, rent, lease, distribute, market, commercialize or otherwise
+ * transfer rights or usage to: (a) the Software, (b) any modified version
+ * or derivative work of the Software created by you or for you, or (c)
+ * MindTouch Open Source (which includes all non-supported versions of
+ * MindTouch-developed software), for any purpose including timesharing or
+ * service bureau purposes; (ii) remove or alter any copyright, trademark
+ * or proprietary notice in the Software; (iii) transfer, use or export the
+ * Software in violation of any applicable laws or regulations of any
+ * government or governmental agency; (iv) use or run on any of your
+ * hardware, or have deployed for use, any production version of MindTouch
+ * Open Source; (v) use any of the Support Services, Error corrections,
+ * Updates or Upgrades, for the MindTouch Open Source software or for any
+ * Server for which Support Services are not then purchased as provided
+ * hereunder; or (vi) reverse engineer, decompile or modify any encrypted
+ * or encoded portion of the Software.
+ *
+ * A complete copy of the MSA is available at http://www.mindtouch.com/msa
  */
 
 /**
- * @fileOverview AutoGrow plugin.
+ * @file Autogrow source plugin.
  */
 
 (function() {
+	var interval = null,
+		onResize;
 
-	// Actual content height, figured out by appending check the last element's document position.
-	function contentHeight( scrollable ) {
-		var overflowY = scrollable.getStyle( 'overflow-y' );
+	function resizeTextarea(editor) {
+		var win = CKEDITOR.document.getWindow(),
+			textarea = editor.editable(),
+			pre = textarea.getPrevious(),
+			span = pre.getFirst();
 
-		var doc = scrollable.getDocument();
-		// Create a temporary marker element.
-		var marker = CKEDITOR.dom.element.createFromHtml( '<span style="margin:0;padding:0;border:0;clear:both;width:1px;height:1px;display:block;">' + ( CKEDITOR.env.webkit ? '&nbsp;' : '' ) + '</span>', doc );
-		doc[ CKEDITOR.env.ie ? 'getBody' : 'getDocumentElement' ]().append( marker );
+		pre.setStyles({
+			'padding-top': textarea.getComputedStyle('padding-top') || 0,
+			'padding-right': textarea.getComputedStyle('padding-right') || 0,
+			'padding-bottom': textarea.getComputedStyle('padding-bottom') || 0,
+			'padding-left': textarea.getComputedStyle('padding-left') || 0,
+			'margin-top': textarea.getComputedStyle('margin-top') || 0,
+			'margin-right': textarea.getComputedStyle('margin-right') || 0,
+			'margin-bottom': textarea.getComputedStyle('margin-bottom') || 0,
+			'margin-left': textarea.getComputedStyle('margin-left') || 0,
+			'border-top': textarea.getComputedStyle('border-top') || '',
+			'border-right': textarea.getComputedStyle('border-right') || '',
+			'border-bottom': textarea.getComputedStyle('border-bottom') || '',
+			'border-left': textarea.getComputedStyle('border-left') || '',
+			'font-size': textarea.getComputedStyle('font-size') || 'medium',
+			'font-family': textarea.getComputedStyle('font-family') || '',
+			'line-height': textarea.getComputedStyle('line-height') || 'normal',
+			'letter-spacing': textarea.getComputedStyle('letter-spacing') || 'normal',
+			'tab-size': textarea.getComputedStyle('tab-size') || '8',
+			// @see EDT-607
+			'outline': ((!(CKEDITOR.env.ie && CKEDITOR.env.version < 9)) && textarea.getComputedStyle('outline')) || 'inherit'
+		});
 
-		var height = marker.getDocumentPosition( doc ).y + marker.$.offsetHeight;
-		marker.remove();
-		scrollable.setStyle( 'overflow-y', overflowY );
-		return height;
-	}
+		if (CKEDITOR.env.ie) {
+			onResize = function(evt) {
+				textarea.setStyle('width', '100%');
+				textarea.setStyle('height', '100%');
+				evt && evt.cancel();
+			};
 
-	function getScrollable( editor ) {
-		var doc = editor.document,
-			body = doc.getBody(),
-			htmlElement = doc.getDocumentElement();
-
-		// Quirks mode overflows body, standards overflows document element
-		return doc.$.compatMode == 'BackCompat' ? body : htmlElement;
-	}
-
-	// @param editor
-	// @param {Number} lastHeight The last height set by autogrow.
-	// @returns {Number} New height if has been changed, or the passed `lastHeight`.
-	var resizeEditor = function( editor, lastHeight ) {
-		if ( !editor.window )
-			return null;
-
-		var maximize = editor.getCommand( 'maximize' );
-			// Disable autogrow when the editor is maximized .(#6339)
-		if( maximize && maximize.state == CKEDITOR.TRISTATE_ON )
-			return null;
-
-		var scrollable = getScrollable( editor ),
-			currentHeight = editor.window.getViewPaneSize().height,
-			newHeight = contentHeight( scrollable );
-
-		// Additional space specified by user.
-		newHeight += ( editor.config.autoGrow_bottomSpace || 0 );
-
-		var min = editor.config.autoGrow_minHeight != undefined ? editor.config.autoGrow_minHeight : 200,
-			max = editor.config.autoGrow_maxHeight || Infinity;
-
-		newHeight = Math.max( newHeight, min );
-		newHeight = Math.min( newHeight, max );
-
-		// #10196 Do not resize editor if new height is equal
-		// to the one set by previous resizeEditor() call.
-		if ( newHeight != currentHeight && lastHeight != newHeight ) {
-			newHeight = editor.fire( 'autoGrow', { currentHeight: currentHeight, newHeight: newHeight } ).newHeight;
-			editor.resize( editor.container.getStyle( 'width' ), newHeight, true );
-			lastHeight = newHeight;
+			editor.on('resize', onResize, null, null, 1);
+			win.on('resize', onResize, null, null, 1);
+			setTimeout(onResize, 0);
 		}
 
-		if ( scrollable.$.scrollHeight > scrollable.$.clientHeight && newHeight < max )
-			scrollable.setStyle( 'overflow-y', 'hidden' );
-		else
-			scrollable.removeStyle( 'overflow-y' );
+		var update = function(ev) {
+			span.setText(textarea.getValue());
+		};
 
-		return lastHeight;
-	};
+		textarea.on('input', update);
+		textarea.on('propertychange', update);
+		update();
 
-	CKEDITOR.plugins.add( 'autogrow', {
-		init: function( editor ) {
+		// buggy support of propertychange in ie9
+		if (CKEDITOR.env.ie9Compat) {
+			interval = setInterval(update, 400);
+		}
+	}
 
-			// This feature is available only for themed ui instance.
-			if ( editor.elementMode == CKEDITOR.ELEMENT_MODE_INLINE )
+	CKEDITOR.plugins.add('mindtouch/autogrow', {
+		init: function(editor) {
+			if ( editor.elementMode == CKEDITOR.ELEMENT_MODE_INLINE ) {
 				return;
+			}
 
-			editor.on( 'instanceReady', function() {
+			editor.on('infobar', function() {
+				setTimeout( function() {
+					editor.execCommand('autogrow');
+				}, 100 );
+			});
 
-				var editable = editor.editable(),
-					lastHeight;
+			editor.on('mode', function() {
+				if (editor.mode == 'source') {
+					resizeTextarea(editor);
+				} else {
+					window.clearInterval(interval);
+					interval = null;
 
-				// Simply set auto height with div wysiwyg.
-				if ( editable.isInline() )
-					editor.ui.space( 'contents' ).setStyle( 'height', 'auto' );
-				// For framed wysiwyg we need to resize the editor.
-				else
-				{
-					editor.addCommand( 'autogrow', {
-						exec: function( editor ) {
-							lastHeight = resizeEditor( editor, lastHeight );
-						},
-						modes:{ wysiwyg:1 },
-						readOnly: 1,
-						canUndo: false,
-						editorFocus: false
-					} );
-
-					var eventsList = { contentDom:1,key:1,selectionChange:1,insertElement:1,mode:1 };
-					for ( var eventName in eventsList ) {
-						editor.on( eventName, function( evt ) {
-							// Some time is required for insertHtml, and it gives other events better performance as well.
-							if ( evt.editor.mode == 'wysiwyg'  ) {
-								setTimeout( function() {
-									lastHeight = resizeEditor( evt.editor, lastHeight );
-									// Second pass to make correction upon
-									// the first resize, e.g. scrollbar.
-									lastHeight = resizeEditor( evt.editor, lastHeight );
-								}, 100 );
-							}
-						});
+					if (typeof onResize == 'function') {
+						editor.removeListener('resize', onResize);
+						CKEDITOR.document.getWindow().removeListener('resize', onResize);
 					}
 
-					/**
-					 * Autogrow source plugin may change editor height
-					 * so it is necessary to reset lastHeight
-					 * @author MindTouch
-					 */
-					editor.on( 'mode', function( evt ) {
-						if ( evt.editor.mode == 'source' ) {
-							lastHeight = 0;
-						}
-					});
-					/* END */
+					var inner = editor.ui.space('contents').getParent();
+					inner.removeStyle('display');
+					inner.removeStyle('table-layout');
+					inner.removeStyle('width');
+				}
+			});
 
-					// Coordinate with the "maximize" plugin. (#9311)
-					editor.on( 'afterCommandExec', function( evt ) {
-						if ( evt.data.name == 'maximize' && evt.editor.mode == 'wysiwyg' ) {
-							if ( evt.data.command.state == CKEDITOR.TRISTATE_ON ) {
-								var scrollable = getScrollable( editor );
-								scrollable.removeStyle( 'overflow' );
-							}
- 							else
-								lastHeight = resizeEditor( editor, lastHeight );
-						}
-					});
+			// prepare the markup
+			// @link {http://www.alistapart.com/articles/expanding-text-areas-made-elegant/}
+			editor.on('ariaWidget', function(ev) {
+				var data = ev.data,
+					editable = editor.editable();
 
-					editor.config.autoGrow_onStartup && editor.execCommand( 'autogrow' );
+				if (!(data.source && editable.hasClass('cke_source'))) {
+					return;
+				}
+
+				var autogrowArea = CKEDITOR.dom.element.createFromHtml('<div class="cke_autogrow_source"><pre><span></span><br></pre></div>');
+				autogrowArea.insertBefore(editable);
+				editable.move(autogrowArea);
+				editable = autogrowArea.getLast();
+
+				var contents = editor.ui.space('contents'),
+					inner = contents.getParent();
+
+				contents.setStyle('height', 'auto');
+
+				inner.setStyles({
+					'display': 'table',
+					'table-layout': 'fixed',
+					'width': '100%'
+				});
+
+				if (CKEDITOR.env.webkit) {
+					inner.setStyle('display', '');
+					inner.setStyle('display', 'table');
 				}
 			});
 		}
 	});
 })();
-
-/**
- * The minimum height that the editor can reach using the AutoGrow feature.
- *
- *		config.autoGrow_minHeight = 300;
- *
- * @since 3.4
- * @cfg {Number} [autoGrow_minHeight=200]
- * @member CKEDITOR.config
- */
-
-/**
- * The maximum height that the editor can reach using the AutoGrow feature. Zero means unlimited.
- *
- *		config.autoGrow_maxHeight = 400;
- *
- * @since 3.4
- * @cfg {Number} [autoGrow_maxHeight=0]
- * @member CKEDITOR.config
- */
-
-/**
- * Whether to have the auto grow happen on editor creation.
- *
- *		config.autoGrow_onStartup = true;
- *
- * @since 3.6.2
- * @cfg {Boolean} [autoGrow_onStartup=false]
- * @member CKEDITOR.config
- */
-
-/**
- * Extra height in pixel to leave between the bottom boundary of content with document size when auto resizing.
- *
- * @since 3.6.2
- * @cfg {Number} [autoGrow_bottomSpace=0]
- * @member CKEDITOR.config
- */
-
-/**
- * Fired when the AutoGrow plugin is about to change the size of the editor.
- *
- * @event autogrow
- * @member CKEDITOR.editor
- * @param {CKEDITOR.editor} editor This editor instance.
- * @param data
- * @param {Number} data.currentHeight The current height of the editor (before resizing).
- * @param {Number} data.newHeight The new height of the editor (after resizing). It can be changed
- * to determine a different height value to be used instead.
- */
