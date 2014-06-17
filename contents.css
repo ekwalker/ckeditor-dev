@@ -131,3 +131,11 @@ td[data-cke-cell-selected] *::selection,
 th[data-cke-cell-selected] *::selection {
     background: rgba(255, 255, 255, 0.0);
 }
+
+/* @see EDT-671 */
+table[style*="fixed"] td {
+    word-wrap: break-word;
+}
+body[contenteditable="false"] table[style*="fixed"] td {
+    word-wrap: break-word;
+}
