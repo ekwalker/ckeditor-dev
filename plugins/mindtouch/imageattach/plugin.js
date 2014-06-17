@@ -40,50 +40,12 @@
         return href;
     }
     function attachImages(editor, files) {
-        var file = new Deki.PageFile(Deki.PageId);
-        file.attachFile({ fileInput: files }).done(function (result) {
-            var elements = [];
-            _(result).each(function(file) {
-                if('@href' in file.contents) {
-                    var element = null;
-                    var url = stripHost(file.contents['@href']);
-                    var size = {
-                        width: file.contents['@width'],
-                        height: file.contents['@height']
-                    };
-                    if (size.width && size.height) {
-                        element = editor.document.createElement('img');
-                        element.setAttribute('src', url);
-                        element.data('cke-saved-src', url);
-                        element.setStyle('width', size.width + 'px');
-                        element.setStyle('height', size.height + 'px');
-                        element.setAttribute('alt', '');
-                    } else {
-                        element = editor.document.createElement('a');
-                        element.setAttribute('href', url);
-                        element.data('cke-saved-href', url);
-                        element.setAttribute('title', url);
-                        element.setHtml(url);
-                    }
-                    element.addClass('internal');
-                    elements.push(element);
-                    parent.postMessage(JSON.stringify(file), window.location.protocol + '//' + window.location.host);
-                }
-            });
-            CKEDITOR.tools.setTimeout(function() {
-                editor.focus();
-                if(CKEDITOR.env.ie) {
-                    var selection = editor.getSelection();
-                    selection.unlock(true);
-                }
-                for(var i = 0; i < elements.length; i++) {
-                    editor.insertElement(elements[i]);
-                }
-            }, 0);
-
-        }).fail(function() {
-            Deki.Log('FAIL');
-            Deki.Log(arguments);
+        $('<div></div>').modal({
+            width: 600,
+            naming: 'AttachFile',
+            load: function() {
+                Deki.Ui.Dialog.AttachFile.init(files);
+            }
         });
     }
     var doAttachCmd = {
@@ -98,60 +60,41 @@
         }
     };
     CKEDITOR.plugins.add('mindtouch/imageattach', {
-        lang: 'en', // %REMOVE_LINE_CORE%
+        lang: 'en',  // %REMOVE_LINE_CORE%
         requires: 'dialog,mindtouch/dialog,mindtouch/save',
-        init: function(editor) {// enable attaching files on drag and drop
+        init: function(editor) {  // enable attaching files on drag and drop
             editor.addCommand('attachimage', doAttachCmd);
-            editor.on('contentDom', function() {
-                editor.document.getBody().on('paste', function(ev) {
-                    var e = ev.data.$;
+            var stopPropagation = function(evt) {
+                var stop = true;
 
-                    // We need to check if event.clipboardData is supported (Chrome)
-                    if(e.clipboardData) {
-
-                        // Get the items from the clipboard
-                        var items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                        if(items) {
-
-                            // Loop through all items, looking for any kind of image
-                            _(items).chain().filter(function(item) {
-                                return _.str.include(item.type, 'image');
-                            }).each(function(image) {
-                                if(editor.config.mindtouch.pageId === 0) {
-                                    CKEDITOR.plugins.mindtouchsave.confirmSave(editor);
-                                } else {
-                                    ev.data.preventDefault(true);
-                                    editor.lock();
-
-                                    // We need to represent the image as a file
-                                    var imageType = image.type;
-                                    var extension = _(imageType).strRightBack('/');
-                                    var blob = image.getAsFile();
-                                    var reader = new FileReader();
-                                    reader.onload = function(e) {
-                                        var fileInfo = {
-                                            base64: true,
-                                            size: e.total,
-                                            name: 'clipboard_' + new Date().getTime() + '.' + extension,
-                                            encoded: this.result,
-                                            contentType: imageType
-                                        };
-                                        try {
-                                            attachImages(editor, fileInfo);
-                                        } catch (ex) {
-                                            window.alert(ex);
-                                        }
-                                    };
-                                    reader.readAsDataURL(blob);
-                                    editor.unlock();
-                                }
-                        });
-                    }}
-                });
-            });
-            var stopPropagation = function(event) {
-                event.preventDefault();
-                event.stopPropagation();
+                // files.length in webkit is 0 if event default action is not cancelled
+                if(CKEDITOR.env.webkit) {
+                    try {
+                        for(var i = 0; i < evt.data.$.dataTransfer.types.length; i++) {
+                            if(evt.data.$.dataTransfer.types[i].toLowerCase() === 'files') {
+                                stop = false;
+                                break;
+                            }
+                        }
+                    } catch(ex) {}
+                } else if(evt.data.$.dataTransfer) {
+                    var dt = evt.data.$.dataTransfer;
+                    if(typeof dt.files === 'undefined') {
+                        stop = false;
+                    } else if(dt.files && dt.files.length > 0) {
+                        stop = false;
+                    } else if(CKEDITOR.env.ie && dt.types) {
+                        for(var type = 0; type < dt.types.length; type++) {
+                            if(dt.types[type].toLowerCase() === 'files') {
+                                stop = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if(stop) {
+                    evt.data.$.stopImmediatePropagation();
+                }
             };
             var destroyUploader = function() {
                 if(editor.body) {
@@ -159,13 +102,7 @@
                     if(body) {
                         body.removeListener('dragenter', stopPropagation);
                         body.removeListener('dragover', stopPropagation);
-                        body.removeListener('drop', function(e) {
-                            stopPropagation(e);
-                            if(e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
-                                var files = e.originalEvent.dataTransfer.files;
-                                editor.execCommand('attachimage', files);
-                            }
-                        });
+                        body.removeListener('drop', stopPropagation);
                     }
                 }
             };
@@ -173,11 +110,16 @@
 
                 // prevent bubbling event to window when files are not transfered
                 // to allow drag/drop operations available into editor
-                var $body = $(editor.document.getBody().$);
-                $body.on('dragenter', stopPropagation).on('dragover', stopPropagation).on('drop', function(e) {
+                var body = editor.document.getBody();
+                body.on('dragenter', stopPropagation);
+                body.on('dragover', stopPropagation);
+                body.on('drop', function(e) {
                     stopPropagation(e);
-                    if(e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
-                        var files = e.originalEvent.dataTransfer.files;
+                    var evt = e.data.$;
+                    if(evt.dataTransfer && evt.dataTransfer.files.length) {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        var files = evt.dataTransfer.files;
                         editor.execCommand('attachimage', files);
                     }
                 });
@@ -185,6 +127,46 @@
             editor.on('contentDom', initUploader);
             editor.on('contentDomUnload', destroyUploader);
             editor.on('destroy', destroyUploader);
+            $(document).on(Deki.Ui.Events.Files.UploadComplete, function(e, fileData) {
+                fileData = Deki.Utility.makeArray(fileData);
+                var elements = [];
+                _(fileData).each(function(file) {
+                    if('@href' in file.contents) {
+                        var element = null;
+                        var url = stripHost(file.contents['@href']);
+                        var size = {
+                            width: file.contents['@width'],
+                            height: file.contents['@height']
+                        };
+                        if(size.width && size.height) {
+                            element = editor.document.createElement('img');
+                            element.setAttribute('src', url);
+                            element.data('cke-saved-src', url);
+                            element.setStyle('width', size.width + 'px');
+                            element.setStyle('height', size.height + 'px');
+                            element.setAttribute('alt', '');
+                        } else {
+                            element = editor.document.createElement('a');
+                            element.setAttribute('href', url);
+                            element.data('cke-saved-href', url);
+                            element.setAttribute('title', url);
+                            element.setHtml(url);
+                        }
+                        element.addClass('internal');
+                        elements.push(element);
+                    }
+                });
+                CKEDITOR.tools.setTimeout(function() {
+                    editor.focus();
+                    if(CKEDITOR.env.ie) {
+                        var selection = editor.getSelection();
+                        selection.unlock(true);
+                    }
+                    for(var i = 0; i < elements.length; i++) {
+                        editor.insertElement(elements[i]);
+                    }
+                }, 0);
+            });
         }
     });
 })();
