@@ -9,19 +9,18 @@ html {
 
 html,
 body {
-    background: #fff;
     font-size: 12px;
     line-height: 1.5;
+}
+
+html,
+body.cke_editable {
+    background: #fff;
 }
 
 body.cke_editable {
     cursor: text;
     height: auto; 
-}
-
-body.page-mode-editor {
-    height: auto;
-    min-height: 100%;
 }
 
 hr {
