@@ -1,3 +1,0 @@
-[submodule "plugins/scayt"]
-	path = plugins/scayt
-	url = git@github.com:MindTouch/ckeditor-plugin-scayt.git
