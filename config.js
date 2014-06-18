@@ -96,12 +96,23 @@ CKEDITOR.editorConfig = function( config ) {
 		'mindtouch/viewmenu,' +
 		'mindtouch/whoisediting,' +
 		'mindtouch/zeroclipboard';
+
+	var plugins = config.plugins.split( ',' );
+	for ( var i = 0 ; i < plugins.length ; i++ ) {
+		var plugin = plugins[ i ];
+		if ( plugin.indexOf( 'mindtouch/' ) == 0 ) {
+			CKEDITOR.plugins.addExternal( plugin, CKEDITOR.basePath + '../plugins/' + plugin + '/' );
+		}
+	}
+
+	CKEDITOR.plugins.addExternal( 'scayt', CKEDITOR.basePath + '../vendor/scayt/' );
 	// %REMOVE_END%
 
 	config.bodyId = 'topic';
 	config.bodyClass = 'deki-content-edit ' + CKEDITOR.env.cssClass;
 
 	config.skin = 'mindtouch';
+	config.skin = 'mindtouch,' + CKEDITOR.basePath + '../skins/mindtouch/'; // %REMOVE_LINE%
 
 	config.menu_groups = 'clipboard,' +
 		'form,' +
