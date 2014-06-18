@@ -14,6 +14,7 @@ body {
 }
 
 html,
+html.cke_panel_container body,
 body.cke_editable {
     background: #fff;
 }
