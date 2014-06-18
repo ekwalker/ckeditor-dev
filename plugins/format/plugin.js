@@ -1,234 +1,217 @@
-/*
- * MindTouch
- * Copyright (c) 2006-2012 MindTouch Inc.
- * http://mindtouch.com
- *
- * This file and accompanying files are licensed under the
- * MindTouch Master Subscription Agreement (MSA).
- *
- * At any time, you shall not, directly or indirectly: (i) sublicense,
- * resell, rent, lease, distribute, market, commercialize or otherwise
- * transfer rights or usage to: (a) the Software, (b) any modified version
- * or derivative work of the Software created by you or for you, or (c)
- * MindTouch Open Source (which includes all non-supported versions of
- * MindTouch-developed software), for any purpose including timesharing or
- * service bureau purposes; (ii) remove or alter any copyright, trademark
- * or proprietary notice in the Software; (iii) transfer, use or export the
- * Software in violation of any applicable laws or regulations of any
- * government or governmental agency; (iv) use or run on any of your
- * hardware, or have deployed for use, any production version of MindTouch
- * Open Source; (v) use any of the Support Services, Error corrections,
- * Updates or Upgrades, for the MindTouch Open Source software or for any
- * Server for which Support Services are not then purchased as provided
- * hereunder; or (vi) reverse engineer, decompile or modify any encrypted
- * or encoded portion of the Software.
- *
- * A complete copy of the MSA is available at http://www.mindtouch.com/msa
+﻿/**
+ * @license Copyright (c) 2003-2013, CKSource - Frederico Knabben. All rights reserved.
+ * For licensing, see LICENSE.html or http://ckeditor.com/license
  */
 
-/**
- * @file MindTouch plugin.
- */
+CKEDITOR.plugins.add( 'format', {
+	requires: 'richcombo',
+	lang: 'af,ar,bg,bn,bs,ca,cs,cy,da,de,el,en,en-au,en-ca,en-gb,eo,es,et,eu,fa,fi,fo,fr,fr-ca,gl,gu,he,hi,hr,hu,id,is,it,ja,ka,km,ko,ku,lt,lv,mk,mn,ms,nb,nl,no,pl,pt,pt-br,ro,ru,si,sk,sl,sq,sr,sr-latn,sv,th,tr,ug,uk,vi,zh,zh-cn', // %REMOVE_LINE_CORE%
+	init: function( editor ) {
+		if ( editor.blockless )
+			return;
 
-(function() {
-	var allowedContent = [];
+		var config = editor.config,
+			lang = editor.lang.format;
 
-	var addButtonCommand = function( editor, name, buttonDefinition, styleDefiniton ) {
-		var command = buttonDefinition.command;
+		// Gets the list of tags from the settings.
+		var tags = config.format_tags.split( ';' );
 
-		var style = new CKEDITOR.style( styleDefiniton );
-
-		if ( !editor.filter.customConfig || editor.filter.check( style ) ) {
-			style._.enterMode = editor.config.enterMode;
-
-			if ( command ) {
-				editor.attachStyleStateChange( style, function( state ) {
-					!editor.readOnly && editor.getCommand( command ).setState( state );
-				});
-
-				var cmd = new CKEDITOR.styleCommand( style );
-				cmd.requiredContent = styleDefiniton.element;
-
-				editor.addCommand( command, cmd );
+		// Create style objects for all defined styles.
+		var styles = {},
+			stylesCount = 0,
+			allowedContent = [];
+		for ( var i = 0; i < tags.length; i++ ) {
+			var tag = tags[ i ];
+			var style = new CKEDITOR.style( config[ 'format_' + tag ] );
+			if ( !editor.filter.customConfig || editor.filter.check( style ) ) {
+				stylesCount++;
+				styles[ tag ] = style;
+				styles[ tag ]._.enterMode = editor.config.enterMode;
+				allowedContent.push( style );
 			}
-
-			allowedContent.push( style );
 		}
 
-		editor.ui.addButton( name, buttonDefinition );
-	};
+		// Hide entire combo when all formats are rejected.
+		if ( stylesCount === 0 )
+			return;
 
-	CKEDITOR.plugins.add( 'mindtouch/format', {
-		lang: 'en', // %REMOVE_LINE_CORE%
-		icons: 'h1,h2,h3,h4,h5,hx,code,plaintext', // %REMOVE_LINE_CORE%
-		requires: 'format',
-		init: function( editor ) {
-			CKEDITOR.on( 'style.copyAttributes', function( evt ) {
-				evt.data.skipAttributes[ 'class' ] = 1;
-			});
+		editor.ui.addRichCombo( 'Format', {
+			label: lang.label,
+			title: lang.panelTitle,
+			toolbar: 'styles,20',
+			allowedContent: allowedContent,
 
-			var format = editor.lang.format,
-				lang = editor.lang[ 'mindtouch/format' ],
-				config = editor.config;
+			panel: {
+				css: [ CKEDITOR.skin.getPath( 'editor' ) ].concat( config.contentsCss ),
+				multiSelect: false,
+				attributes: { 'aria-label': lang.panelTitle }
+			},
 
-			editor.ui.addToolbarGroup( 'format', 'styles' );
+			init: function() {
+				this.startGroup( lang.panelTitle );
 
-			format.tag_h6 = format.tag_h5;
-			format.tag_h5 = format.tag_h4;
-			format.tag_h4 = format.tag_h3;
-			format.tag_h3 = format.tag_h2;
-			format.tag_h2 = format.tag_h1;
-			format.tag_h1 = lang.tag_h1;
+				for ( var tag in styles ) {
+					var label = lang[ 'tag_' + tag ];
 
-			var menuGroup = 'formatButton';
-			editor.addMenuGroup( menuGroup );
+					// Add the tag entry to the panel list.
+					this.add( tag, styles[ tag ].buildPreview( label ), label );
+				}
+			},
 
-			var normalTag = config.enterMode == CKEDITOR.ENTER_DIV ? 'div' : 'p',
-				menuItems = {
-					normal: {
-						label: format[ 'tag_' + normalTag ],
-						command: 'normal',
-						group: menuGroup,
-						toolbar: 'format,10'
-					},
-					h1: {
-						label: format.tag_h2,
-						command: 'h1',
-						group: menuGroup,
-						toolbar: 'format,20'
-					},
-					h2: {
-						label: editor.lang.format.tag_h3,
-						command: 'h2',
-						group: menuGroup,
-						toolbar: 'format,30'
-					},
-					h3: {
-						label: editor.lang.format.tag_h4,
-						command: 'h3',
-						group: menuGroup,
-						toolbar: 'format,40'
-					},
-					h4: {
-						label: editor.lang.format.tag_h5,
-						command: 'h4',
-						group: menuGroup,
-						toolbar: 'format,50'
-					},
-					h5: {
-						label: editor.lang.format.tag_h6,
-						command: 'h5',
-						group: menuGroup,
-						toolbar: 'format,60'
-					}
-				};
+			onClick: function( value ) {
+				editor.focus();
+				editor.fire( 'saveSnapshot' );
 
-			addButtonCommand( editor, 'Normal', menuItems.normal, config[ 'format_' + normalTag ] );
-			addButtonCommand( editor, 'H1', menuItems.h1, config[ 'format_h2' ] );
-			addButtonCommand( editor, 'H2', menuItems.h2, config[ 'format_h3' ] );
-			addButtonCommand( editor, 'H3', menuItems.h3, config[ 'format_h4' ] );
-			addButtonCommand( editor, 'H4', menuItems.h4, config[ 'format_h5' ] );
-			addButtonCommand( editor, 'H5', menuItems.h5, config[ 'format_h6' ] );
+				var style = styles[ value ],
+					elementPath = editor.elementPath();
 
-			editor.addMenuItems( menuItems );
+				editor[ style.checkActive( elementPath ) ? 'removeStyle' : 'applyStyle' ]( style );
 
-			editor.ui.add( 'Hx', CKEDITOR.UI_MENUBUTTON, {
-				label: lang.tag_hx,
-				title: lang.tag_hx,
-				toolbar: 'format,70',
-				className: 'cke_button_hx',
-				modes: { 'wysiwyg': 1 },
-				allowedContent: allowedContent,
-				panel: {
-					toolbarRelated: true,
-					css: [ CKEDITOR.skin.getPath( 'editor' ) ].concat( config.contentsCss )
-				},
-				onMenu: function() {
-					var items = {};
+				// Save the undo snapshot after all changes are affected. (#4899)
+				setTimeout( function() {
+					editor.fire( 'saveSnapshot' );
+				}, 0 );
+			},
 
-					for ( var i = 0; i < config.menu_hxItems.length; i++ ) {
-						var itemName = config.menu_hxItems[ i ].toLowerCase();
+			onRender: function() {
+				editor.on( 'selectionChange', function( ev ) {
 
-						var state = CKEDITOR.TRISTATE_DISABLED,
-							commandName = menuItems[ itemName ].command,
-							command = commandName && editor.getCommand( commandName );
+					var currentTag = this.getValue(),
+						elementPath = ev.data.path,
+						isEnabled = !editor.readOnly && elementPath.isContextFor( 'p' );
 
-						if ( command ) {
-							state = command.state;
-						}
+					// Disable the command when selection path is "blockless".
+					this[ isEnabled ? 'enable' : 'disable' ]();
 
-						items[ itemName ] = state;
-					}
+					if ( isEnabled ) {
 
-					return items;
-				},
-				onRender: function() {
-					var me = this;
-
-					editor.on( 'selectionChange', function() {
-						if ( editor.readOnly ) {
-							return;
-						}
-
-						var state = CKEDITOR.TRISTATE_OFF;
-
-						for ( var i = 0; i < config.menu_hxItems.length; i++ ) {
-							var itemName = config.menu_hxItems[ i ].toLowerCase();
-							var command = editor.getCommand( menuItems[ itemName ].command );
-
-							if ( command && command.state == CKEDITOR.TRISTATE_ON ) {
-								state = CKEDITOR.TRISTATE_ON;
+						for ( var tag in styles ) {
+							if ( styles[ tag ].checkActive( elementPath ) ) {
+								if ( tag != currentTag )
+									this.setValue( tag, editor.lang.format[ 'tag_' + tag ] );
+								return;
 							}
 						}
 
-						me.setState( state );
-					});
-				}
-			});
-
-			addButtonCommand( editor, 'Code', {
-				label: lang.code,
-				command: 'code',
-				toolbar: 'basicstyles,70'
-			}, editor.config.mindtouchStyles_code );
-
-			addButtonCommand( editor, 'PlainText', {
-				label: lang.plaintext,
-				command: 'plaintext',
-				toolbar: 'basicstyles,80'
-			}, editor.config.mindtouchStyles_plaintext );
-
-			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 76 /*L*/, 'justifyleft' );
-			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 69 /*E*/, 'justifycenter' );
-			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 82 /*R*/, 'justifyright' );
-			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.SHIFT + 74 /*J*/, 'justifyblock' );
-
-			editor.setKeystroke( CKEDITOR.CTRL + 188 /*,*/, 'subscript' );
-			editor.setKeystroke( CKEDITOR.CTRL + 190 /*.*/, 'superscript' );
-			editor.setKeystroke( CKEDITOR.CTRL + 220 /*\*/, 'removeFormat' );
-			editor.setKeystroke( CKEDITOR.CTRL + 222 /*'*/, 'code' );
-			
-			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 48 /*0*/, 'normal' );
-			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 49 /*1*/, 'h1' );
-			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 50 /*2*/, 'h2' );
-			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 51 /*3*/, 'h3' );
-			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 52 /*4*/, 'h4' );
-			editor.setKeystroke( CKEDITOR.CTRL + CKEDITOR.ALT + 53 /*5*/, 'h5' );
-		}
-	});
-})();
+						// If no styles match, just empty it.
+						this.setValue( '' );
+					}
+				}, this );
+			}
+		});
+	}
+});
 
 /**
- * The style definition to be used to apply the code style in the text.
- * @type Object
- * @default { element : 'code' }
- * @example
- * config.mindtouchStyles_code = { element : 'code', attributes : { 'class': 'Code' } };
+ * A list of semi colon separated style names (by default tags) representing
+ * the style definition for each entry to be displayed in the Format combo in
+ * the toolbar. Each entry must have its relative definition configuration in a
+ * setting named `'format_(tagName)'`. For example, the `'p'` entry has its
+ * definition taken from `config.format_p`.
+ *
+ *		config.format_tags = 'p;h2;h3;pre';
+ *
+ * @cfg {String} [format_tags='p;h1;h2;h3;h4;h5;h6;pre;address;div']
+ * @member CKEDITOR.config
  */
-CKEDITOR.config.mindtouchStyles_code = { element: 'code' };
-CKEDITOR.config.mindtouchStyles_plaintext = {
-	element: 'span',
-	attributes: { 'class': 'plain' }
-};
+CKEDITOR.config.format_tags = 'p;h1;h2;h3;h4;h5;h6;pre;address;div';
 
-CKEDITOR.config.menu_hxItems = [ 'H4', 'H5' ];
+/**
+ * The style definition to be used to apply the `'Normal'` format.
+ *
+ *		config.format_p = { element: 'p', attributes: { 'class': 'normalPara' } };
+ *
+ * @cfg {Object} [format_p={ element: 'p' }]
+ * @member CKEDITOR.config
+ */
+CKEDITOR.config.format_p = { element: 'p' };
+
+/**
+ * The style definition to be used to apply the `'Normal (DIV)'` format.
+ *
+ *		config.format_div = { element: 'div', attributes: { 'class': 'normalDiv' } };
+ *
+ * @cfg {Object} [format_div={ element: 'div' }]
+ * @member CKEDITOR.config
+ */
+CKEDITOR.config.format_div = { element: 'div' };
+
+/**
+ * The style definition to be used to apply the `'Formatted'` format.
+ *
+ *		config.format_pre = { element: 'pre', attributes: { 'class': 'code' } };
+ *
+ * @cfg {Object} [format_pre={ element: 'pre' }]
+ * @member CKEDITOR.config
+ */
+CKEDITOR.config.format_pre = { element: 'pre' };
+
+/**
+ * The style definition to be used to apply the `'Address'` format.
+ *
+ *		config.format_address = { element: 'address', attributes: { 'class': 'styledAddress' } };
+ *
+ * @cfg {Object} [format_address={ element: 'address' }]
+ * @member CKEDITOR.config
+ */
+CKEDITOR.config.format_address = { element: 'address' };
+
+/**
+ * The style definition to be used to apply the `'Heading 1'` format.
+ *
+ *		config.format_h1 = { element: 'h1', attributes: { 'class': 'contentTitle1' } };
+ *
+ * @cfg {Object} [format_h1={ element: 'h1' }]
+ * @member CKEDITOR.config
+ */
+CKEDITOR.config.format_h1 = { element: 'h1' };
+
+/**
+ * The style definition to be used to apply the `'Heading 2'` format.
+ *
+ *		config.format_h2 = { element: 'h2', attributes: { 'class': 'contentTitle2' } };
+ *
+ * @cfg {Object} [format_h2={ element: 'h2' }]
+ * @member CKEDITOR.config
+ */
+CKEDITOR.config.format_h2 = { element: 'h2' };
+
+/**
+ * The style definition to be used to apply the `'Heading 3'` format.
+ *
+ *		config.format_h3 = { element: 'h3', attributes: { 'class': 'contentTitle3' } };
+ *
+ * @cfg {Object} [format_h3={ element: 'h3' }]
+ * @member CKEDITOR.config
+ */
+CKEDITOR.config.format_h3 = { element: 'h3' };
+
+/**
+ * The style definition to be used to apply the `'Heading 4'` format.
+ *
+ *		config.format_h4 = { element: 'h4', attributes: { 'class': 'contentTitle4' } };
+ *
+ * @cfg {Object} [format_h4={ element: 'h4' }]
+ * @member CKEDITOR.config
+ */
+CKEDITOR.config.format_h4 = { element: 'h4' };
+
+/**
+ * The style definition to be used to apply the `'Heading 5'` format.
+ *
+ *		config.format_h5 = { element: 'h5', attributes: { 'class': 'contentTitle5' } };
+ *
+ * @cfg {Object} [format_h5={ element: 'h5' }]
+ * @member CKEDITOR.config
+ */
+CKEDITOR.config.format_h5 = { element: 'h5' };
+
+/**
+ * The style definition to be used to apply the `'Heading 6'` format.
+ *
+ *		config.format_h6 = { element: 'h6', attributes: { 'class': 'contentTitle6' } };
+ *
+ * @cfg {Object} [format_h6={ element: 'h6' }]
+ * @member CKEDITOR.config
+ */
+CKEDITOR.config.format_h6 = { element: 'h6' };
