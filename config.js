@@ -58,49 +58,49 @@ CKEDITOR.editorConfig = function( config ) {
 		'wysiwygarea,' +
 		'onchange,' +
 		'scayt,' +
-		'mindtouch/autogrow,' +
-		'mindtouch/autosave,' +
-		'mindtouch/ckoverrides,' +
-		'mindtouch/clearcontents,' +
-		'mindtouch/clipboard,' +
-		'mindtouch/commentdelete,' +
-		'mindtouch/definitionlist,' +
-		'mindtouch/dialog,' +
-		'mindtouch/elementbubble,' +
-		'mindtouch/enterkey,' +
-		'mindtouch/floatingtoolbar,' +
-		'mindtouch/format,' +
-		'mindtouch/image,' +
-		'mindtouch/imageattach,' +
-		'mindtouch/imageresize,' +
-		'mindtouch/infobar,' +
-		'mindtouch/infopanel,' +
-		'mindtouch/keystrokes,' +
-		'mindtouch/link,' +
-		'mindtouch/misc,' +
-		'mindtouch/pre,' +
-		'mindtouch/richcombomenu,' +
-		'mindtouch/save,' +
-		'mindtouch/scaytcustom,' +
-		'mindtouch/statistics,' +
-		'mindtouch/stylescombomenu,' +
-		'mindtouch/stylewrap,' +
-		'mindtouch/storage,' +
-		'mindtouch/table,' +
-		'mindtouch/tableclipboard,' +
-		'mindtouch/tableselection,' +
-		'mindtouch/tablehandlers,' +
-		'mindtouch/templates,' +
-		'mindtouch/transformations,' +
-		'mindtouch/video,' +
-		'mindtouch/viewmenu,' +
-		'mindtouch/whoisediting,' +
-		'mindtouch/zeroclipboard';
+		'mt-autogrow,' +
+		'mt-autosave,' +
+		'mt-ckoverrides,' +
+		'mt-clearcontents,' +
+		'mt-clipboard,' +
+		'mt-commentdelete,' +
+		'mt-definitionlist,' +
+		'mt-dialog,' +
+		'mt-elementbubble,' +
+		'mt-enterkey,' +
+		'mt-floatingtoolbar,' +
+		'mt-format,' +
+		'mt-image,' +
+		'mt-imageattach,' +
+		'mt-imageresize,' +
+		'mt-infobar,' +
+		'mt-infopanel,' +
+		'mt-keystrokes,' +
+		'mt-link,' +
+		'mt-misc,' +
+		'mt-pre,' +
+		'mt-richcombomenu,' +
+		'mt-save,' +
+		'mt-scaytcustom,' +
+		'mt-statistics,' +
+		'mt-stylescombomenu,' +
+		'mt-stylewrap,' +
+		'mt-storage,' +
+		'mt-table,' +
+		'mt-tableclipboard,' +
+		'mt-tableselection,' +
+		'mt-tablehandlers,' +
+		'mt-templates,' +
+		'mt-transformations,' +
+		'mt-video,' +
+		'mt-viewmenu,' +
+		'mt-whoisediting,' +
+		'mt-zeroclipboard';
 
 	var plugins = config.plugins.split( ',' );
 	for ( var i = 0 ; i < plugins.length ; i++ ) {
 		var plugin = plugins[ i ];
-		if ( plugin.indexOf( 'mindtouch/' ) == 0 ) {
+		if ( plugin.indexOf( 'mt-' ) == 0 ) {
 			CKEDITOR.plugins.addExternal( plugin, CKEDITOR.basePath + '../plugins/' + plugin + '/' );
 		}
 	}
