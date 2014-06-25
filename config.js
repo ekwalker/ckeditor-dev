@@ -105,6 +105,7 @@ CKEDITOR.editorConfig = function( config ) {
 		}
 	}
 
+	CKEDITOR.plugins.addExternal( 'mt-extensions', CKEDITOR.basePath + '../plugins/mt-extensions/' );
 	CKEDITOR.plugins.addExternal( 'scayt', CKEDITOR.basePath + '../vendor/scayt/' );
 	// %REMOVE_END%
 
@@ -190,6 +191,10 @@ CKEDITOR.editorConfig = function( config ) {
 
 	if ( CKEDITOR.customEditorConfigFn ) {
 		CKEDITOR.customEditorConfigFn.call( this, config );
+	}
+
+	if ( config.extraPlugins.length ) {
+		config.extraPlugins = config.extraPlugins.replace( 'mindtouch/', 'mt-' );
 	}
 };
 
