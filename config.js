@@ -193,6 +193,7 @@ CKEDITOR.editorConfig = function( config ) {
 		CKEDITOR.customEditorConfigFn.call( this, config );
 	}
 
+	// @todo: remove this workaround when all users custom configs will be updated
 	if ( config.extraPlugins.length ) {
 		config.extraPlugins = config.extraPlugins.replace( 'mindtouch/', 'mt-' );
 	}
