@@ -151,6 +151,8 @@ CKEDITOR.editorConfig = function( config ) {
 
 	config.format_p = { element : 'p', attributes : { 'class' : '' } };
 
+	config.magicline_triggers = { table:1,hr:1,div:1,ul:1,ol:1,dl:1,form:1,blockquote:1,pre:1,p:'p.comment' };
+
 	// @see MT-10759
 	config.pasteFromWordRemoveFontStyles = false;
 
