@@ -36,10 +36,9 @@
 				holdDistance: 0 | triggerOffset * ( config.magicline_holdDistance || 0.5 ),
 				boxColor: config.magicline_color || '#ff0000',
 				rtl: config.contentsLangDirection == 'rtl',
-				// added pre element
-				// @see EDT-522
+				// make list of triggers configurable
 				// @author MindTouch
-				triggers: config.magicline_everywhere ? DTD_BLOCK : { table:1,hr:1,div:1,ul:1,ol:1,dl:1,form:1,blockquote:1,pre:1 }
+				triggers: config.magicline_everywhere ? DTD_BLOCK : config.magicline_triggers || { table:1,hr:1,div:1,ul:1,ol:1,dl:1,form:1,blockquote:1 }
 				// triggers: config.magicline_everywhere ? DTD_BLOCK : { table:1,hr:1,div:1,ul:1,ol:1,dl:1,form:1,blockquote:1 }
 			},
 			scrollTimeout, checkMouseTimeoutPending, checkMouseTimeout, checkMouseTimer;
@@ -463,7 +462,7 @@
 			trigger;
 
 		if ( node && isHtml( node ) ) {
-			return ( trigger = node.getAscendant( that.triggers, true ) ) &&
+			return ( trigger = isTriggerSelector( that, node ) && node.getAscendant( that.triggers, true ) ) &&
 				!trigger.contains( that.editable ) &&
 				!trigger.equals( that.editable ) ? trigger : null;
 		}
@@ -918,7 +917,7 @@
 					var sibling = getNonEmptyNeighbour( that, target, !insertAfter );
 
 					// (2.) Target has a sibling that belongs to that.triggers -> access.
-					if ( sibling && isHtml( sibling ) && sibling.is( that.triggers ) ) {
+					if ( sibling && isHtml( sibling ) && sibling.is( that.triggers ) && isTriggerSelector( that, sibling ) ) {
 						doAccess( target );
 						return;
 					}
@@ -973,7 +972,18 @@
 	}
 
 	function isTrigger( that, element ) {
-		return isHtml( element ) ? element.is( that.triggers ) : null;
+		return isHtml( element ) ? element.is( that.triggers ) && isTriggerSelector( that, element ) : null;
+	}
+
+	// allow to filter triggers by css selector (mt-15845)
+	// @author MindTouch
+	function isTriggerSelector( that, element ) {
+		if ( !jQuery ) {
+			return true;
+		}
+
+		var trigger = that.triggers[ element.getName() ];
+		return ( typeof trigger == 'string' ) ? jQuery( element.$ ).is( trigger ) : true;
 	}
 
 	// This function checks vertically is there's a relevant child between element's edge

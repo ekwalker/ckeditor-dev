@@ -105,6 +105,7 @@ CKEDITOR.editorConfig = function( config ) {
 		}
 	}
 
+	CKEDITOR.plugins.addExternal( 'mt-extensions', CKEDITOR.basePath + '../plugins/mt-extensions/' );
 	CKEDITOR.plugins.addExternal( 'scayt', CKEDITOR.basePath + '../vendor/scayt/' );
 	// %REMOVE_END%
 
@@ -150,6 +151,8 @@ CKEDITOR.editorConfig = function( config ) {
 
 	config.format_p = { element : 'p', attributes : { 'class' : '' } };
 
+	config.magicline_triggers = { table:1,hr:1,div:1,ul:1,ol:1,dl:1,form:1,blockquote:1,pre:1,p:'p.comment' };
+
 	// @see MT-10759
 	config.pasteFromWordRemoveFontStyles = false;
 
@@ -190,6 +193,11 @@ CKEDITOR.editorConfig = function( config ) {
 
 	if ( CKEDITOR.customEditorConfigFn ) {
 		CKEDITOR.customEditorConfigFn.call( this, config );
+	}
+
+	// @TODO (karena): remove this workaround when all users custom configs will be updated
+	if ( config.extraPlugins.length ) {
+		config.extraPlugins = config.extraPlugins.replace( 'mindtouch/', 'mt-' );
 	}
 };
 

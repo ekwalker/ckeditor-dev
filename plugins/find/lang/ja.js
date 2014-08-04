@@ -4,7 +4,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 */
 CKEDITOR.plugins.setLang( 'find', 'ja', {
 	find: '検索',
-	findOptions: 'Find Options',
+	findOptions: '検索オプション',
 	findWhat: '検索する文字列:',
 	matchCase: '大文字と小文字を区別する',
 	matchCyclic: '一周する',
