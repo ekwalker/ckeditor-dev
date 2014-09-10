@@ -4,7 +4,7 @@ For licensing, see LICENSE.html or http://ckeditor.com/license
 */
 CKEDITOR.plugins.setLang( 'find', 'zh', {
 	find: '尋找',
-	findOptions: 'Find Options',
+	findOptions: '查找選項',
 	findWhat: '尋找:',
 	matchCase: '大小寫須相符',
 	matchCyclic: '循環搜索',
